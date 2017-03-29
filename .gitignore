@@ -1,0 +1,5 @@
+# Do not include files from simulation or synthetisation.
+
+*simdir**
+*synthdir**
+*~
