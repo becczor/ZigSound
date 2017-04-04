@@ -1,8 +1,8 @@
 --------------------------------------------------------------------------------
 -- KBD ENC
--- Anders Nilsson
--- 16-feb-2016
--- Version 1.1
+-- ZigSound 
+-- 04-apr-2017
+-- Version 0.1
 
 
 -- library declaration
