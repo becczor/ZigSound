@@ -8,8 +8,8 @@
 -- library declaration
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;            -- basic IEEE library
-use IEEE.NUMERIC_STD.ALL;               -- IEEE library for the unsigned type
-                                        -- and various arithmetic operations
+use IEEE.NUMERIC_STD.ALL;               -- IEEE library for the unsigned type and various arithmetic operations
+use IEEE.MATH_REAL.ALL;                 -- For floor, ceil, round etc.
 
 -- entity
 entity SOUND is
@@ -17,23 +17,40 @@ port (clk               : in std_logic;                      -- system clock (10
     rst                 : in std_logic;                      -- reset signal
     goal_pos            : in std_logic_vector(17 downto 0);  -- goal position
     curr_pos            : in std_logic_vector(17 downto 0);  -- current position
-    channel             : in std_logic;                      -- deciding which of the two sound that should be played
-    sound_enable        : in std_logic;                      -- possible for later to add on/off for sound
+    channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = corr, 1 = goal.
     sound_data          : out std_logic;                     -- output to speaker
+    --sound_enable        : in std_logic;                      -- possible for later to add on/off for sound
 end SOUND;
 
 -- architecture
 architecture behavioral of SOUND is
-    signal freq_clk     : std_logic_vector(5 downto 0);         -- 40 cols gives 40 possible frequencies
+    signal freq         : std_logic_vector(5 downto 0);         -- 40 cols gives 40 possible frequencies
     signal goal_x       : std_logic_vector(5 downto 0);
     signal curr_x       : std_logic_vector(5 downto 0);
 
-    signal beat_clk     : std_logic_vector(4 downto 0);         -- 30 rows gives 30 possible beats
+    signal beat         : std_logic_vector(4 downto 0);         -- 30 rows gives 30 possible beats
     signal goal_y       : std_logic_vector(4 downto 0);
     signal curr_y       : std_logic_vector(4 downto 0);
+
+    signal x            : std_logic_vector(5 downto 0);         -- x-signal for playing
+    signal y            : std_logic_vector(4 downto 0);         -- y-signal for playing
 begin
 
-  -- Transfer position data to internal signals
+    -- Set signals for playing sound
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if channel = '1' then
+                x <= goal_x;
+                y <= goal_y;
+            else
+                x <= curr_x;
+                y <= curr_y;
+            end if;
+        end if;
+    end process;
+
+    -- Transfer position data to internal signals
     process(clk)
     begin
         if rising_edge(clk) then
@@ -45,22 +62,27 @@ begin
     end process;
 
     
-  -- Generate one cycle pulse from PS2 clock, negative edge
-
+    -- Generate beat and freq
     process(clk)
-    begin
-        if rising_edge(clk) then
-            if rst='1' then
-                PS2Clk_Q1 <= '1';
-                PS2Clk_Q2 <= '0';
-            else
-                PS2Clk_Q1 <= PS2Clk;
-                PS2Clk_Q2 <= not PS2Clk_Q1;
+        begin
+            if rising_edge(clk) then
+                if rst='1' then
+                    beat <= 0;
+                    freq <= 0;
+                else
+                    beat <= floor(0.555764 * exp(0.0980482 * y));   -- In Hertz
+                    freq <= 300 + 25*x;                             -- In Hertz
             end if;
         end if;
     end process;
-    
-  PS2Clk_op <= (not PS2Clk_Q1) and (not PS2Clk_Q2);
+
+
+    process(clk) begin
+        if rising_edge(clk) then
+            q1 <= q1_plus;      -- Skapar en D-vippa
+            q0 <= q0_plus;      -- Skapar en D-vippa
+        end if;
+    end process;
     
 
   
