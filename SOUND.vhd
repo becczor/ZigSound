@@ -13,49 +13,52 @@ use IEEE.NUMERIC_STD.ALL;               -- IEEE library for the unsigned type
 
 -- entity
 entity SOUND is
-  port (clk                : in std_logic;                      -- system clock (100 MHz)
-        rst                : in std_logic;                      -- reset signal
-        goal_pos           : in std_logic_vector(17 downto 0);  -- goal position
-        curr_pos           : in std_logic_vector(17 downto 0);  -- current position
-        channel            : in std_logic;                      -- deciding which of the two sound that should be played
-        sound_data         : out std_logic;                     -- output to speaker
+port (clk               : in std_logic;                      -- system clock (100 MHz)
+    rst                 : in std_logic;                      -- reset signal
+    goal_pos            : in std_logic_vector(17 downto 0);  -- goal position
+    curr_pos            : in std_logic_vector(17 downto 0);  -- current position
+    channel             : in std_logic;                      -- deciding which of the two sound that should be played
+    sound_enable        : in std_logic;                      -- possible for later to add on/off for sound
+    sound_data          : out std_logic;                     -- output to speaker
 end SOUND;
 
 -- architecture
 architecture behavioral of SOUND is
-  signal PS2Clk                 : std_logic;            -- Synchronized PS2 clock
-  signal PS2Data                : std_logic;            -- Synchronized PS2 data
-  signal PS2Clk_Q1, PS2Clk_Q2                   : std_logic;            -- PS2 clock one pulse flip flop
-  signal PS2Clk_op              : std_logic;            -- PS2 clock one pulse 
-    
-  signal PS2Data_sr             : std_logic_vector(10 downto 0);-- PS2 data shift register
+    signal freq_clk     : std_logic_vector(5 downto 0);         -- 40 cols gives 40 possible frequencies
+    signal goal_x       : std_logic_vector(5 downto 0);
+    signal curr_x       : std_logic_vector(5 downto 0);
 
+    signal beat_clk     : std_logic_vector(4 downto 0);         -- 30 rows gives 30 possible beats
+    signal goal_y       : std_logic_vector(4 downto 0);
+    signal curr_y       : std_logic_vector(4 downto 0);
 begin
 
-  -- Synchronize PS2-KBD signals
-  process(clk)
-  begin
-    if rising_edge(clk) then
-      PS2Clk <= PS2KeyboardCLK;
-      PS2Data <= PS2KeyboardData;
-    end if;
-  end process;
+  -- Transfer position data to internal signals
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            goal_x <= goal_pos(14 downto 9);
+            goal_y <= goal_pos(4 downto 0);
+            curr_x <= curr_pos(14 downto 9);
+            curr_y <= curr_pos(4 downto 0);
+        end if;
+    end process;
 
     
   -- Generate one cycle pulse from PS2 clock, negative edge
 
-  process(clk)
-  begin
-    if rising_edge(clk) then
-      if rst='1' then
-        PS2Clk_Q1 <= '1';
-        PS2Clk_Q2 <= '0';
-      else
-        PS2Clk_Q1 <= PS2Clk;
-        PS2Clk_Q2 <= not PS2Clk_Q1;
-      end if;
-    end if;
-  end process;
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if rst='1' then
+                PS2Clk_Q1 <= '1';
+                PS2Clk_Q2 <= '0';
+            else
+                PS2Clk_Q1 <= PS2Clk;
+                PS2Clk_Q2 <= not PS2Clk_Q1;
+            end if;
+        end if;
+    end process;
     
   PS2Clk_op <= (not PS2Clk_Q1) and (not PS2Clk_Q2);
     
