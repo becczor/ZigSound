@@ -37,7 +37,7 @@ architecture behavioral of KBD_ENC is
   type state_type is (IDLE, MAKE, BREAK);			-- declare state types for PS2
   signal PS2state : state_type;					-- PS2 state
 
-  signal ScanCode				: std_logic_vector(7 downto 0);	-- scan code
+  signal ScanCode			: std_logic_vector(7 downto 0);	-- scan code
   signal keyPressed			: std_logic_vector(17 downto 0);	--Which_key_that_has_been_pressed
                                                                    
                                                                     
@@ -103,7 +103,7 @@ process(clk)
   -- *                                 *
   -- ***********************************
 
-process(clk)
+ process(clk)
   begin
     if rising_edge(clk) then
       if rst='1' then
@@ -132,7 +132,7 @@ process(clk)
   -- ***********************************
 
   
-process(clk)
+ process(clk)
   begin
     if rising_edge(clk) then
       if rst='1' then
@@ -160,12 +160,12 @@ process(clk)
         end case;
       end if;
     end if;
-end process;
+ end process;
 
     
  -- Scan Code -> KeyPressed mapping
  -- Translates the ScanCode to relevant key pressed codes.
-with ScanCode select
+ with ScanCode select
     keyPressed <= "000000000000000001" when x"1D",	-- W (UP)
     "000000000000000010" when x"1C",	-- A (LEFT)
     "000000000000000011" when x"1B",	-- S (DOWN)
@@ -177,7 +177,7 @@ with ScanCode select
  -- Sets the out signal PS2cmd when
  -- the PSstate is make
  
-process(clk)
+ process(clk)
   begin
     if rising_edge(clk) then
       if rst = '1' then
@@ -189,7 +189,7 @@ process(clk)
             PS2cmd <= "000000000000000000";
         end if;
     end if;
-end process;
+ end process;
 
 
   
