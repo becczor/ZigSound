@@ -17,7 +17,7 @@ port (clk               : in std_logic;                      -- system clock (10
     rst                 : in std_logic;                      -- reset signal
     goal_pos            : in std_logic_vector(17 downto 0);  -- goal position
     curr_pos            : in std_logic_vector(17 downto 0);  -- current position
-    channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = corr, 1 = goal.
+    channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = curr, 1 = goal.
     sound_data          : out std_logic);                    -- output to speaker
     --sound_enable        : in std_logic;                      -- possible for later to add on/off for sound
 end SOUND;
@@ -34,11 +34,11 @@ architecture behavioral of SOUND is
     signal x            : std_logic_vector(5 downto 0);         -- x-position for playing
     signal y            : std_logic_vector(4 downto 0);         -- y-position for playing
 
-    signal freq         : std_logic_vector(10 downto 0);        -- Divided value for desired frequency for freq at position
     signal beat         : std_logic_vector(19 downto 0);        -- Divided value for desired frequency for beat at position
+    signal freq         : std_logic_vector(10 downto 0);        -- Divided value for desired frequency for freq at position
 
-    signal clk_div_beat : std_logic_vector;                     -- Dividing clock for beat
-    signal clk_div_freq : std_logic_vector;                     -- Dividing clock for freq
+    signal clk_div_beat : std_logic_vector(19 downto 0);        -- Dividing clock for beat
+    signal clk_div_freq : std_logic_vector(10 downto 0);        -- Dividing clock for freq
 
     signal clk_beat     : std_logic;                            -- Clock signal for beat
     signal clk_freq     : std_logic;                            -- Clock signal for freq
