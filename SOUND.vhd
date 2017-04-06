@@ -13,7 +13,8 @@ use IEEE.MATH_REAL.ALL;                 -- For floor, ceil, round etc.
 
 -- entity
 entity SOUND is
-port (clk               : in std_logic;                      -- system clock (100 MHz)
+port (
+    clk                 : in std_logic;                      -- system clock (100 MHz)
     rst                 : in std_logic;                      -- reset signal
     goal_pos            : in std_logic_vector(17 downto 0);  -- goal position
     curr_pos            : in std_logic_vector(17 downto 0);  -- current position

@@ -13,19 +13,22 @@ architecture Behavioral of zigsound is
 
     -- micro Memory component
     component uMem
-        port(uAddr : in unsigned(5 downto 0);
+        port(
+            uAddr : in unsigned(5 downto 0);
             uData : out unsigned(15 downto 0));
     end component;
 
     -- program Memory component
     component pMem
-        port(pAddr : in unsigned(15 downto 0);
+        port(
+            pAddr : in unsigned(15 downto 0);
             pData : out unsigned(15 downto 0));
     end component;
 
     -- Sound component
     component sound
-        port (clk               : in std_logic;                      -- system clock (100 MHz)
+        port (
+            clk               : in std_logic;                      -- system clock (100 MHz)
             rst                 : in std_logic;                      -- reset signal
             goal_pos            : in std_logic_vector(17 downto 0);  -- goal position
             curr_pos            : in std_logic_vector(17 downto 0);  -- current position
