@@ -14,15 +14,15 @@ use IEEE.NUMERIC_STD.ALL;               -- IEEE library for the unsigned type
 -- entity
 entity VGA_MOTOR is
     port (
-        clk	    	    	: in std_logic;
-        data			    : in std_logic_vector(7 downto 0);
-        addr		    	: out unsigned(10 downto 0);
-        rst			        : in std_logic;
-        vgaRed		        : out std_logic_vector(2 downto 0);
-        vgaGreen	        : out std_logic_vector(2 downto 0);
-        vgaBlue		        : out std_logic_vector(2 downto 1);
-        Hsync		        : out std_logic;
-        Vsync		        : out std_logic);
+    clk	    	    		: in std_logic;
+    rst		        		: in std_logic;
+	data		    		: in std_logic_vector(7 downto 0);
+    addr		    		: out unsigned(10 downto 0);
+    vgaRed		        	: out std_logic_vector(2 downto 0);
+    vgaGreen	        	: out std_logic_vector(2 downto 0);
+    vgaBlue		        	: out std_logic_vector(2 downto 1);
+    Hsync		        	: out std_logic;
+    Vsync		        	: out std_logic);
 end VGA_MOTOR;
 
 
@@ -32,7 +32,7 @@ architecture Behavioral of VGA_MOTOR is
     signal Xpixel	        : unsigned(9 downto 0);     -- Horizontal pixel counter
     signal Ypixel	        : unsigned(9 downto 0);		-- Vertical pixel counter
     signal ClkDiv	        : unsigned(1 downto 0);		-- Clock divisor, to generate 25 MHz signal
-    signal Clk25		    : std_logic;			    -- One pulse width 25 MHz signal
+    signal Clk25			: std_logic;			    -- One pulse width 25 MHz signal
     signal tilePixel        : std_logic_vector(7 downto 0);	-- Tile pixel data
     signal tileAddr         : unsigned(10 downto 0);	-- Tile address
     signal blank            : std_logic;                -- blanking signal

@@ -13,19 +13,21 @@ use IEEE.NUMERIC_STD.ALL;               -- IEEE library for the unsigned type
 
 -- entity
 entity PIC_MEM is
-    port(
-        clk		        : in std_logic;
-        -- port 1: GRPX CTRL
-        we		        : in std_logic;
-        data_nextpos    : out std_logic_vector(4 downto 0);
-        addr_nextpos    : in std_logic_vector(10 downto 0)
-        data_change	    : in std_logic_vector(4 downto 0);
-        addr_change	    : in unsigned(10 downto 0);
-        -- port 2: VGA MOTOR
-        data_vga        : out std_logic_vector(4 downto 0);
-        addr_vga	    : in unsigned(10 downto 0);
-        -- port 3: TRACK
-        sel_track       : in std_logic_vector(1 downto 0));
+	port(
+        clk		        	: in std_logic;
+        rst		            : in std_logic;
+        -- CPU
+        sel_track       	: in std_logic_vector(1 downto 0);
+        -- GPU
+        we		        	: in std_logic;
+        data_nextpos    	: out std_logic_vector(7 downto 0);
+        addr_nextpos    	: in std_logic_vector(10 downto 0);
+        data_change	    	: in std_logic_vector(7 downto 0);
+        addr_change	    	: in unsigned(10 downto 0);
+        -- VGA MOTOR
+        data_vga        	: out std_logic_vector(7 downto 0);
+        addr_vga	    	: in unsigned(10 downto 0)
+	);
 
 end PIC_MEM;
 	

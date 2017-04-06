@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- GRPX CTRL
+-- GPU
 -- ZigSound
 -- 04-apr-2017
 -- Version 0.1
@@ -12,33 +12,39 @@ use IEEE.NUMERIC_STD.ALL;               -- IEEE library for the unsigned type
                                         -- and various arithmetic operations
 
 -- entity
-entity GRPX_CTRL is
+entity GPU is
     port (
         clk                 : in std_logic;			-- system clock (100 MHz)
         rst	        		: in std_logic;			-- reset signal
+        
         -- TO/FROM CPU
         move_req            : in std_logic;         -- move request
+        move_resp			: out std_logic;		-- response to move request
         curr_pos            : in std_logic_vector(17 downto 0); -- current position
         next_pos            : in std_logic_vector(17 downto 0); -- next position
-        move_resp			: out std_logic;		-- response to move request
+   
         -- TO/FROM PIC_MEM
-        data_nextpos        : in std_logic_vector(4 downto 0);  -- tile data at nextpos
+        data_nextpos        : in std_logic_vector(7 downto 0);  -- tile data at nextpos
         addr_nextpos        : out std_logic_vector(10 downto 0); -- tile addr of nextpos
-        data_change			: out std_logic_vector(4 downto 0);	-- tile data for change
+        data_change			: out std_logic_vector(7 downto 0);	-- tile data for change
         addr_change			: out unsigned(10 downto 0); -- tile address for change
         we_picmem			: out std_logic);		-- write enable for PIC_MEM
-end GRPX_CTRL;
+end GPU;
 
 -- architecture
-architecture behavioral of GRPX_CTRL is
+architecture behavioral of GPU is
+
     signal we               : std_logic;  -- write enable
     signal ypos             : std_logic_vector(4 downto 0);  -- curr y position
-    signal xpos             : std_logic_vector(4 downto 0);  -- curr x position
-    signal tile		: std_logic_vector(4 downto 0);	-- tile index
+    signal xpos             : std_logic_vector(5 downto 0);  -- curr x position
+    signal tile		        : std_logic_vector(7 downto 0);	-- tile index
+
     type wr_type is (IDLE, DRAW);  -- declare state types for write cycle
     signal WRstate : wr_type;  -- write cycle state
+
     type ch_type is (WAITING, CHECK);  -- declare state types for write cycle
     signal CHstate : ch_type;  -- write cycle state
+
 begin
 	
 
@@ -55,7 +61,7 @@ begin
                 when WAITING =>
                     if move_req = '1' then  -- CPU is telling us we have a move request.
                         -- Translates x- (14 downto 9) and y-pos (4 downto 0) in next_pos into PIC_MEM-address.
-                        addr_nextpos <= next_pos(14 downto 9) + (to_unsigned(40, 11) * next_pos(4 downto 0));
+                        addr_nextpos <= (to_unsigned(40, 6)*next_pos(4 downto 0)) + next_pos(14 downto 9);
                         CHstate <= CHECK;   -- Sets state to CHECK so that we check PIC_MEMs response next tick.
                     end if;
                 when others =>
@@ -87,13 +93,13 @@ begin
                         move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
                         we_picmem <= '1';   -- PIC_MEM can now take address and data.
                         WRstate <= DRAW;    -- Set state to DRAW so we take data from next_pos.
-                    else
-                        move_resp <= '0';    
+                    else   
                         we_picmem <= '0';
                     end if;
                 when others =>              -- We're in DRAW-state, set data for PIC_MEM.
                     addr_change <= xpos + (to_unsigned(40, 11) * ypos); -- Translates x- and y-pos into PIC_MEM-address.
                     data_change <= tile;    -- Sets data to the correct tile (CHAR since we're in DRAW).
+                    move_resp <= '0'; 
                     WRstate <= IDLE;        -- Go back to IDLE-state.
             end case;
         end if;
@@ -104,7 +110,7 @@ begin
     -- otherwise from next_pos.
     xpos <= curr_pos(14 downto 9) when (WRstate = CLEAR) else next_pos(14 downto 9);
     ypos <= curr_pos(4 downto 0) when (WRstate = CLEAR) else next_pos(4 downto 0);
-    tile <= "00001" when (WRstate = DRAW) else "00000";
+    tile <= x"01" when (WRstate = DRAW) else x"00";
   
     end behavioral;
 
