@@ -31,13 +31,11 @@ architecture behavioral of SOUND is
     signal goal_y       : std_logic_vector(4 downto 0);
     signal curr_y       : std_logic_vector(4 downto 0);
 
-    signal x            : std_logic_vector(5 downto 0);         -- x-signal for playing
-    signal y            : std_logic_vector(4 downto 0);         -- y-signal for playing
+    signal x            : std_logic_vector(5 downto 0);         -- x-position for playing
+    signal y            : std_logic_vector(4 downto 0);         -- y-position for playing
 
-    signal freq         : std_logic_vector(5 downto 0);         -- Divided value for desired frequency for freq at position,
-                                                                -- 40 cols gives 40 possible frequencies
-    signal beat         : std_logic_vector(4 downto 0);         -- Divided value for desired frequency for beat at position,
-                                                                -- 30 cols gives 30 possible beats
+    signal freq         : std_logic_vector(10 downto 0);        -- Divided value for desired frequency for freq at position
+    signal beat         : std_logic_vector(19 downto 0);        -- Divided value for desired frequency for beat at position
 
     signal clk_div_beat : std_logic_vector;                     -- Dividing clock for beat
     signal clk_div_freq : std_logic_vector;                     -- Dividing clock for freq
@@ -73,19 +71,93 @@ begin
         end if;
     end process;
 
-    
-    -- Generate beat and freq
-    process(clk) begin
-        if rising_edge(clk) then
-            if rst='1' then
-                beat <= 1;
-                freq <= 1;
-            else
-                beat <= floor(100000000 / (0.555764 * exp(0.0980482 * y)));  -- 100 MHz/desired beat, gives value for when to toggle clk_beat.
-                freq <= floor(100000000/ (300 + 25*x);                       -- 100 MHz/desired freq, gives value for when to toggle clk_freq.
-            end if;
-        end if;
-    end process;
+
+    -- y position -> beat value for toggle clk_beat
+    -- follows beat = round(100000000 / (0.555764 * exp(0.0980482 * y)))
+    -- See list of Hz-values in frequencies.txt
+    -- Position is 0 at top of screen
+    with y select
+      beat <=
+      1000000 when 29,
+      789474  when 28,
+      652174  when 27,
+      555556  when 26,
+      483871  when 25,
+      428571  when 24,
+      384615  when 23,
+      348837  when 22,
+      319149  when 21,
+      294118  when 20,
+      272727  when 19,
+      250000  when 18,
+      230769  when 17,
+      214286  when 16,
+      197368  when 15,
+      180723  when 14,
+      166667  when 13,
+      153846  when 12,
+      142180  when 11,
+      130435  when 10,
+      119048  when 9,
+      109091  when 8,
+      100000  when 7,
+      90909   when 6,
+      81081   when 5,
+      73171   when 4,
+      65217   when 3,
+      57692   when 2,
+      50847   when 1,
+      45455   when 0,
+      1       when others;
+
+    -- x-position -> freq value for toggle clk_freq
+    -- Follows freq <= round(100000000/ (300 + 25*x)
+    -- See list of Hz-values in frequencies.txt
+    -- Position is 0 at left of screen
+    with x select
+      freq <=
+      1538 when 0,
+      1429 when 1,
+      1333 when 2,
+      1250 when 3,
+      1176 when 4,
+      1111 when 5,
+      1053 when 6,
+      1000 when 7,
+      952  when 8,
+      909  when 9,
+      870  when 10,
+      833  when 11,
+      800  when 12,
+      769  when 13,
+      741  when 14,
+      714  when 15,
+      690  when 16,
+      667  when 17,
+      645  when 18,
+      625  when 19,
+      606  when 20,
+      588  when 21,
+      571  when 22,
+      556  when 23,
+      541  when 24,
+      526  when 25,
+      513  when 26,
+      500  when 27,
+      488  when 28
+      476  when 29,
+      465  when 30,
+      455  when 31,
+      444  when 32,
+      435  when 33,
+      426  when 34,
+      417  when 35,
+      408  when 36,
+      400  when 37,
+      392  when 38,
+      385  when 39,
+      1    when others;
+
         
     -- Clock divisor
     -- Divide system clock (100 MHz) by beat and freq
@@ -106,48 +178,8 @@ begin
     end process;
 	
   -- Set sound clocks (one system clock pulse width)
-  clk_beat <= not clk_beat when (clk_beat_div <  floor(beat/2)) else clk_beat;
-  clk_freq <= not clk_freq when (clk_freq_div <  floor(freq/2)) else clk_freq;
-
-  
-    
-
-  -- Scan Code -> Tile Index mapping
-  --with ScanCode select
-  --  TileIndex <= x"00" when x"29",  -- space
-  --  x"01" when x"1C",   -- A
-  --  x"02" when x"32",   -- B
-  --  x"03" when x"21",   -- C
-  --  x"04" when x"23",   -- D
-  --  x"05" when x"24",   -- E
-  --  x"06" when x"2B",   -- F
-  --  x"07" when x"34",   -- G
-  --  x"08" when x"33",   -- H
-  --  x"09" when x"43",   -- I
-  --  x"0A" when x"3B",   -- J
-  --  x"0B" when x"42",   -- K
-  --  x"0C" when x"4B",   -- L
-  --  x"0D" when x"3A",   -- M
-  --  x"0E" when x"31",   -- N
-  --  x"0F" when x"44",   -- O
-  --  x"10" when x"4D",   -- P
-  --  x"11" when x"15",   -- Q
-  --  x"12" when x"2D",   -- R
-  --  x"13" when x"1B",   -- S
-  --  x"14" when x"2C",   -- T
-  --  x"15" when x"3C",   -- U
-  --  x"16" when x"2A",   -- V
-  --  x"17" when x"1D",   -- W
-  --  x"18" when x"22",   -- X
-  --  x"19" when x"35",   -- Y
-  --  x"1A" when x"1A",   -- Z
-  --  x"1B" when x"54",  -- Å
-  --  x"1C" when x"52",  -- Ä
-  --  x"1D" when x"4C",  -- Ö
-  --  x"00" when others;
-    
-
-
+  clk_beat <= not clk_beat when (clk_beat_div < beat) else clk_beat;
+  clk_freq <= not clk_freq when (clk_freq_div < freq) else clk_freq;
 
   
 end behavioral;
