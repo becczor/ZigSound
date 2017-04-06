@@ -50,7 +50,10 @@ begin
     process(clk)
     begin
         if rising_edge(clk) then
-            if channel = '1' then
+            if rst='1' then
+                x <= 0;
+                y <= 0;
+            elsif channel = '1' then
                 x <= goal_x;
                 y <= goal_y;
             else
@@ -64,6 +67,7 @@ begin
     process(clk)
     begin
         if rising_edge(clk) then
+            -- Should look at registers all the time, even at reset
             goal_x <= goal_pos(14 downto 9);
             goal_y <= goal_pos(4 downto 0);
             curr_x <= curr_pos(14 downto 9);
