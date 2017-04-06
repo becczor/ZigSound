@@ -186,8 +186,8 @@ begin
             end if;
         end if;
     end process;
-	
-    -- Set sound clocks (one system clock pulse width)
+
+    -- Toggle sound clocks to get 50% duty cycle
     clk_beat <= not clk_beat when (clk_beat_div < beat) else clk_beat;
     clk_freq <= not clk_freq when (clk_freq_div < freq) else clk_freq;
 
@@ -196,22 +196,26 @@ begin
     process(clk_beat) begin
         if rising_edge(clk_beat) then
             if rst='1' then
-
+                q_beat <= 0;
             else
-                
+                q_beat <= q_beat_plus;
+            end if;
+        end if;
+    end process;
+
+    -- Freq flip flop
+    process(clk_freq) begin
+        if rising_edge(clk_beat) then
+            if rst='1' then
+                q_freq <= 0;
+            else
+                q_freq <= q_freq_plus;
             end if;
         end if;
     end process;
         
-    -- Freq flip flop
-    process(clk_freq) begin
-        if rising_edge(clk_freq) then
-            if rst='1' then
-
-            else
-                
-            end if;
-        end if;
-    end process;
+    --q_beat_plus <= sound_enable and not q_beat;
+    q_beat_plus <= not q_beat;
+    q_freq_plus <= q_beat and not q_freq;
   
 end behavioral;
