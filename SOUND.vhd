@@ -18,7 +18,7 @@ port (clk               : in std_logic;                      -- system clock (10
     goal_pos            : in std_logic_vector(17 downto 0);  -- goal position
     curr_pos            : in std_logic_vector(17 downto 0);  -- current position
     channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = corr, 1 = goal.
-    sound_data          : out std_logic;                     -- output to speaker
+    sound_data          : out std_logic);                    -- output to speaker
     --sound_enable        : in std_logic;                      -- possible for later to add on/off for sound
 end SOUND;
 
@@ -40,9 +40,15 @@ architecture behavioral of SOUND is
     signal clk_div_beat : std_logic_vector;                     -- Dividing clock for beat
     signal clk_div_freq : std_logic_vector;                     -- Dividing clock for freq
 
-    signal clk_beat : std_logic;                                -- Clock signal for beat
-    signal clk_freq : std_logic;                                -- Clock signal for freq
+    signal clk_beat     : std_logic;                            -- Clock signal for beat
+    signal clk_freq     : std_logic;                            -- Clock signal for freq
 
+    -- Flip flops
+    signal q_beat       : std_logic := 0;                       -- Beat flip flop
+    signal q_beat_plus  : std_logic := 0;    
+    
+    signal q_freq       : std_logic := 0;                       -- Freq flip flop
+    signal q_freq_plus  : std_logic := 0;     
 
 begin
 
@@ -181,9 +187,31 @@ begin
         end if;
     end process;
 	
-  -- Set sound clocks (one system clock pulse width)
-  clk_beat <= not clk_beat when (clk_beat_div < beat) else clk_beat;
-  clk_freq <= not clk_freq when (clk_freq_div < freq) else clk_freq;
+    -- Set sound clocks (one system clock pulse width)
+    clk_beat <= not clk_beat when (clk_beat_div < beat) else clk_beat;
+    clk_freq <= not clk_freq when (clk_freq_div < freq) else clk_freq;
 
+
+    -- Beat flip flop
+    process(clk_beat) begin
+        if rising_edge(clk_beat) then
+            if rst='1' then
+
+            else
+                
+            end if;
+        end if;
+    end process;
+        
+    -- Freq flip flop
+    process(clk_freq) begin
+        if rising_edge(clk_freq) then
+            if rst='1' then
+
+            else
+                
+            end if;
+        end if;
+    end process;
   
 end behavioral;
