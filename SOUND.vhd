@@ -9,7 +9,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;            -- basic IEEE library
 use IEEE.NUMERIC_STD.ALL;               -- IEEE library for the unsigned type and various arithmetic operations
-use IEEE.MATH_REAL.ALL;                 -- For floor, ceil, round etc.
 
 -- entity
 entity SOUND is

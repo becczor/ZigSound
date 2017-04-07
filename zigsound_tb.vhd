@@ -9,8 +9,12 @@ ARCHITECTURE behavior OF zigsound_tb IS
 
   --Component Declaration for the Unit Under Test (UUT)
   COMPONENT zigsound
-  PORT(clk : IN std_logic;
-       rst : IN std_logic);
+  PORT( clk                 : IN std_logic;
+        rst                 : IN std_logic;
+        goal_pos            : in std_logic_vector(17 downto 0);  -- goal position
+        curr_pos            : in std_logic_vector(17 downto 0);  -- current position
+        channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = curr, 1 = goal.
+        sound_data          : out std_logic);                    -- output to speaker);
   END COMPONENT;
 
   --Inputs

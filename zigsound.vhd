@@ -26,9 +26,9 @@ architecture Behavioral of zigsound is
     end component;
 
     -- Sound component
-    component sound
+    component SOUND
         port (
-            clk               : in std_logic;                      -- system clock (100 MHz)
+            clk                 : in std_logic;                      -- system clock (100 MHz)
             rst                 : in std_logic;                      -- reset signal
             goal_pos            : in std_logic_vector(17 downto 0);  -- goal position
             curr_pos            : in std_logic_vector(17 downto 0);  -- current position
@@ -112,6 +112,10 @@ begin
 
     -- program memory component connection
     U1 : pMem port map(pAddr=>ASR, pData=>PM);
+
+    -- sound component connection
+    -- Connection here between CPU and sound
+    --U5 : SOUND port map();    
   	
     -- micro memory signal assignments
     uAddr <= uM(5 downto 0);
