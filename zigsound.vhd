@@ -5,7 +5,9 @@ use IEEE.NUMERIC_STD.ALL;
 --CPU interface
 entity zigsound is
     port(clk: in std_logic;
-  	     rst: in std_logic);
+  	 rst: in std_logic;
+         JA1: in std_logic      -- the pmod is plugged in to the upper row of
+         );                     -- connector JA.  Uses only pin1 for data.
 end zigsound ;
 
 architecture Behavioral of zigsound is
@@ -130,5 +132,7 @@ begin
         PC when (TB = "011") else
         ASR when (TB = "100") else
         (others => '0');
+
+    -- JA1 <= sound_data;
 
   end Behavioral;
