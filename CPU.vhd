@@ -8,8 +8,8 @@ entity CPU is
         clk : in std_logic;
         rst : in std_logic;
         uAddr : out unsigned(5 downto 0);
-        uData : in unsigned(17 downto 0);
-        pAddr : out unsigned(17 downto 0);
+        uData : in unsigned(24 downto 0);
+        pAddr : out unsigned(7 downto 0);
         pData : in unsigned(17 downto 0)
 		move_req : out std_logic;
 		move_resp : in std_logic;
@@ -22,13 +22,29 @@ end CPU;
 
 architecture Behavioral of CPU is
     
--- Alias
---  alias TO_BUS : std_logic_vector(3 downto 0) is micro_instr(23 downto 20);     -- to bus
---  alias FROM_BUS : std_logic_vector(3 downto 0) is micro_instr(19 downto 16);   -- from bus
---  alias P_BIT : std_logic is micro_instr(15);                                   -- p bit
---  alias ALU_OP : std_logic_vector(2 downto 0) is micro_instr(14 downto 12);     -- alu_op
---  alias SEQ : std_logic_vector(3 downto 0) is micro_instr(11 downto 8);         -- seq
---  alias MICRO_ADR : std_logic_vector(7 downto 0) is micro_instr(7 downto 0);    -- micro address
+    --********
+    -- Alias
+    --********
+    -- Post aliases
+	alias uM : unsigned(24 downto 0) is uData(24 downto 0);
+	alias PM : unsigned(17 downto 0) is pData(17 downto 0);
+	alias ASR : unsigned(15 downto 0) is pAddr(15 downto 0);
+    
+    -- Micro instruction aliases
+    alias ALU       : std_logic_vector(3 downto 0) is uM(24 downto 21);     -- alu    
+    alias TB        : std_logic_vector(3 downto 0) is uM(20 downto 18);     -- to bus
+    alias FB        : std_logic_vector(3 downto 0) is uM(17 downto 15);     -- from bus
+    alias S         : std_logic is uM(14);                                  -- s bit
+    alias P         : std_logic is uM(13);                                  -- p bit
+    alias LC        : std_logic_vector(1 downto 0) is uM(12 downto 11);     -- lc
+    alias SEQ       : std_logic_vector(3 downto 0) is uM(10 downto 7);      -- seq
+    alias MICROADDR : std_logic_vector(7 downto 0) is uM(6 downto 0);       -- micro address
+
+    -- Program memory instruction aliases
+    alias OP        : std_logic_vector(4 downto 0) is PM(17 downto 13);     -- Operation    
+    alias GRxx      : std_logic_vector(2 downto 0) is PM(12 downto 10);     -- register    
+    alias M         : std_logic_vector(1 downto 0) is PM(9 downto 8);       -- Addressing mode    
+    alias A         : std_logic_vector(7 downto 0) is PM(7 downto 0);       -- Address field    
 
 	-- micro memory signals
 	signal uPC : unsigned(5 downto 0); -- micro Program Counter
@@ -41,10 +57,6 @@ architecture Behavioral of CPU is
 	signal Pcsig : std_logic; -- 0:PC=PC, 1:PC++
 	signal IR : unsigned(15 downto 0); -- Instruction Register 
 	signal DATA_BUS : unsigned(15 downto 0); -- Data Bus
-
-	alias uM : unsigned(24 downto 0) is uData(24 downto 0);
-	alias PM : unsigned(17 downto 0) is pData(17 downto 0);
-	alias ASR : unsigned(15 downto 0) is pAddr(15 downto 0);
 	
 	-- flag signals
 	signal flag_Z : std_logic;
