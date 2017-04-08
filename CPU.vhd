@@ -46,6 +46,9 @@ architecture Behavioral of CPU is
     alias M         : std_logic_vector(1 downto 0) is PM(9 downto 8);       -- Addressing mode    
     alias A         : std_logic_vector(7 downto 0) is PM(7 downto 0);       -- Address field    
 
+    --**********
+    -- Signals
+    --**********
 	-- micro memory signals
 	signal uPC : unsigned(5 downto 0); -- micro Program Counter
 	signal uPCsig : std_logic; -- (0:uPC++, 1:uPC=uAddr)
