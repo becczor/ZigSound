@@ -21,15 +21,15 @@ end CPU;
 
 
 architecture Behavioral of CPU is
-    
+
     --********
     -- Alias
     --********
     -- Post aliases
-	alias uM : unsigned(24 downto 0) is uData(24 downto 0);
-	alias PM : unsigned(17 downto 0) is pData(17 downto 0);
-	alias ASR : unsigned(15 downto 0) is pAddr(15 downto 0);
-    
+    alias uM : unsigned(24 downto 0) is uData(24 downto 0);
+    alias PM : unsigned(17 downto 0) is pData(17 downto 0);
+    alias ASR : unsigned(15 downto 0) is pAddr(15 downto 0);
+
     -- Micro instruction aliases
     alias ALU       : std_logic_vector(3 downto 0) is uM(24 downto 21);     -- alu    
     alias TB        : std_logic_vector(3 downto 0) is uM(20 downto 18);     -- to bus
@@ -68,9 +68,40 @@ architecture Behavioral of CPU is
 	-- table of uAddresses where each instruction begins in uMem.
 	-- LÄGG IN STARTADRESSER HÄR GUYS!!
 	type uAddr_instr_t is array (0 to 31) of std_logic_vector(5 downto 0);
-	signal uAddr_instr : uAddr_instr_t := (
-	    0 => "000000", 
-	    others => (others => '0'));
+	constant uAddr_instr_c : uAddr_instr_t := 
+        ("000000",
+         "000000",
+         "000000", 
+         "000000", 
+         "000000", 
+         "000000", 
+         "000000",
+         "000000",
+         "000000",
+         "000000",
+         "000000",
+         "000000",
+         "000000", 
+         "000000", 
+         "000000", 
+         "000000", 
+         "000000",
+         "000000",
+         "000000",
+         "000000",
+         "000000",
+         "000000",
+         "000000", 
+         "000000", 
+         "000000", 
+         "000000", 
+         "000000",
+         "000000",
+         "000000",
+         "000000",
+         "000000",
+         "000000");
+    signal uAddr_instr : uAddr_instr_t := uAddr_instr_c;
 
 begin 
 
@@ -87,17 +118,75 @@ begin
                     when "0001" => 
                         uPC <= uAddr_instr(to_integer(OP));
                     when "0010" =>
-                        
-                            
-                    
+                        case M is
+                            when "00" =>
+                                uPC <= "000000" -- "Direkt adresserings" uAddr
+                            when "01" => 
+                                uPC <= "000000" -- "Omedelbar operands" uAddr
+                            when "10" => 
+                                uPC <= "000000" -- "Indirekt adresserings" uAddr
+                            when others => 
+                                uPC <= "000000" -- "Indexerad adresserings" uAddr
+                        end case;
+                    when "0011" =>
+                        uPC <= "000000";
+                    when "0100" =>
+                        if (flag_Z = '0') then
+                            uPC <= MICROADDR;
+                        else 
+                            uPC <= uPC + 1;
+                        end if;        
+                    when "0101" =>          -- "0110" och "0111" SUBRUTINGREJER
+                        uPC <= MICROADDR;
+                    when "1000" =>
+                        if (flag_Z = '1') then
+                            uPC <= MICROADDR;
+                        else 
+                            uPC <= uPC + 1;
+                       end if;
+                    when "1001" =>
+                        if (flag_N = '1') then
+                            uPC <= MICROADDR;
+                        else 
+                            uPC <= uPC + 1;
+                        end if;
+                    when "1010" =>
+                        if (flag_C = '1') then
+                            uPC <= MICROADDR;
+                        else 
+                            uPC <= uPC + 1;
+                        end if;
+                    when "1011" =>
+                        if (flag_O = '1') then
+                            uPC <= MICROADDR;
+                        else 
+                            uPC <= uPC + 1;
+                        end if;
+                    when "1100" =>
+                        if (flag_L = '1') then
+                            uPC <= MICROADDR;
+                        else 
+                            uPC <= uPC + 1;
+                        end if;  
+                    when "1101" =>
+                        if (flag_C = '0') then
+                            uPC <= MICROADDR;
+                        else 
+                            uPC <= uPC + 1;
+                        end if; 
+                    when "1110" =>
+                        if (flag_O = '0') then
+                            uPC <= MICROADDR;
+                        else 
+                            uPC <= uPC + 1;
+                        end if;  
+                    when "1111" =>
+                        uPC = "000000"; -- SKA ÄVEN GÖRA HALT          
+                end case; -- BEhöver vi en others grej?
             end if;
         end if;
     end process;
     
-    if (uPCsig = '1') then
-                uPC <= uAddr;
-            else
-                uPC <= uPC + 1;
 	
     -- PC : Program Counter
     process(clk)
@@ -107,7 +196,7 @@ begin
                 PC <= (others => '0');
             elsif (FB = "011") then
                 PC <= DATA_BUS;
-            elsif (PCsig = '1') then
+            elsif (P = '1') then
                 PC <= PC + 1;
             end if;
         end if;
@@ -116,25 +205,35 @@ begin
     -- IR : Instruction Register
     process(clk)
     begin
-    if rising_edge(clk) then
-        if (rst = '1') then
-            IR <= (others => '0');
-        elsif (FB = "001") then
-            IR <= DATA_BUS;
+        if rising_edge(clk) then
+            if (rst = '1') then
+                IR <= (others => '0');
+            elsif (FB = "001") then
+                IR <= DATA_BUS;
+            end if;
         end if;
-    end if;
     end process;
 	
     -- ASR : Address Register
     process(clk)
     begin
-    if rising_edge(clk) then
-        if (rst = '1') then
-            ASR <= (others => '0');
-        elsif (FB = "100") then
-            ASR <= DATA_BUS;
+        if rising_edge(clk) then
+            if (rst = '1') then
+                ASR <= (others => '0');
+            elsif (FB = "100") then
+                ASR <= DATA_BUS;
+            end if;
         end if;
-    end if;
+    end process;
+    
+    
+    -- ALU : Aritmetisk logisk enhet (?)
+   process(clk)
+   begin
+        if rising_edge(clk) then
+            case ALU when =>
+                "0001"
+        end if;
     end process;
 
     -- micro memory signal assignments
