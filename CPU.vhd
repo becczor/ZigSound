@@ -45,60 +45,85 @@ architecture Behavioral of CPU is
 	alias uM : unsigned(24 downto 0) is uData(24 downto 0);
 	alias PM : unsigned(17 downto 0) is pData(17 downto 0);
 	alias ASR : unsigned(15 downto 0) is pAddr(15 downto 0);
+	
+	-- flag signals
+	signal flag_Z : std_logic;
+	signal flag_N : std_logic;
+	signal flag_C : std_logic;
+	signal flag_O : std_logic;
+	signal flag_L : std_logic;
+	
+	-- table of uAddresses where each instruction begins in uMem.
+	-- LÄGG IN STARTADRESSER HÄR GUYS!!
+	type uAddr_instr_t is array (0 to 31) of std_logic_vector(5 downto 0);
+	signal uAddr_instr : uAddr_instr_t := (
+	    0 => "000000", 
+	    others => (others => '0'));
 
 begin 
 
-	-- mPC : micro Program Counter
-	process(clk)
-	begin
-		if rising_edge(clk) then
-			if (rst = '1') then
-				uPC <= (others => '0');
-			elsif (uPCsig = '1') then
-				uPC <= uAddr;
-			else
-				uPC <= uPC + 1;
-			end if;
-		end if;
-	end process;
+    -- mPC : micro Program Counter
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if (rst = '1') then
+                uPC <= (others => '0');
+            else
+                case SEQ is
+                    when "0000" =>
+                        uPC <= uPC + 1;
+                    when "0001" => 
+                        uPC <= uAddr_instr(to_integer(OP));
+                    when "0010" =>
+                        
+                            
+                    
+            end if;
+        end if;
+    end process;
+    
+    if (uPCsig = '1') then
+                uPC <= uAddr;
+            else
+                uPC <= uPC + 1;
 	
-	-- PC : Program Counter
-	process(clk)
-	begin
-		if rising_edge(clk) then
-		  if (rst = '1') then
-			PC <= (others => '0');
-		  elsif (FB = "011") then
-			PC <= DATA_BUS;
-		  elsif (PCsig = '1') then
-			PC <= PC + 1;
-		  end if;
-		end if;
-	end process;
+    -- PC : Program Counter
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if (rst = '1') then
+                PC <= (others => '0');
+            elsif (FB = "011") then
+                PC <= DATA_BUS;
+            elsif (PCsig = '1') then
+                PC <= PC + 1;
+            end if;
+        end if;
+    end process;
 	
-	-- IR : Instruction Register
-	process(clk)
-	begin
-		if rising_edge(clk) then
-		  if (rst = '1') then
-			IR <= (others => '0');
-		  elsif (FB = "001") then
-			IR <= DATA_BUS;
-		  end if;
-		end if;
-	end process;
-	
-  -- ASR : Address Register
-  process(clk)
-  begin
+    -- IR : Instruction Register
+    process(clk)
+    begin
     if rising_edge(clk) then
-      if (rst = '1') then
-        ASR <= (others => '0');
-      elsif (FB = "100") then
-        ASR <= DATA_BUS;
-      end if;
+        if (rst = '1') then
+            IR <= (others => '0');
+        elsif (FB = "001") then
+            IR <= DATA_BUS;
+        end if;
     end if;
-  end process;
+    end process;
+	
+    -- ASR : Address Register
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if (rst = '1') then
+            ASR <= (others => '0');
+        elsif (FB = "100") then
+            ASR <= DATA_BUS;
+        end if;
+    end if;
+    end process;
 
     -- micro memory signal assignments
     uAddr <= uM(5 downto 0);
@@ -107,12 +132,12 @@ begin
     FB <= uM(10 downto 8);
     TB <= uM(13 downto 11);
 
-  -- data bus assignment
-  DATA_BUS <= IR when (TB = "001") else
+    -- data bus assignment
+    DATA_BUS <= IR when (TB = "001") else
     PM when (TB = "010") else
     PC when (TB = "011") else
     ASR when (TB = "100") else
-   (others => '0');
+    (others => '0');
 
 end Behavioral;
 
