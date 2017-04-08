@@ -31,14 +31,20 @@ architecture Behavioral of CPU is
 	alias ASR : unsigned(15 downto 0) is pAddr(15 downto 0);
     
     -- Micro instruction aliases
-    alias ALU : std_logic_vector(3 downto 0) is uM(24 downto 21);       -- alu_op    
-    alias TB : std_logic_vector(3 downto 0) is uM(20 downto 18);        -- to bus
-    alias FB : std_logic_vector(3 downto 0) is uM(17 downto 15);        -- from bus
-    alias S : std_logic is uM(14);                                      -- s bit
-    alias P : std_logic is uM(13);                                      -- p bit
-    alias LC : std_logic_vector(1 downto 0) is uM(12 downto 11);        -- lc
-    alias SEQ : std_logic_vector(3 downto 0) is uM(10 downto 7);        -- seq
-    alias MICROADDR : std_logic_vector(7 downto 0) is uM(6 downto 0);   -- micro address
+    alias ALU       : std_logic_vector(3 downto 0) is uM(24 downto 21);     -- alu    
+    alias TB        : std_logic_vector(3 downto 0) is uM(20 downto 18);     -- to bus
+    alias FB        : std_logic_vector(3 downto 0) is uM(17 downto 15);     -- from bus
+    alias S         : std_logic is uM(14);                                  -- s bit
+    alias P         : std_logic is uM(13);                                  -- p bit
+    alias LC        : std_logic_vector(1 downto 0) is uM(12 downto 11);     -- lc
+    alias SEQ       : std_logic_vector(3 downto 0) is uM(10 downto 7);      -- seq
+    alias MICROADDR : std_logic_vector(7 downto 0) is uM(6 downto 0);       -- micro address
+
+    -- Program memory instruction aliases
+    alias OP        : std_logic_vector(4 downto 0) is PM(17 downto 13);     -- Operation    
+    alias GRxx      : std_logic_vector(2 downto 0) is PM(12 downto 10);     -- register    
+    alias M         : std_logic_vector(1 downto 0) is PM(9 downto 8);       -- Addressing mode    
+    alias A         : std_logic_vector(7 downto 0) is PM(7 downto 0);       -- Address field    
 
 	-- micro memory signals
 	signal uPC : unsigned(5 downto 0); -- micro Program Counter
