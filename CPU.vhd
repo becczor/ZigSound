@@ -68,6 +68,20 @@ architecture Behavioral of CPU is
 	signal flag_O : std_logic;
 	signal flag_L : std_logic;
 	
+    --**********
+    -- Registers
+    --**********
+    -- Rename for postion registers
+    signal gr0 : std_logic_vector(15 downto 0) := "0000000000000011";    
+    signal gr1 : std_logic_vector(15 downto 0) := "0000000000000011";
+    signal gr2 : std_logic_vector(15 downto 0) := "0000000000000001";
+    signal gr3 : std_logic_vector(15 downto 0);
+    signal gr4 : std_logic_vector(15 downto 0);
+    signal gr5 : std_logic_vector(15 downto 0);
+    signal gr6 : std_logic_vector(15 downto 0);
+    signal gr7 : std_logic_vector(15 downto 0);
+
+
 	-- table of uAddresses where each instruction begins in uMem.
 	-- LÄGG IN STARTADRESSER HÄR GUYS!!
 	type uAddr_instr_t is array (0 to 31) of std_logic_vector(5 downto 0);
