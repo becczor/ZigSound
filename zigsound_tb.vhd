@@ -13,26 +13,26 @@ ARCHITECTURE behavior OF zigsound_tb IS
         clk                     : IN std_logic;
         rst                     : IN std_logic;
         move_req                : IN std_logic;         -- move request
-        move_resp			    : OUT std_logic;		-- response to move request
-        curr_pos                : IN std_logic_vector(17 downto 0); -- current position
-        next_pos                : IN std_logic_vector(17 downto 0); -- next position
-        sel_track       	    : in std_logic_vector(1 downto 0);   -- track select
+        --move_resp			    : OUT std_logic;		-- response to move request
+        curr_pos                : IN unsigned(17 downto 0); -- current position
+        next_pos                : IN unsigned(17 downto 0); -- next position
+        sel_track       	    : in std_logic_vector(1 downto 0)   -- track select
         -- VGA OUT
-        addr		    		: out unsigned(10 downto 0);
-        vgaRed		        	: out std_logic_vector(2 downto 0);
-        vgaGreen	        	: out std_logic_vector(2 downto 0);
-        vgaBlue		        	: out std_logic_vector(2 downto 1);
-        Hsync		        	: out std_logic;
-        Vsync		        	: out std_logic
+        --addr		    		: out unsigned(10 downto 0);
+        --vgaRed		        	: out std_logic_vector(2 downto 0);
+        --vgaGreen	        	: out std_logic_vector(2 downto 0);
+        --vgaBlue		        	: out std_logic_vector(2 downto 1);
+        --Hsync		        	: out std_logic;
+        --Vsync		        	: out std_logic
         );
     END COMPONENT;
 
     --Inputs
-    signal clk : std_logic:= '0';
-    signal rst : std_logic:= '0';
+    signal clk : std_logic := '0';
+    signal rst : std_logic := '0';
     signal move_req : std_logic := '0';         -- move request
-    signal curr_pos : std_logic_vector(17 downto 0) := "000000000000000000"; -- current position
-    signal next_pos : std_logic_vector(17 downto 0) := "000000000000000000"; -- next position
+    signal curr_pos : unsigned(17 downto 0) := "000000000000000000"; -- current position
+    signal next_pos : unsigned(17 downto 0) := "000000001000000001"; -- next position
     signal sel_track : std_logic_vector(1 downto 0) := "00";   -- track select
 
     --Clock period definitions
@@ -58,6 +58,7 @@ BEGIN
         wait for clk_period/2;
     end process;
 
-    rst <= '0', '1' after 1.7 us, '0' after 2.7 us;
+    rst <= '1', '0' after 1.7 us;
+    move_req <= '1' after 2.0 us, '0' after 2.1 us;
 END;
 

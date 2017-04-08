@@ -2,16 +2,11 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
---CPU interface
+-- Computer interface
 entity zigsound is
 	port(
 	clk		                : in std_logic;
 	rst		                : in std_logic;
-    move_req                : in std_logic;                     -- move request
-    move_resp			    : out std_logic;		            -- response to move request
-    curr_pos                : in std_logic_vector(17 downto 0); -- current position
-    next_pos                : in std_logic_vector(17 downto 0); -- next position
-    sel_track       	    : in std_logic_vector(1 downto 0);   -- track select
     -- VGA OUT
     addr		    		: out unsigned(10 downto 0);
     vgaRed		        	: out std_logic_vector(2 downto 0);
@@ -23,16 +18,33 @@ entity zigsound is
 end zigsound ;
 
 architecture Behavioral of zigsound is
-
+    
+    -- CPU component
+    component CPU
+        port(
+        clk                 : in std_logic;
+        rst                 : in std_logic;
+        uAddr               : in unsigned(5 downto 0);
+        uData               : in  unsigned(15 downto 0);
+        pAddr               : in  unsigned(15 downto 0);
+        pData               : in  unsigned(15 downto 0));
+        move_req            : out std_logic;  -- move request
+        move_resp			: in std_logic;  -- response to move request
+        curr_pos            : out unsigned(17 downto 0); -- current position
+        next_pos            : out unsigned(17 downto 0); -- next position
+        sel_track           : out std_logic_vector(1 downto 0);  -- track selector
+        
 	-- Micro Memory component
 	component uMem
-		port(uAddr 	        : in unsigned(5 downto 0);
+		port(
+        uAddr 	            : in unsigned(5 downto 0);
 	 	uData 		        : out unsigned(15 downto 0));
 	end component;
 
 	-- Program Memory component
 	component pMem
-		port(pAddr 	        : in unsigned(15 downto 0);
+		port(
+        pAddr 	            : in unsigned(15 downto 0);
 	 	pData 		        : out unsigned(15 downto 0));
 	end component;
 
@@ -43,12 +55,12 @@ architecture Behavioral of zigsound is
         rst	        		: in std_logic;			-- reset signal
         -- TO/FROM CPU
         move_req            : in std_logic;         -- move request
-        curr_pos            : in std_logic_vector(17 downto 0); -- current position
-        next_pos            : in std_logic_vector(17 downto 0); -- next position
+        curr_pos            : in unsigned(17 downto 0); -- current position
+        next_pos            : in unsigned(17 downto 0); -- next position
         move_resp			: out std_logic;		-- response to move request
         -- TO/FROM PIC_MEM
         data_nextpos        : in std_logic_vector(7 downto 0);  -- tile data at nextpos
-        addr_nextpos        : out std_logic_vector(10 downto 0); -- tile addr of nextpos
+        addr_nextpos        : out unsigned(10 downto 0); -- tile addr of nextpos
         data_change			: out std_logic_vector(7 downto 0);	-- tile data for change
         addr_change			: out unsigned(10 downto 0); -- tile address for change
         we_picmem			: out std_logic		-- write enable for PIC_MEM
@@ -65,7 +77,7 @@ architecture Behavioral of zigsound is
         -- GPU
         we		        	: in std_logic;
         data_nextpos    	: out std_logic_vector(7 downto 0);
-        addr_nextpos    	: in std_logic_vector(10 downto 0);
+        addr_nextpos    	: in unsigned(10 downto 0);
         data_change	    	: in std_logic_vector(7 downto 0);
         addr_change	    	: in unsigned(10 downto 0);
         -- VGA MOTOR
@@ -88,100 +100,70 @@ architecture Behavioral of zigsound is
 		Vsync		    	: out std_logic
 		);
 	end component;
-
-
+    
+    -- ******************
+    -- CONNECTING SIGNALS 
+    -- ******************
+    
+    -- CPU signals
+    signal move_req_con : std_logic;
+    signal curr_pos_con : unsigned(17 downto 0); -- current position
+    signal next_pos_con : unsigned(17 downto 0); -- next position
+    signal sel_track_con : std_logic_vector(1 downto 0);  -- track selector
 
 	-- Micro memory signals
-	signal uM : unsigned(15 downto 0); -- micro Memory output
-	signal uPC : unsigned(5 downto 0); -- micro Program Counter
-	signal uPCsig : std_logic; -- (0:uPC++, 1:uPC=uAddr)
-	signal uAddr : unsigned(5 downto 0); -- micro Address
-	signal TB : unsigned(2 downto 0); -- To Bus field
-	signal FB : unsigned(2 downto 0); -- From Bus field
-	
+    signal uAddr_con : unsigned(5 downto 0); -- micro Program Counter
+	signal uData_con : unsigned(15 downto 0); -- micro Memory output
+
 	-- Program memory signals
-	signal PM : unsigned(15 downto 0); -- Program Memory output
-	signal PC : unsigned(15 downto 0); -- Program Counter
-	signal Pcsig : std_logic; -- 0:PC=PC, 1:PC++
-	signal ASR : unsigned(15 downto 0); -- Address Register
-	signal IR : unsigned(15 downto 0); -- Instruction Register
-	signal DATA_BUS : unsigned(15 downto 0); -- Data Bus
+    signal pAddr_con : unsigned(15 downto 0); -- Address Register
+	signal pData_con : unsigned(15 downto 0); -- Program Memory output
 	
 	-- GPU signals
-    signal addr_nextpos_out     : std_logic_vector(10 downto 0);    -- tile addr of nextpos
-    signal data_change_out      : std_logic_vector(7 downto 0);	    -- tile data for change
-    signal addr_change_out      : unsigned(10 downto 0);            -- tile address for change
-    signal we_picmem_out        : std_logic;		                -- write enable for PIC_MEM
+    signal move_resp_out        : std_logic;  -- Move request response
+    signal addr_nextpos_con     : unsigned(10 downto 0);    -- tile addr of nextpos
+    signal data_change_con      : std_logic_vector(7 downto 0);	    -- tile data for change
+    signal addr_change_con      : unsigned(10 downto 0);            -- tile address for change
+    signal we_picmem_con        : std_logic;		                -- write enable for PIC_MEM
 	
 	-- PIC_MEM signals
-    signal data_nextpos_out     : std_logic_vector(7 downto 0); -- data PIC_MEM -> GPU
-    signal data_vga_out         : std_logic_vector(7 downto 0); -- data PIC_MEM -> VGA
+    signal data_nextpos_con     : std_logic_vector(7 downto 0); -- data PIC_MEM -> GPU
+    signal data_vga_con         : std_logic_vector(7 downto 0); -- data PIC_MEM -> VGA
 	
 	-- VGA MOTOR signals 
-    signal addr_vga_out         : unsigned(10 downto 0);
+    signal addr_vga_con         : unsigned(10 downto 0);
 	
 begin
+	
+    -- CPU component connection
+    U0 : CPU port map(
+                    clk => clk,
+                    rst => rst,
+                    uAddr => uAddr_con,
+                    uData => uData_con
+                    pAddr => pAddr_con,
+                    pData => pData_con,
+                    move_req => move_req_con,
+                    move_resp => move_resp_con,
+                    curr_pos => curr_pos_con,
+                    next_pos => next_pos_con,
+                    sel_track => sel_track_con,                    
+                    );
 
-	-- mPC : micro Program Counter
-	process(clk)
-	begin
-	if rising_edge(clk) then
-		if (rst = '1') then
-			uPC <= (others => '0');
-		elsif (uPCsig = '1') then
-			uPC <= uAddr;
-		else
-			uPC <= uPC + 1;
-		end if;
-	end if;
-	end process;
-	
-	-- PC : Program Counter
-	process(clk)
-	begin
-	if rising_edge(clk) then
-		if (rst = '1') then
-			PC <= (others => '0');
-		elsif (FB = "011") then
-			PC <= DATA_BUS;
-		elsif (PCsig = '1') then
-			PC <= PC + 1;
-		end if;
-	end if;
-	end process;
-	
-	-- IR : Instruction Register
-	process(clk)
-	begin
-	if rising_edge(clk) then
-		if (rst = '1') then
-			IR <= (others => '0');
-		elsif (FB = "001") then
-			IR <= DATA_BUS;
-		end if;
-	end if;
-	end process;
-
-	-- ASR : Address Register
-	process(clk)
-	begin
-	if rising_edge(clk) then
-		if (rst = '1') then
-			ASR <= (others => '0');
-		elsif (FB = "100") then
-			ASR <= DATA_BUS;
-		end if;
-	end if;
-	end process;
-	
 	-- Micro memory component connection
-	U0 : uMem port map(uAddr=>uPC, uData=>uM);
+	U1 : uMem port map(
+                    uAddr => uAddr_con,
+                    uData => uData_con
+                    );
 
 	-- Program memory component connection
-	U1 : pMem port map(pAddr=>ASR, pData=>PM);
+	U2 : pMem port map(
+                    pAddr => ASR, 
+                    pData => PM
+                    );
 	
 	-- GPU component connection
-	U2 : GPU port map(
+	U3 : GPU port map(
 	            clk => clk, 
 	            rst => rst, 
 	            move_req => move_req,
@@ -196,7 +178,7 @@ begin
 	            );
 	
 	-- PIC_MEM component connection
-	U3 : PIC_MEM port map(
+	U4 : PIC_MEM port map(
 	            clk => clk,
 	            rst => rst,
 	            we => we_picmem_out,
@@ -210,7 +192,7 @@ begin
 	            );
 	
 	-- VGA_MOTOR component connection
-	U4 : VGA_MOTOR port map(
+	U5 : VGA_MOTOR port map(
 	            clk => clk,
 	            rst => rst,
 	            data => data_vga_out,
@@ -222,18 +204,5 @@ begin
 	            Vsync => Vsync
 	            );
 	
-	-- micro memory signal assignments
-	uAddr <= uM(5 downto 0);
-	uPCsig <= uM(6);
-	PCsig <= uM(7);
-	FB <= uM(10 downto 8);
-	TB <= uM(13 downto 11);
-
-	-- data bus assignment
-	DATA_BUS <= IR when (TB = "001") else
-	PM when (TB = "010") else
-	PC when (TB = "011") else
-	ASR when (TB = "100") else
-	(others => '0');
 
 end Behavioral;

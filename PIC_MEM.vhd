@@ -21,7 +21,7 @@ entity PIC_MEM is
         -- GPU
         we		        	: in std_logic;
         data_nextpos    	: out std_logic_vector(7 downto 0);
-        addr_nextpos    	: in std_logic_vector(10 downto 0);
+        addr_nextpos    	: in unsigned(10 downto 0);
         data_change	    	: in std_logic_vector(7 downto 0);
         addr_change	    	: in unsigned(10 downto 0);
         -- VGA MOTOR
@@ -68,8 +68,18 @@ begin
     end process;
 
     -- Sets data_nextpos to data at addr_nextpos and data_vga to data at addr_vga.
-    data_nextpos <= picMem(to_integer(addr_nextpos));
-    data_vga <= picMem(to_integer(addr_vga));
+    with sel_track select
+        data_nextpos <= 
+        track_1(to_integer(addr_nextpos)) when "01",
+        track_2(to_integer(addr_nextpos)) when "10",
+        track_3(to_integer(addr_nextpos)) when "11",
+        "00000000" when others;
+    with sel_track select
+        data_vga <= 
+        track_1(to_integer(addr_vga)) when "01",
+        track_2(to_integer(addr_vga)) when "10",
+        track_3(to_integer(addr_vga)) when "11",
+        "00000000" when others;
 
 end Behavioral;
 
