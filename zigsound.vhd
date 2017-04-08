@@ -5,23 +5,28 @@ use IEEE.NUMERIC_STD.ALL;
 --CPU interface
 entity zigsound is
   port(clk: in std_logic;
-	   rst: in std_logic);
+		rst: in std_logic);
 end zigsound ;
 
 architecture Behavioral of zigsound is
 
 
-  -- CPU component
-  component CPU
-    port(
-        clk : in std_logic;
-        rst : out std_logic
-        uAddr : out unsigned(5 downto 0);
-        uData : in unsigned(15 downto 0)
-        pAddr : out unsigned(15 downto 0);
-        pData : in unsigned(15 downto 0)
-        );
-  end component;
+    -- CPU component
+	component CPU
+    	port(
+		    clk : in std_logic;
+		    rst : out std_logic
+		    uAddr : out unsigned(5 downto 0);
+		    uData : in unsigned(15 downto 0)
+		    pAddr : out unsigned(15 downto 0);
+		    pData : in unsigned(15 downto 0);
+            move_req : out std_logic;
+		    move_resp : in std_logic;
+		    curr_pos : out unsigned(17 downto 0);
+		    next_pos : out unsigned(17 downto 0);
+		    sel_track : out std_logic_vector(1 downto 0)
+		    );
+  	end component;
 
     -- micro Memory component
     component uMem
@@ -29,14 +34,15 @@ architecture Behavioral of zigsound is
              uData : out unsigned(15 downto 0));
     end component;
 
-  -- program Memory component
-  component pMem
-    port(pAddr : in unsigned(15 downto 0);
-         pData : out unsigned(15 downto 0));
-  end component;
+    -- program Memory component
+	component pMem
+		port(pAddr : in unsigned(15 downto 0);
+			 pData : out unsigned(15 downto 0));
+	end component;
 
-
-    -- Connection signals  
+    --********************
+    -- Connecting signals
+    --********************  
     signal uAddr_con : unsigned(5 downto 0);
     signal uData_con : unsigned(15 downto 0);
     signal pAddr_con : unsigned(15 downto 0);
