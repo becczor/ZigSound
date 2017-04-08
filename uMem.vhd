@@ -6,13 +6,13 @@ use IEEE.NUMERIC_STD.all;
 entity uMem is
   port (
     uAddr : in unsigned(7 downto 0);
-    uData : out unsigned(15 downto 0));
+    uData : out unsigned(24 downto 0));
 end uMem;
 
 architecture Behavioral of uMem is
 
 -- micro Memory
-type u_mem_t is array (0 to 255) of unsigned(15 downto 0);
+type u_mem_t is array (0 to 255) of unsigned(24 downto 0);
 constant u_mem_c : u_mem_t :=
        -- ALU_TB_FB_S_P_LC_SEQ_MICROADDR
 	   -- 4444_333_333_1_1_22_4444_7777777
