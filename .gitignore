@@ -4,3 +4,8 @@
 *synthdir**
 *~
 .metadata/
+CPU_notforuse.vhd
+ZigSoundGraphics.cr.mti
+ZigSoundGraphics.mpf
+vsim.wlf
+work/
