@@ -12,12 +12,14 @@ entity CPU is
         uAddr       : out unsigned(7 downto 0);
         uData       : in unsigned(24 downto 0);
         pAddr       : out unsigned(7 downto 0);
-        pData       : in unsigned(17 downto 0)
+        pData       : in unsigned(17 downto 0);
+        PS2cmd      : in unsigned(17 downto 0);
 		move_req    : out std_logic;
 		move_resp   : in std_logic;
 		curr_pos    : out unsigned(17 downto 0);
 		next_pos    : out unsigned(17 downto 0);
-		sel_track   : out unsigned(1 downto 0)
+		sel_track   : out unsigned(1 downto 0);
+		sel_sound   : out std_logic
         );
 end CPU;
 
@@ -29,6 +31,10 @@ architecture Behavioral of CPU is
     alias uM        : unsigned(24 downto 0) is uData(24 downto 0);
     alias PM        : unsigned(17 downto 0) is pData(17 downto 0);
     alias ASR       : unsigned(7 downto 0) is pAddr(7 downto 0);
+    alias curr_xpos : unsigned(5 downto 0) is curr_pos(14 downto 9);
+    alias curr_ypos : unsigned(4 downto 0) is curr_pos(4 downto 0);
+    alias next_xpos : unsigned(5 downto 0) is next_pos(14 downto 9);
+    alias next_ypos : unsigned(4 downto 0) is next_pos(4 downto 0);
     
     --*****************************
     --* Micro Instruction Aliases *
@@ -80,9 +86,8 @@ architecture Behavioral of CPU is
     signal GR2      : signed(17 downto 0) := "0000000000000001";
     signal GR3      : signed(17 downto 0) := (others => '0');
     signal GOALPOS  : unsigned(17 downto 0) := (others => '0');
-    signal NEXTPOS  : unsigned(17 downto 0) := (others => '0');
-    signal CURPOS   : unsigned(17 downto 0) := (others => '0');
-    signal PS2CMD   : unsigned(17 downto 0) := (others => '0');
+    --signal NEXTPOS  : unsigned(17 downto 0) := (others => '0');
+    --signal CURPOS   : unsigned(17 downto 0) := (others => '0');
 
     --****************************************************************************
 	--* uAddr_instr : Array of uAddresses where each instruction begins in uMem. *
@@ -256,44 +261,30 @@ begin
         end if;
     end process;
     
-    --************************************
-    --* NEXTPOS : Next Position Register *
-    --************************************
-    process(clk)
+    --*************************************
+    --* next_pos : Next Position Register *
+    --*************************************
+    --process(clk)
     begin
         if rising_edge(clk) then
             if (rst = '1') then
-                NEXTPOS <= (others => '0');
+                next_pos <= "000000001000000001";  -- Character starts at (1,1)
             elsif (FB = "110" and GRX = "101") then
-                NEXTPOS <= DATA_BUS;
+                next_pos <= DATA_BUS;
             end if;
         end if;
     end process;
     
-    --**************************************
-    --* CURPOS : Current Position Register *
-    --**************************************
+    --***************************************
+    --* cur_pos : Current Position Register *
+    --***************************************
     process(clk)
     begin
         if rising_edge(clk) then
             if (rst = '1') then
-                CURPOS <= (others => '0');
+                next_pos <= (others => '0');
             elsif (FB = "110" and GRX = "110") then
-                CURPOS <= DATA_BUS;
-            end if;
-        end if;
-    end process;
-    
-    --*********************************
-    --* PS2CMD : PS2 Command Register *
-    --*********************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                PS2CMD <= (others => '0');
-            elsif (FB = "110" and GRX = "111") then
-                PS2CMD <= DATA_BUS;
+                next_pos <= DATA_BUS;
             end if;
         end if;
     end process;
@@ -379,9 +370,9 @@ begin
                             uPC <= uPC + 1;
                         end if;  
                     when "1111" =>
-                        uPC = "000000"; -- SHOULD ALSO HALT EXECUTION   
+                        uPC <= "000000"; -- SHOULD ALSO HALT EXECUTION   
                     when others =>
-                        uPC = (others => '0');
+                        uPC <= (others => '0');
                 end case; 
             end if;
         end if;
@@ -404,6 +395,7 @@ begin
         else
             case ALU is
                 when "0000" =>  -- NO FUNCTION (No flags) 
+                    null;
                     
                 when "0001" => -- AR := DATA_BUS (No flags)
                     AR <= DATA_BUS;
@@ -475,9 +467,9 @@ begin
                     flag_C <= AR(17);
                     flag_N <= AR(16);
                     if (to_integer(AR(16 downto 0) = 0) then
-                        flag_Z = '1';
+                        flag_Z <= '1';
                     else
-                        flag_Z = '0';
+                        flag_Z <= '0';
                     end if;
                     
                 when "1010" => -- AR LSL, 32-bit, UNUSED
@@ -488,9 +480,9 @@ begin
                     flag_C <= AR(0);
                     flag_N <= AR(17);
                     if (to_integer(AR(17) & AR(17 downto 1)) = 0) then
-                        flag_Z = '1';
+                        flag_Z <= '1';
                     else
-                        flag_Z = '0';
+                        flag_Z <= '0';
                     end if;
                 
                 when "1100" => -- ARHR ASR, UNUSED
@@ -501,9 +493,9 @@ begin
                     flag_C <= AR(0);
                     flag_N <= '0';
                     if (to_integer(AR(17 downto 1)) = 0) then
-                        flag_Z = '1';
+                        flag_Z <= '1';
                     else
-                        flag_Z = '0';
+                        flag_Z <= '0';
                     end if;
                 
                 when "1110" => -- Rotate AR to the left, UNUSED
@@ -513,7 +505,7 @@ begin
                     AR <= (others => '0'); 
                 
                 when others =>
-                    AR <= (others => '0');
+                    null;
                 
             end case;
     end if;
@@ -525,19 +517,57 @@ begin
     DATA_BUS <= 
     IR                      when (TB = "001") else
     PM                      when (TB = "010") else
-    ("0000000000" & PC)     when (TB = "011") else
+    (signed(0,10) & PC)     when (TB = "011") else
     AR                      when (TB = "100") else
-    ("0000000000" & ASR)    when (TB = "101") else
+    (signed(0,10) & ASR)    when (TB = "101") else
     GR0                     when (TB = "110" and GRX = "000") else 
     GR1                     when (TB = "110" and GRX = "001") else 
     GR2                     when (TB = "110" and GRX = "010") else 
     GR3                     when (TB = "110" and GRX = "011") else 
     GOALPOS                 when (TB = "110" and GRX = "100") else 
-    NEXTPOS                 when (TB = "110" and GRX = "101") else 
-    CURRPOS                 when (TB = "110" and GRX = "110") else 
-    PS2CMD                  when (TB = "110" and GRX = "111") else 
+    next_pos                when (TB = "110" and GRX = "101") else 
+    cur_pos                 when (TB = "110" and GRX = "110") else 
     (others => '0');
-
+    
+    
+    --*************************
+    --* PS2cmd Interpretation *
+    --*************************
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if (rst = '1') then
+                move_req <= '0';
+            else
+                if (move_resp = '1') then
+                    cur_pos <= next_pos;
+                end if;
+                case to_integer(PS2cmd) is
+                    when 1 =>  -- UP (W)
+                        next_pos <= cur_pos;
+                        next_ypos <= cur_ypos - 1;
+                        move_req <= '1';
+                    when 2 =>  -- LEFT (A)
+                        next_pos <= cur_pos;
+                        next_xpos <= cur_xpos - 1;
+                        move_req <= '1';
+                    when 3 =>  -- DOWN (S)
+                        next_pos <= cur_pos;
+                        next_ypos <= cur_ypos + 1;
+                        move_req <= '1';
+                    when 4 =>  -- RIGHT (D)
+                        next_pos <= cur_pos;
+                        next_xpos <= cur_xpos + 1;
+                        move_req <= '1';
+                    when 5 => -- SOUND TOGGLE (SPACE)
+                        sel_sound <= not sel_sound;
+                    when others =>
+                        null:
+                end case;
+            end if;
+        end if;
+    end process;
+ 
 end Behavioral;
 
 
