@@ -13,12 +13,15 @@ use IEEE.NUMERIC_STD.ALL;               -- IEEE library for the unsigned type
 
 -- entity
 entity KBD_ENC is
-  port (clk 					: in std_logic;			-- system clock (100 MHz)
-	rst		        		: in std_logic;			-- reset signal
-        PS2KeyboardCLK	                        : in std_logic; 		-- USB keyboard PS2 clock
-        PS2KeyboardData			        : in std_logic;			-- USB keyboard PS2 data
-        PS2cmd					: out std_logic_vector(17 downto 0);		-- tile data
-  
+
+    port (
+        clk 					: in std_logic;			-- system clock (100 MHz)
+        rst		        		: in std_logic;			-- reset signal
+        PS2KeyboardCLK          : in std_logic; 		-- USB keyboard PS2 clock
+        PS2KeyboardData			: in std_logic;			-- USB keyboard PS2 data
+        PS2cmd					: out std_logic_vector(17 downto 0)
+        );		-- tile data
+
 end KBD_ENC;
 
 -- architecture
@@ -173,23 +176,24 @@ process(clk)
     "000000000000000101" when x"29",	-- space
     "000000000000000000" when others;
 						 
- 
- -- Sets the out signal PS2cmd when
- -- the PSstate is make
- 
- process(clk)
-  begin
+
+    -- Sets the out signal PS2cmd when
+    -- the PSstate is make
+
+    process(clk)
+    begin
     if rising_edge(clk) then
-      if rst = '1' then
-        PS2cmd <= "000000000000000000";
-      else
-        if (PS2state = MAKE) then
-            PS2cmd <= keyPressed;
-        else
+        if rst = '1' then
             PS2cmd <= "000000000000000000";
+        else
+            if (PS2state = MAKE) then
+                PS2cmd <= keyPressed;
+            else
+                PS2cmd <= "000000000000000000";
+            end if;
         end if;
     end if;
- end process;
+    end process;
 
 
   

@@ -62,10 +62,6 @@ architecture Behavioral of CPU is
     signal MOVE_REQ     : std_logic := '0';  -- Move request (move_req_out)
     signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
     signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
-   
-   
-    -- SLÅ IHOP
-    MOVE REQ
     signal SEL_TRACK    : unsigned(1 downto 0) := "00";  -- Track select (sel_track_out) 
     -- To SOUND
     signal SEL_SOUND    : std_logic := '0'; -- Sound select (sel_sound_out)
@@ -293,34 +289,6 @@ begin
     --****************************************
     --* CURR_POS : Current Position Register *
     --****************************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                CURR_POS <= (others => '0');
-            elsif (FB = "110" and GRX = "110") then
-                CURR_POS <= DATA_BUS;
-            end if;
-        end if;
-    end process;
-    
-    --****************************
-    --* SEL_TRACK : Track Select *
-    --****************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                SEL_TRACK <= (others => '0');
-            elsif (FB = "110" and GRX = "111") then
-                SEL_TRACK <= DATA_BUS;
-            end if;
-        end if;
-    end process;
-    
-    --****************************
-    --* SEL_SOUND : Sound Select *
-    --****************************
     process(clk)
     begin
         if rising_edge(clk) then
@@ -571,9 +539,7 @@ begin
     GOAL_POS                    when (TB = "110" and GRX = "100") else 
     NEXT_POS                    when (TB = "110" and GRX = "101") else 
     CURR_POS                    when (TB = "110" and GRX = "110") else 
-    SEL_TRACK                   when (TB = "110" and GRX = "111") else
-    
-    null;
+    DATA_BUS;
     
     
     --*************************

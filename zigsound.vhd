@@ -8,8 +8,17 @@ use IEEE.NUMERIC_STD.ALL;
 entity zigsound is
 
     port(
-        clk             : in std_logic;
-        rst             : in std_logic
+        clk                     : in std_logic;
+        rst                     : in std_logic;
+        -- VGA_MOTOR out
+        vgaRed		        	: out std_logic_vector(2 downto 0);
+        vgaGreen	        	: out std_logic_vector(2 downto 0);
+        vgaBlue		        	: out std_logic_vector(2 downto 1);
+        Hsync		        	: out std_logic;
+        Vsync		        	: out std_logic;
+        -- KBD_ENC out
+        PS2KeyboardCLK          : in std_logic;  -- USB keyboard PS2 clock
+        PS2KeyboardData         : in std_logic;  -- USB keyboard PS2 data
         );
         
 end zigsound;
@@ -103,6 +112,18 @@ architecture Behavioral of zigsound is
 		Vsync		    	: out std_logic
 		);
 	end component;
+	
+	-- KBD_ENC : Keyboard encoder
+	component KBD_ENC
+		port(
+		clk					: in std_logic;
+		rst	        		: in std_logic;
+		PS2KeyboardCLK      : in std_logic;  -- USB keyboard PS2 clock
+        PS2KeyboardData     : in std_logic;  -- USB keyboard PS2 data
+        PS2cmd              : out std_logic_vector(17 downto 0)  
+		);
+	end component;
+	
 
     --**********************
     --* Connecting signals *
@@ -138,6 +159,9 @@ architecture Behavioral of zigsound is
 	
 	-- VGA MOTOR signals 
     signal addr_vga_con         : unsigned(10 downto 0);
+    
+    -- KBD_ENC signals
+    signal PS2cmd_con           : std_logic_vector(17 downto 0);
 	
 begin
 
@@ -207,13 +231,22 @@ begin
 	U5 : VGA_MOTOR port map(
 	            clk => clk,
 	            rst => rst,
-	            data => data_vga_out,
-	            addr => addr_vga_out,
+	            data => data_vga_con,
+	            addr => addr_vga_con,
 	            vgaRed => vgaRed,
 	            vgaGreen => vgaGreen,
 	            vgaBlue => vgaBlue,
 	            Hsync => Hsync,
 	            Vsync => Vsync
 	            );
+	            
+    U6 : KBD_ENC port map(
+	            clk => clk,
+	            rst => rst,
+	            PS2KeyboardCLK => PS2KeyboardCLK,
+	            PS2KeyboardData => PS2KeyboardData,
+	            PS2cmd => PS2cmd_con
+	            );
+
 
 end Behavioral;
