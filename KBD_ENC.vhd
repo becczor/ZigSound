@@ -19,7 +19,10 @@ entity KBD_ENC is
         rst		        		        : in std_logic;  -- reset signal
         PS2KeyboardCLK                  : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData			        : in std_logic;  -- USB keyboard PS2 data
-        PS2cmd					        : out unsigned(17 downto 0)
+        PS2cmd					        : out unsigned(17 downto 0);
+        
+        --TEST
+        test_diod                       : out std_logic
         );		
 
 end KBD_ENC;
@@ -42,6 +45,9 @@ architecture behavioral of KBD_ENC is
 
     signal ScanCode			            : unsigned(7 downto 0);  -- scan code
     signal keyPressed			        : unsigned(17 downto 0);  --Which_key_that_has_been_pressed
+    
+    -- TEST                             
+    signal test_toggle_led              : std_logic := '0';
                                                                    
                                                                     
 begin
@@ -187,6 +193,7 @@ begin
             PS2cmd <= (others =>'0');
         else
             if (PS2state = MAKE) then
+                test_toggle_led <= not test_toggle_led;
                 PS2cmd <= keyPressed;
             else
                 PS2cmd <= (others =>'0');
@@ -194,5 +201,7 @@ begin
         end if;
     end if;
     end process;
+    
+    test_diod <= test_toggle_led;
   
 end behavioral;

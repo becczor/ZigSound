@@ -57,22 +57,14 @@ begin
     if rising_edge(clk) then
         if rst = '1' then
             we <= '0';
-            CHstate <= WAITING;
         else
-            case CHstate is
-                when WAITING =>
-                    we <= '0';
-                    if move_req = '1' then
-                        -- Translates x- (14 downto 9) and y-pos (4 downto 0) in next_pos into PIC_MEM-address.
-                        addr_nextpos <= unsigned(next_pos(14 downto 9)) + (to_unsigned(40, 6) * unsigned(next_pos(4 downto 0)));
-                        CHstate <= CHECK;   -- Sets state to CHECK so that we check PIC_MEMs response next tick.
-                    end if;
-                when others =>
-                    if data_nextpos = x"00" then -- If the tile is free (BG),
-                        we <= '1';               -- it's ok to move here.
-                    end if;
-                    CHstate <= WAITING;
-            end case;
+            we <= '0';
+            if move_req = '1' then
+                -- Translates x- (14 downto 9) and y-pos (4 downto 0) in next_pos into PIC_MEM-address.
+                if data_nextpos = x"00" then -- If the tile is free (BG),
+                    we <= '1';               -- it's ok to move here.
+                end if;
+            end if;
         end if;
     end if;
     end process;
@@ -107,7 +99,9 @@ begin
         end if;
     end if;
     end process;
-	
+    
+
+	addr_nextpos <= unsigned(next_pos(14 downto 9)) + (to_unsigned(40, 6) * unsigned(next_pos(4 downto 0)));
     -- Sets variables. Takes x- and y-pos from curr_pos if we're in CLEAR,
     -- otherwise from next_pos.
     xpos <= unsigned(curr_pos(14 downto 9)) when (WRstate = IDLE) else unsigned(next_pos(14 downto 9));
