@@ -62,7 +62,7 @@ architecture Behavioral of CPU is
     signal MOVE_REQ     : std_logic := '0';  -- Move request (move_req_out)
     signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
     signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
-    signal SEL_TRACK    : unsigned(1 downto 0) := "00";  -- Track select (sel_track_out) 
+    signal SEL_TRACK    : unsigned(1 downto 0) := "01";  -- Track select (sel_track_out) 
     -- To SOUND
     signal SEL_SOUND    : std_logic := '0'; -- Sound select (sel_sound_out)
 	
@@ -159,16 +159,16 @@ begin
 	--*****************************
     --* AR : Accumulator Register *
     --*****************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                AR <= (others => '0');
-            elsif (FB = "010") then
-                AR <= DATA_BUS;
-            end if;
-        end if;
-    end process;
+    --process(clk)
+    --begin
+    --    if rising_edge(clk) then
+    --        if (rst = '1') then
+    --            AR <= (others => '0');
+    --        elsif (FB = "010") then
+    --            AR <= DATA_BUS;
+    --        end if;
+    --    end if;
+    --end process;
     
     --************************
     --* PC : Program Counter *
@@ -275,30 +275,30 @@ begin
     --*************************************
     --* NEXT_POS : Next Position Register *
     --*************************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                NEXT_POS <= "000000001000000001";  -- Character starts at (1,1)
-            elsif (FB = "110" and GRX = "101") then
-                NEXT_POS <= DATA_BUS;
-            end if;
-        end if;
-    end process;
+    --process(clk)
+    --begin
+    --    if rising_edge(clk) then
+    --        if (rst = '1') then
+    --            NEXT_POS <= "000000001000000001";  -- Character starts at (1,1)
+    --        elsif (FB = "110" and GRX = "101") then
+    --            NEXT_POS <= DATA_BUS;
+    --        end if;
+    --    end if;
+    --end process;
     
     --****************************************
     --* CURR_POS : Current Position Register *
     --****************************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                CURR_POS <= (others => '0');
-            elsif (FB = "110" and GRX = "110") then
-                CURR_POS <= DATA_BUS;
-            end if;
-        end if;
-    end process;
+    --process(clk)
+    --begin
+    --    if rising_edge(clk) then
+    --        if (rst = '1') then
+    --            CURR_POS <= (others => '0');
+    --        elsif (FB = "110" and GRX = "110") then
+    --            CURR_POS <= DATA_BUS;
+    --        end if;
+    --    end if;
+    --end process;
     
 
     --*******************************
@@ -306,87 +306,88 @@ begin
     --*******************************
     process(clk)
     begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                uPC <= (others => '0');
-            else
-                case SEQ is
-                    when "0000" =>
-                        uPC <= uPC + 1;
-                    when "0001" => 
-                        uPC <= uAddr_instr(to_integer(OP));
-                    when "0010" =>
-                        case M is
-                            when "00" =>
-                                uPC <= "00000011"; -- "Direct adressering" uAddr
-                            when "01" => 
-                                uPC <= "00000100"; -- "Immediate operand" uAddr
-                            when "10" => 
-                                uPC <= "00000101"; -- "Indirect adressering" uAddr
-                            when "11" => 
-                                uPC <= "00000111"; -- "Indexed adressering" uAddr
-                            when others => 
-                                uPC <= (others => '0');
-                        end case;
-                    when "0011" =>
-                        uPC <= (others => '0');
-                    when "0100" =>
-                        if (flag_Z = '0') then
-                            uPC <= MICROADDR;
-                        else 
-                            uPC <= uPC + 1;
-                        end if;        
-                    when "0101" =>          -- "0110" and "0111" UNUSED (Subroutine-related)
+    if rising_edge(clk) then
+        if (rst = '1') then
+            uPC <= (others => '0');
+        else
+            case SEQ is
+                when "0000" =>
+                    null;
+                    --uPC <= uPC + 1;
+                when "0001" => 
+                    uPC <= uAddr_instr(to_integer(OP));
+                when "0010" =>
+                    case M is
+                        when "00" =>
+                            uPC <= "00000011"; -- "Direct adressering" uAddr
+                        when "01" => 
+                            uPC <= "00000100"; -- "Immediate operand" uAddr
+                        when "10" => 
+                            uPC <= "00000101"; -- "Indirect adressering" uAddr
+                        when "11" => 
+                            uPC <= "00000111"; -- "Indexed adressering" uAddr
+                        when others => 
+                            uPC <= (others => '0');
+                    end case;
+                when "0011" =>
+                    uPC <= (others => '0');
+                when "0100" =>
+                    if (flag_Z = '0') then
                         uPC <= MICROADDR;
-                    when "1000" =>
-                        if (flag_Z = '1') then
-                            uPC <= MICROADDR;
-                        else 
-                            uPC <= uPC + 1;
-                       end if;
-                    when "1001" =>
-                        if (flag_N = '1') then
-                            uPC <= MICROADDR;
-                        else 
-                            uPC <= uPC + 1;
-                        end if;
-                    when "1010" =>
-                        if (flag_C = '1') then
-                            uPC <= MICROADDR;
-                        else 
-                            uPC <= uPC + 1;
-                        end if;
-                    when "1011" =>
-                        if (flag_O = '1') then
-                            uPC <= MICROADDR;
-                        else 
-                            uPC <= uPC + 1;
-                        end if;
-                    when "1100" =>
-                        if (flag_L = '1') then
-                            uPC <= MICROADDR;
-                        else 
-                            uPC <= uPC + 1;
-                        end if;  
-                    when "1101" =>
-                        if (flag_C = '0') then
-                            uPC <= MICROADDR;
-                        else 
-                            uPC <= uPC + 1;
-                        end if; 
-                    when "1110" =>
-                        if (flag_O = '0') then
-                            uPC <= MICROADDR;
-                        else 
-                            uPC <= uPC + 1;
-                        end if;  
-                    when "1111" =>
-                        uPC <= (others => '0'); -- SHOULD ALSO HALT EXECUTION   
-                    when others =>
-                        uPC <= (others => '0');
-                end case; 
-            end if;
+                    else 
+                        uPC <= uPC + 1;
+                    end if;        
+                when "0101" =>          -- "0110" and "0111" UNUSED (Subroutine-related)
+                    uPC <= MICROADDR;
+                when "1000" =>
+                    if (flag_Z = '1') then
+                        uPC <= MICROADDR;
+                    else 
+                        uPC <= uPC + 1;
+                   end if;
+                when "1001" =>
+                    if (flag_N = '1') then
+                        uPC <= MICROADDR;
+                    else 
+                        uPC <= uPC + 1;
+                    end if;
+                when "1010" =>
+                    if (flag_C = '1') then
+                        uPC <= MICROADDR;
+                    else 
+                        uPC <= uPC + 1;
+                    end if;
+                when "1011" =>
+                    if (flag_O = '1') then
+                        uPC <= MICROADDR;
+                    else 
+                        uPC <= uPC + 1;
+                    end if;
+                when "1100" =>
+                    if (flag_L = '1') then
+                        uPC <= MICROADDR;
+                    else 
+                        uPC <= uPC + 1;
+                    end if;  
+                when "1101" =>
+                    if (flag_C = '0') then
+                        uPC <= MICROADDR;
+                    else 
+                        uPC <= uPC + 1;
+                    end if; 
+                when "1110" =>
+                    if (flag_O = '0') then
+                        uPC <= MICROADDR;
+                    else 
+                        uPC <= uPC + 1;
+                    end if;  
+                when "1111" =>
+                    uPC <= (others => '0'); -- SHOULD ALSO HALT EXECUTION   
+                when others =>
+                    null;
+            end case; 
         end if;
+    end if;
     end process;
     
     
@@ -537,8 +538,8 @@ begin
     GR2                         when (TB = "110" and GRX = "010") else 
     GR3                         when (TB = "110" and GRX = "011") else 
     GOAL_POS                    when (TB = "110" and GRX = "100") else 
-    NEXT_POS                    when (TB = "110" and GRX = "101") else 
-    CURR_POS                    when (TB = "110" and GRX = "110") else 
+    --NEXT_POS                    when (TB = "110" and GRX = "101") else 
+    --CURR_POS                    when (TB = "110" and GRX = "110") else 
     DATA_BUS;
     
     
@@ -575,7 +576,7 @@ begin
                         SEL_SOUND <= not SEL_SOUND;
                         MOVE_REQ <= '0';
                     when others =>
-                        MOVE_REQ <= '1';
+                        MOVE_REQ <= '0';
                 end case;
             end if;
         end if;

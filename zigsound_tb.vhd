@@ -10,30 +10,28 @@ ARCHITECTURE behavior OF zigsound_tb IS
     --Component Declaration for the Unit Under Test (UUT)
     COMPONENT zigsound
         PORT(
-        clk                     : IN std_logic;
-        rst                     : IN std_logic;
-        move_req                : IN std_logic;         -- move request
-        --move_resp			    : OUT std_logic;		-- response to move request
-        curr_pos                : IN unsigned(17 downto 0); -- current position
-        next_pos                : IN unsigned(17 downto 0); -- next position
-        sel_track       	    : in std_logic_vector(1 downto 0)   -- track select
-        -- VGA OUT
-        --addr		    		: out unsigned(10 downto 0);
-        --vgaRed		        	: out std_logic_vector(2 downto 0);
-        --vgaGreen	        	: out std_logic_vector(2 downto 0);
-        --vgaBlue		        	: out std_logic_vector(2 downto 1);
-        --Hsync		        	: out std_logic;
-        --Vsync		        	: out std_logic
-        );
+            clk                     : in std_logic;
+            btnd                    : in std_logic;
+            -- VGA_MOTOR out
+            vgaRed		        	: out std_logic_vector(2 downto 0);
+            vgaGreen	        	: out std_logic_vector(2 downto 0);
+            vgaBlue		        	: out std_logic_vector(2 downto 1);
+            Hsync		        	: out std_logic;
+            Vsync		        	: out std_logic;
+            -- KBD_ENC out
+            PS2KeyboardCLK          : in std_logic;  -- USB keyboard PS2 clock
+            PS2KeyboardData         : in std_logic  -- USB keyboard PS2 data
+            );
     END COMPONENT;
 
     --Inputs
     signal clk : std_logic := '0';
-    signal rst : std_logic := '0';
-    signal move_req : std_logic := '0';         -- move request
-    signal curr_pos : unsigned(17 downto 0) := "000000000000000000"; -- current position
-    signal next_pos : unsigned(17 downto 0) := "000000001000000001"; -- next position
-    signal sel_track : std_logic_vector(1 downto 0) := "00";   -- track select
+    signal btnd : std_logic := '0';
+    signal PS2KeyboardCLK : std_logic := '0';  -- USB keyboard PS2 clock
+    signal PS2KeyboardData : std_logic := '0'; -- USB keyboard PS2 data
+    
+    -- Sabina says : NEJ NEJ JAG ORKAR INTE VI KOPPLAR IN DET FUCK IT.
+
 
     --Clock period definitions
     constant clk_period : time:= 1 us;

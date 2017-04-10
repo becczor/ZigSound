@@ -18,7 +18,7 @@ entity zigsound is
         Vsync		        	: out std_logic;
         -- KBD_ENC out
         PS2KeyboardCLK          : in std_logic;  -- USB keyboard PS2 clock
-        PS2KeyboardData         : in std_logic;  -- USB keyboard PS2 data
+        PS2KeyboardData         : in std_logic  -- USB keyboard PS2 data
         );
         
 end zigsound;
@@ -48,62 +48,62 @@ architecture Behavioral of zigsound is
 		    );
   	end component;
 
-    -- Micro Memory Component
+    -- uMem : Micro Memory Component
     component uMem
         port(uAddr          : in unsigned(7 downto 0);
              uData          : out unsigned(24 downto 0));
     end component;
 
-    -- Program Memory Component
+    -- pMem : Program Memory Component
 	component pMem
 		port(pAddr          : in signed(7 downto 0);
 			 pData          : out signed(17 downto 0));
 	end component;
 	
-    -- Graphics control component (GPU)
+    -- GPU : Graphics control component 
 	component GPU
 		port(
         clk                 : in std_logic;			-- system clock (100 MHz)
         rst	        		: in std_logic;			-- reset signal
         -- TO/FROM CPU
         move_req            : in std_logic;         -- move request
-        curr_pos            : in unsigned(17 downto 0); -- current position
-        next_pos            : in unsigned(17 downto 0); -- next position
+        curr_pos            : in signed(17 downto 0); -- current position
+        next_pos            : in signed(17 downto 0); -- next position
         move_resp			: out std_logic;		-- response to move request
         -- TO/FROM PIC_MEM
-        data_nextpos        : in std_logic_vector(7 downto 0);  -- tile data at nextpos
+        data_nextpos        : in unsigned(7 downto 0);  -- tile data at nextpos
         addr_nextpos        : out unsigned(10 downto 0); -- tile addr of nextpos
-        data_change			: out std_logic_vector(7 downto 0);	-- tile data for change
+        data_change			: out unsigned(7 downto 0);	-- tile data for change
         addr_change			: out unsigned(10 downto 0); -- tile address for change
         we_picmem			: out std_logic		-- write enable for PIC_MEM
 		);
 	end component;
 
-	-- Picture memory component (PIC_MEM)
+	-- PIC_MEM : Picture memory component
 	component PIC_MEM
 		port(
         clk		        	: in std_logic;
         rst		            : in std_logic;
         -- CPU
-        sel_track       	: in std_logic_vector(1 downto 0);
+        sel_track       	: in unsigned(1 downto 0);
         -- GPU
         we		        	: in std_logic;
-        data_nextpos    	: out std_logic_vector(7 downto 0);
+        data_nextpos    	: out unsigned(7 downto 0);
         addr_nextpos    	: in unsigned(10 downto 0);
-        data_change	    	: in std_logic_vector(7 downto 0);
+        data_change	    	: in unsigned(7 downto 0);
         addr_change	    	: in unsigned(10 downto 0);
         -- VGA MOTOR
-        data_vga        	: out std_logic_vector(7 downto 0);
+        data_vga        	: out unsigned(7 downto 0);
         addr_vga	    	: in unsigned(10 downto 0)
 		);
 	end component;
 
-	-- VGA motor component (VGA_MOTOR)
+	-- VGA_MOTOR : VGA motor component
 	component VGA_MOTOR
 		port(
 		clk					: in std_logic;
 		rst	        		: in std_logic;
-		data	    		: in std_logic_vector(7 downto 0);
+		data	    		: in unsigned(7 downto 0);
 		addr	    		: out unsigned(10 downto 0);
 		vgaRed	       		: out std_logic_vector(2 downto 0);
 		vgaGreen	    	: out std_logic_vector(2 downto 0);
@@ -120,7 +120,7 @@ architecture Behavioral of zigsound is
 		rst	        		: in std_logic;
 		PS2KeyboardCLK      : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData     : in std_logic;  -- USB keyboard PS2 data
-        PS2cmd              : out std_logic_vector(17 downto 0)  
+        PS2cmd              : out unsigned(17 downto 0)  
 		);
 	end component;
 	
@@ -129,39 +129,37 @@ architecture Behavioral of zigsound is
     --* Connecting signals *
     --**********************  
     
-    -- CPU
+    -- CPU signals
     signal pAddr_con        : signed(7 downto 0);
     signal uAddr_con        : unsigned(7 downto 0);
-    signal PS2cmd_con       : unsigned(17 downto 0);
     signal move_req_con     : std_logic;
-    signal move_resp_con    : std_logic;
     signal curr_pos_con     : signed(17 downto 0);
 	signal next_pos_con     : signed(17 downto 0);
 	signal sel_track_con    : unsigned(1 downto 0);
 	signal sel_sound_con    : std_logic;
     
-    -- uMem
+    -- uMem signals
     signal uData_con        : unsigned(24 downto 0);
     
-    -- pMem
+    -- pMem signals
     signal pData_con        : signed(17 downto 0);
     
     -- GPU signals
     signal move_resp_con        : std_logic;  -- Move request response
     signal addr_nextpos_con     : unsigned(10 downto 0);    -- tile addr of nextpos
-    signal data_change_con      : std_logic_vector(7 downto 0);	    -- tile data for change
+    signal data_change_con      : unsigned(7 downto 0);	    -- tile data for change
     signal addr_change_con      : unsigned(10 downto 0);            -- tile address for change
     signal we_picmem_con        : std_logic;		                -- write enable for PIC_MEM
 	
 	-- PIC_MEM signals
-    signal data_nextpos_con     : std_logic_vector(7 downto 0); -- data PIC_MEM -> GPU
-    signal data_vga_con         : std_logic_vector(7 downto 0); -- data PIC_MEM -> VGA
+    signal data_nextpos_con     : unsigned(7 downto 0); -- data PIC_MEM -> GPU
+    signal data_vga_con         : unsigned(7 downto 0); -- data PIC_MEM -> VGA
 	
 	-- VGA MOTOR signals 
     signal addr_vga_con         : unsigned(10 downto 0);
     
     -- KBD_ENC signals
-    signal PS2cmd_con           : std_logic_vector(17 downto 0);
+    signal PS2cmd_con           : unsigned(17 downto 0);
 	
 begin
 
@@ -169,7 +167,7 @@ begin
     --* Port Mapping *
     --****************
     
-    -- CPU component connection
+    -- CPU Component Connection
     U0 : CPU port map(
                 clk => clk, 
                 rst => rst, 
@@ -186,48 +184,48 @@ begin
                 sel_sound_out => sel_sound_con
                 );
 
-    -- micro memory component connection
+    -- uMem Component Connection
     U1 : uMem port map(
                 uAddr => uAddr_con, 
                 uData => uData_con
                 );
 
-    -- program memory component connection
+    -- pMem Component Connection
     U2 : pMem port map(
                 pAddr => pAddr_con, 
                 pData => pData_con
                 );
                 
-                - GPU component connection
+    -- GPU Component Connection
 	U3 : GPU port map(
 	            clk => clk, 
 	            rst => rst, 
-	            move_req => move_req,
-	            move_resp => move_resp,
-	            curr_pos => curr_pos,
-	            next_pos => next_pos,
-                data_nextpos => data_nextpos_out,
-                addr_nextpos => addr_nextpos_out,
-                data_change => data_change_out,
-                addr_change => addr_change_out,
-                we_picmem => we_picmem_out
+	            move_req => move_req_con,
+	            move_resp => move_resp_con,
+	            curr_pos => curr_pos_con,
+	            next_pos => next_pos_con,
+                data_nextpos => data_nextpos_con,
+                addr_nextpos => addr_nextpos_con,
+                data_change => data_change_con,
+                addr_change => addr_change_con,
+                we_picmem => we_picmem_con
 	            );
 	
-	-- PIC_MEM component connection
+	-- PIC_MEM Component Connection
 	U4 : PIC_MEM port map(
 	            clk => clk,
 	            rst => rst,
-	            we => we_picmem_out,
-	            data_nextpos => data_nextpos_out,
-	            addr_nextpos => addr_nextpos_out,
-	            data_change => data_change_out,
-	            addr_change => addr_change_out,
-	            data_vga => data_vga_out,
-	            addr_vga => addr_vga_out,
-	            sel_track => sel_track
+	            we => we_picmem_con,
+	            data_nextpos => data_nextpos_con,
+	            addr_nextpos => addr_nextpos_con,
+	            data_change => data_change_con,
+	            addr_change => addr_change_con,
+	            data_vga => data_vga_con,
+	            addr_vga => addr_vga_con,
+	            sel_track => sel_track_con
 	            );
 	
-	-- VGA_MOTOR component connection
+	-- VGA_MOTOR Component Connection
 	U5 : VGA_MOTOR port map(
 	            clk => clk,
 	            rst => rst,
@@ -240,6 +238,7 @@ begin
 	            Vsync => Vsync
 	            );
 	            
+	-- KBD_ENC Component Connection            
     U6 : KBD_ENC port map(
 	            clk => clk,
 	            rst => rst,

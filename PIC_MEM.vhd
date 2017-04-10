@@ -17,15 +17,15 @@ entity PIC_MEM is
         clk		        	: in std_logic;
         rst		            : in std_logic;
         -- CPU
-        sel_track       	: in std_logic_vector(1 downto 0);
+        sel_track       	: in unsigned(1 downto 0);
         -- GPU
         we		        	: in std_logic;
-        data_nextpos    	: out std_logic_vector(7 downto 0);
+        data_nextpos    	: out unsigned(7 downto 0);
         addr_nextpos    	: in unsigned(10 downto 0);
-        data_change	    	: in std_logic_vector(7 downto 0);
+        data_change	    	: in unsigned(7 downto 0);
         addr_change	    	: in unsigned(10 downto 0);
         -- VGA MOTOR
-        data_vga        	: out std_logic_vector(7 downto 0);
+        data_vga        	: out unsigned(7 downto 0);
         addr_vga	    	: in unsigned(10 downto 0)
 	);
 
@@ -35,7 +35,7 @@ end PIC_MEM;
 architecture Behavioral of PIC_MEM is
 
     -- Track memory type
-    type ram_t is array (0 to 2047) of std_logic_vector(7 downto 0);
+    type ram_t is array (0 to 2047) of unsigned(7 downto 0);
     
     -- SÄTT VÅRA BANOR HÄR! JUST NU SÄTTS CURSOR PÅ INDEX 1, RESTEN SPACE
 
@@ -56,12 +56,14 @@ begin
     if rising_edge(clk) then
         if (we = '1') then
             case sel_track is
-                when "00" =>
-                    track_1(to_integer(addr_change)) <= data_change;
                 when "01" =>
+                    track_1(to_integer(addr_change)) <= data_change;
+                when "10" =>
                     track_2(to_integer(addr_change)) <= data_change;
-                when others =>
+                when "11" =>
                     track_3(to_integer(addr_change)) <= data_change;
+                when others =>
+                    null;
             end case;
         end if;  
     end if;

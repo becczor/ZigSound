@@ -16,7 +16,7 @@ entity VGA_MOTOR is
     port (
     clk	    	    		: in std_logic;
     rst		        		: in std_logic;
-	data		    		: in std_logic_vector(7 downto 0);
+	data		    		: in unsigned(7 downto 0);
     addr		    		: out unsigned(10 downto 0);
     vgaRed		        	: out std_logic_vector(2 downto 0);
     vgaGreen	        	: out std_logic_vector(2 downto 0);
