@@ -16,7 +16,8 @@ architecture Behavioral of uMem is
 --************************
 --* u_mem : Micro Memory *
 --************************
-type u_mem_t is array (0 to 255) of unsigned(24 downto 0);
+type u_mem_t is array (0 to 46) of unsigned(24 downto 0);
+-- Maximum array length is 256, change when adding/deleting from uMem.
 constant u_mem_c : u_mem_t := (
         -- ALU_TB_FB_S_P_LC_SEQ_MICROADDR
         -- 4444_333_333_1_1_22_4444_7777777
@@ -102,7 +103,7 @@ constant u_mem_c : u_mem_t := (
 		b"0000_000_000_0_0_00_0011_0000000",	--0000180	µPC := 0
 		--HALT
 		--Avbryt exekvering	2E	
-		b"0000_000_000_0_0_00_1111_0000000",	--0000780	Halt
+		b"0000_000_000_0_0_00_1111_0000000"	    --0000780	Halt
         );
 
 signal u_mem : u_mem_t := u_mem_c;

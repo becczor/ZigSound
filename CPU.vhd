@@ -7,19 +7,19 @@ use IEEE.NUMERIC_STD.all;
 --*****************
 entity CPU is
     port(
-        clk         : in std_logic;
-        rst         : in std_logic;
-        uAddr       : out unsigned(7 downto 0);
-        uData       : in unsigned(24 downto 0);
-        pAddr       : out unsigned(7 downto 0);
-        pData       : in unsigned(17 downto 0);
-        PS2cmd      : in unsigned(17 downto 0);
-		move_req    : out std_logic;
-		move_resp   : in std_logic;
-		curr_pos    : out unsigned(17 downto 0);
-		next_pos    : out unsigned(17 downto 0);
-		sel_track   : out unsigned(1 downto 0);
-		sel_sound   : out std_logic
+        clk             : in std_logic;
+        rst             : in std_logic;
+        uAddr           : out unsigned(7 downto 0);
+        uData           : in unsigned(24 downto 0);
+        pAddr           : out signed(7 downto 0);
+        pData           : in signed(17 downto 0);
+        PS2cmd          : in unsigned(17 downto 0);
+		move_req_out    : out std_logic;
+		move_resp       : in std_logic;
+		curr_pos_out    : out signed(17 downto 0);
+		next_pos_out    : out signed(17 downto 0);
+		sel_track_out   : out unsigned(1 downto 0);
+		sel_sound_out   : out std_logic
         );
 end CPU;
 
@@ -28,71 +28,86 @@ architecture Behavioral of CPU is
     --****************
     --* Port aliases *
     --****************
-    alias uM        : unsigned(24 downto 0) is uData(24 downto 0);
-    alias PM        : unsigned(17 downto 0) is pData(17 downto 0);
-    alias ASR       : unsigned(7 downto 0) is pAddr(7 downto 0);
-    alias curr_xpos : unsigned(5 downto 0) is curr_pos(14 downto 9);
-    alias curr_ypos : unsigned(4 downto 0) is curr_pos(4 downto 0);
-    alias next_xpos : unsigned(5 downto 0) is next_pos(14 downto 9);
-    alias next_ypos : unsigned(4 downto 0) is next_pos(4 downto 0);
+    alias uM            : unsigned(24 downto 0) is uData(24 downto 0);
+    alias PM            : signed(17 downto 0) is pData(17 downto 0);
     
     --*****************************
     --* Micro Instruction Aliases *
     --*****************************
-    alias ALU       : unsigned(3 downto 0) is uM(24 downto 21);     -- ALU    
-    alias TB        : unsigned(2 downto 0) is uM(20 downto 18);     -- To bus
-    alias FB        : unsigned(2 downto 0) is uM(17 downto 15);     -- From bus
-    alias S         : std_logic is uM(14);                          -- S-bit
-    alias P         : std_logic is uM(13);                          -- P-bit
-    alias LC        : unsigned(1 downto 0) is uM(12 downto 11);     -- LC
-    alias SEQ       : unsigned(3 downto 0) is uM(10 downto 7);      -- SEQ
-    alias MICROADDR : unsigned(7 downto 0) is uM(7 downto 0);       -- Micro address
+    alias ALU           : unsigned(3 downto 0) is uM(24 downto 21);     -- ALU    
+    alias TB            : unsigned(2 downto 0) is uM(20 downto 18);     -- To bus
+    alias FB            : unsigned(2 downto 0) is uM(17 downto 15);     -- From bus
+    alias S             : std_logic is uM(14);                          -- S-bit
+    alias P             : std_logic is uM(13);                          -- P-bit
+    alias LC            : unsigned(1 downto 0) is uM(12 downto 11);     -- LC
+    alias SEQ           : unsigned(3 downto 0) is uM(10 downto 7);      -- SEQ
+    alias MICROADDR     : unsigned(7 downto 0) is uM(7 downto 0);       -- Micro address
     
     --**************************************
     --* Program Memory Instruction Aliases *
     --**************************************
-    alias OP        : unsigned(4 downto 0) is PM(17 downto 13);     -- Operation    
-    alias GRX       : unsigned(2 downto 0) is PM(12 downto 10);     -- Register    
-    alias M         : unsigned(1 downto 0) is PM(9 downto 8);       -- Addressing mode    
-    alias ADDR      : unsigned(7 downto 0) is PM(7 downto 0);       -- Address field    
+    alias OP            : signed(4 downto 0) is PM(17 downto 13);     -- Operation    
+    alias GRX           : signed(2 downto 0) is PM(12 downto 10);     -- Register    
+    alias M             : signed(1 downto 0) is PM(9 downto 8);       -- Addressing mode        
+    alias ADDR          : signed(7 downto 0) is PM(7 downto 0);       -- Address field    
 
-    --************************
-	--* Micro Memory Signals *
-	--************************
-	signal uPC      : unsigned(7 downto 0); -- Micro Program Counter
+    --****************************
+    --* Outgoing signals signals *
+    --****************************
+    -- To pMem
+    signal ASR          : signed(7 downto 0);  -- (pAddr)
+    -- To uMem
+    signal uPC          : unsigned(7 downto 0); -- Micro Program Counter (uAddr)
+    -- To GPU
+    signal MOVE_REQ     : std_logic := '0';  -- Move request (move_req_out)
+    signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
+    signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
+   
+   
+    -- SLÅ IHOP
+    MOVE REQ
+    signal SEL_TRACK    : unsigned(1 downto 0) := "00";  -- Track select (sel_track_out) 
+    -- To SOUND
+    signal SEL_SOUND    : std_logic := '0'; -- Sound select (sel_sound_out)
 	
     --**************************
 	--* Program Memory Signals *
 	--**************************
-	signal PC       : signed(7 downto 0); -- Program Counter
-	signal IR       : signed(17 downto 0); -- Instruction Register 
-	signal DATA_BUS : signed(17 downto 0); -- Data Bus
+	signal PC           : signed(7 downto 0); -- Program Counter
+	signal IR           : signed(17 downto 0); -- Instruction Register 
+	signal DATA_BUS     : signed(17 downto 0); -- Data Bus
 	
     --****************
     --* Flag Signals *
     --****************
-	signal flag_Z   : std_logic := '0';
-	signal flag_N   : std_logic := '0';
-	signal flag_C   : std_logic := '0';  -- NOT ALWAYS BEING DETECTED ATM
-	signal flag_O   : std_logic := '0';  -- NOT BEING DETECTED ATM
-	signal flag_L   : std_logic := '0';  -- NOT BEING DETECTED ATM
+	signal flag_Z       : std_logic := '0';
+	signal flag_N       : std_logic := '0';
+	signal flag_C       : std_logic := '0';  -- NOT ALWAYS BEING DETECTED ATM
+	signal flag_O       : std_logic := '0';  -- NOT BEING DETECTED ATM
+	signal flag_L       : std_logic := '0';  -- NOT BEING DETECTED ATM
 	
     --********************
     --* Register Signals *
     --********************
-    signal AR       : signed(17 downto 0) := (others => '0');
-    signal GR0      : signed(17 downto 0) := "0000000000000011";    
-    signal GR1      : signed(17 downto 0) := "0000000000000011";
-    signal GR2      : signed(17 downto 0) := "0000000000000001";
-    signal GR3      : signed(17 downto 0) := (others => '0');
-    signal GOALPOS  : unsigned(17 downto 0) := (others => '0');
-    --signal NEXTPOS  : unsigned(17 downto 0) := (others => '0');
-    --signal CURPOS   : unsigned(17 downto 0) := (others => '0');
+    signal AR           : signed(17 downto 0) := (others => '0');
+    signal GR0          : signed(17 downto 0) := "000000000000000011";    
+    signal GR1          : signed(17 downto 0) := "000000000000000011";
+    signal GR2          : signed(17 downto 0) := "000000000000000001";
+    signal GR3          : signed(17 downto 0) := (others => '0');
+    signal GOAL_POS     : signed(17 downto 0) := (others => '0');
+    
+    --********************
+    --* Register aliases *
+    --********************
+    alias CURR_XPOS     : signed(5 downto 0) is CURR_POS(14 downto 9);
+    alias CURR_YPOS     : signed(4 downto 0) is CURR_POS(4 downto 0);
+    alias NEXT_XPOS     : signed(5 downto 0) is NEXT_POS(14 downto 9);
+    alias NEXT_YPOS     : signed(4 downto 0) is NEXT_POS(4 downto 0);
 
     --****************************************************************************
 	--* uAddr_instr : Array of uAddresses where each instruction begins in uMem. *
 	--****************************************************************************
-	type uAddr_instr_t is array (0 to 31) of std_logic_vector(7 downto 0);
+	type uAddr_instr_t is array (0 to 31) of unsigned(7 downto 0);
 	constant uAddr_instr_c : uAddr_instr_t := 
 	-- LÄGG IN STARTADRESSER FÖR INSTRUKTIONER HÄR GUYS!!
         ("00000000",
@@ -248,43 +263,71 @@ begin
     end process;
     
     --************************************
-    --* GOALPOS : Goal Position Register *
+    --* GOAL_POS : Goal Position Register *
     --************************************
     process(clk)
     begin
         if rising_edge(clk) then
             if (rst = '1') then
-                GOALPOS <= (others => '0');
+                GOAL_POS <= (others => '0');
             elsif (FB = "110" and GRX = "100") then
-                GOALPOS <= DATA_BUS;
+                GOAL_POS <= DATA_BUS;
             end if;
         end if;
     end process;
     
     --*************************************
-    --* next_pos : Next Position Register *
+    --* NEXT_POS : Next Position Register *
     --*************************************
-    --process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                next_pos <= "000000001000000001";  -- Character starts at (1,1)
-            elsif (FB = "110" and GRX = "101") then
-                next_pos <= DATA_BUS;
-            end if;
-        end if;
-    end process;
-    
-    --***************************************
-    --* cur_pos : Current Position Register *
-    --***************************************
     process(clk)
     begin
         if rising_edge(clk) then
             if (rst = '1') then
-                next_pos <= (others => '0');
+                NEXT_POS <= "000000001000000001";  -- Character starts at (1,1)
+            elsif (FB = "110" and GRX = "101") then
+                NEXT_POS <= DATA_BUS;
+            end if;
+        end if;
+    end process;
+    
+    --****************************************
+    --* CURR_POS : Current Position Register *
+    --****************************************
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if (rst = '1') then
+                CURR_POS <= (others => '0');
             elsif (FB = "110" and GRX = "110") then
-                next_pos <= DATA_BUS;
+                CURR_POS <= DATA_BUS;
+            end if;
+        end if;
+    end process;
+    
+    --****************************
+    --* SEL_TRACK : Track Select *
+    --****************************
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if (rst = '1') then
+                SEL_TRACK <= (others => '0');
+            elsif (FB = "110" and GRX = "111") then
+                SEL_TRACK <= DATA_BUS;
+            end if;
+        end if;
+    end process;
+    
+    --****************************
+    --* SEL_SOUND : Sound Select *
+    --****************************
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if (rst = '1') then
+                CURR_POS <= (others => '0');
+            elsif (FB = "110" and GRX = "110") then
+                CURR_POS <= DATA_BUS;
             end if;
         end if;
     end process;
@@ -307,13 +350,13 @@ begin
                     when "0010" =>
                         case M is
                             when "00" =>
-                                uPC <= "00000011" -- "Direct adressering" uAddr
+                                uPC <= "00000011"; -- "Direct adressering" uAddr
                             when "01" => 
-                                uPC <= "00000100" -- "Immediate operand" uAddr
+                                uPC <= "00000100"; -- "Immediate operand" uAddr
                             when "10" => 
-                                uPC <= "00000101" -- "Indirect adressering" uAddr
+                                uPC <= "00000101"; -- "Indirect adressering" uAddr
                             when "11" => 
-                                uPC <= "00000111" -- "Indexed adressering" uAddr
+                                uPC <= "00000111"; -- "Indexed adressering" uAddr
                             when others => 
                                 uPC <= (others => '0');
                         end case;
@@ -370,7 +413,7 @@ begin
                             uPC <= uPC + 1;
                         end if;  
                     when "1111" =>
-                        uPC <= "000000"; -- SHOULD ALSO HALT EXECUTION   
+                        uPC <= (others => '0'); -- SHOULD ALSO HALT EXECUTION   
                     when others =>
                         uPC <= (others => '0');
                 end case; 
@@ -466,7 +509,7 @@ begin
                     AR <= AR(16 downto 0) & '0';
                     flag_C <= AR(17);
                     flag_N <= AR(16);
-                    if (to_integer(AR(16 downto 0) = 0) then
+                    if (to_integer(AR(16 downto 0)) = 0) then
                         flag_Z <= '1';
                     else
                         flag_Z <= '0';
@@ -508,6 +551,7 @@ begin
                     null;
                 
             end case;
+        end if;
     end if;
     end process;
 
@@ -515,19 +559,21 @@ begin
     --* Data Bus Assignment *
     --***********************
     DATA_BUS <= 
-    IR                      when (TB = "001") else
-    PM                      when (TB = "010") else
-    (signed(0,10) & PC)     when (TB = "011") else
-    AR                      when (TB = "100") else
-    (signed(0,10) & ASR)    when (TB = "101") else
-    GR0                     when (TB = "110" and GRX = "000") else 
-    GR1                     when (TB = "110" and GRX = "001") else 
-    GR2                     when (TB = "110" and GRX = "010") else 
-    GR3                     when (TB = "110" and GRX = "011") else 
-    GOALPOS                 when (TB = "110" and GRX = "100") else 
-    next_pos                when (TB = "110" and GRX = "101") else 
-    cur_pos                 when (TB = "110" and GRX = "110") else 
-    (others => '0');
+    IR                          when (TB = "001") else
+    PM                          when (TB = "010") else
+    (to_signed(0,10) & PC)      when (TB = "011") else
+    AR                          when (TB = "100") else
+    (to_signed(0,10) & ASR)     when (TB = "101") else
+    GR0                         when (TB = "110" and GRX = "000") else 
+    GR1                         when (TB = "110" and GRX = "001") else 
+    GR2                         when (TB = "110" and GRX = "010") else 
+    GR3                         when (TB = "110" and GRX = "011") else 
+    GOAL_POS                    when (TB = "110" and GRX = "100") else 
+    NEXT_POS                    when (TB = "110" and GRX = "101") else 
+    CURR_POS                    when (TB = "110" and GRX = "110") else 
+    SEL_TRACK                   when (TB = "110" and GRX = "111") else
+    
+    null;
     
     
     --*************************
@@ -537,37 +583,50 @@ begin
     begin
         if rising_edge(clk) then
             if (rst = '1') then
-                move_req <= '0';
+                MOVE_REQ <= '0';
             else
                 if (move_resp = '1') then
-                    cur_pos <= next_pos;
+                    CURR_POS <= NEXT_POS;
                 end if;
                 case to_integer(PS2cmd) is
                     when 1 =>  -- UP (W)
-                        next_pos <= cur_pos;
-                        next_ypos <= cur_ypos - 1;
-                        move_req <= '1';
+                        NEXT_POS <= CURR_POS;
+                        NEXT_YPOS <= CURR_YPOS - 1;
+                        MOVE_REQ <= '1';
                     when 2 =>  -- LEFT (A)
-                        next_pos <= cur_pos;
-                        next_xpos <= cur_xpos - 1;
-                        move_req <= '1';
+                        NEXT_POS <= CURR_POS;
+                        NEXT_XPOS <= CURR_XPOS - 1;
+                        MOVE_REQ <= '1';
                     when 3 =>  -- DOWN (S)
-                        next_pos <= cur_pos;
-                        next_ypos <= cur_ypos + 1;
-                        move_req <= '1';
+                        NEXT_POS <= CURR_POS;
+                        NEXT_YPOS <= CURR_YPOS + 1;
+                        MOVE_REQ <= '1';
                     when 4 =>  -- RIGHT (D)
-                        next_pos <= cur_pos;
-                        next_xpos <= cur_xpos + 1;
-                        move_req <= '1';
+                        NEXT_POS <= CURR_POS;
+                        NEXT_XPOS <= CURR_XPOS + 1;
+                        MOVE_REQ <= '1';
                     when 5 => -- SOUND TOGGLE (SPACE)
-                        sel_sound <= not sel_sound;
+                        SEL_SOUND <= not SEL_SOUND;
+                        MOVE_REQ <= '0';
                     when others =>
-                        null:
+                        MOVE_REQ <= '1';
                 end case;
             end if;
         end if;
     end process;
  
+    --*******************************
+    --* Outgoing signals assignment *
+    --*******************************
+    pAddr <= ASR;
+    uAddr <= uPC; 
+    curr_pos_out <= CURR_POS;
+    next_pos_out <= NEXT_POS;
+    sel_track_out <= SEL_TRACK;
+    sel_sound_out <= SEL_SOUND;
+    move_req_out <= MOVE_REQ;
+    
+    
 end Behavioral;
 
 
