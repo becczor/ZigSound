@@ -55,41 +55,39 @@ architecture behavioral of KBD_ENC is
                                                                     
 begin
 
-    test_diod <= rst;
+    --test_diod <= rst;
 
     -- TEST DIOD COUNTER
-    --process(clk)
-    --begin
-    --if rising_edge(clk) then
-    --    if (rst = '1') then
-    --        test_led_counter <= (others => '0');
-    --        test_diod <= '0';
-    --        working <= '0';
-    --    elsif (test_signal = '1' or working = '1') then
-    --        working <= '1';
-    --        test_diod <= '1';
-    --        test_led_counter <= test_led_counter + 1;
-    --        if (test_led_counter(24) = '1') then
-    --            test_led_counter <= (others => '0');
-    --            test_diod <= '0';
-    --            working <= '0';
-    --        end if;
-    --    end if;
-    --end if;
-    --end process;
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if (rst = '1') then
+            test_led_counter <= (others => '0');
+            test_diod <= '0';
+            working <= '0';
+        elsif (test_signal = '1' or working = '1') then
+            working <= '1';
+            test_diod <= '1';
+            test_led_counter <= test_led_counter + 1;
+            if (test_led_counter(24) = '1') then
+                test_led_counter <= (others => '0');
+                test_diod <= '0';
+                working <= '0';
+            end if;
+        end if;
+    end if;
+    end process;
     
-    --process(clk)
-    --begin
-    --if rising_edge(clk) then
-    --    if (rst = '1') then
-    --        test_signal <= '0';
-    --    elsif (PS2KeyboardData = '1') then
-    --        test_signal <= '1';
-    --    else
-    --        test_signal <= '0';
-    --    end if;
-    --end if;
-    --end process;
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if (rst = '1') then
+           test_signal <= '1';
+        else
+            test_signal <= '0';
+        end if;
+    end if;
+    end process;
     
     --control_signal <= '1' when (test_signal = '1' or working = '1') else '0';
 
