@@ -339,7 +339,7 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        if rst='1' then
+        if rst = '1' then
             ClkDiv <= (others => '0');
         else
             ClkDiv <= ClkDiv + 1;
@@ -361,10 +361,10 @@ begin
     -- ***********************************
     process(clk)
     begin
-    if rst = '1' then
-        Xpixel <= (others => '0');
-    elsif rising_edge(clk) then
-	    if Clk25 = '1' then
+    if rising_edge(clk) then
+	    if rst = '1' then
+            Xpixel <= (others => '0');
+        elsif Clk25 = '1' then
 		    if Xpixel = 799 then	-- vi har nått slutet av pixelantalet
 			    Xpixel <= (others => '0');
 		    else
@@ -397,10 +397,10 @@ begin
     -- ***********************************
     process(clk)
     begin
-    if rst = '1' then
-	    Ypixel <= (others => '0');
-    elsif rising_edge(clk) then
-        if Clk25 = '1' and Xpixel = 799 then
+    if rising_edge(clk) then
+        if rst = '1' then
+	        Ypixel <= (others => '0');
+        elsif Clk25 = '1' and Xpixel = 799 then
             if Ypixel = 520 then	-- vi har nått slutet av pixelantalet
 	            Ypixel <= (others => '0');
             else 
@@ -437,7 +437,9 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        if (blank = '0') then
+        if (rst = '1') then
+            tilePixel <= (others => '0');
+        elsif (blank = '0') then
             tilePixel <= tileMem(to_integer(tileAddr));
         else
             tilePixel <= (others => '0');

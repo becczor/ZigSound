@@ -54,7 +54,9 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        if (we = '1') then
+        if (rst = '1') then
+            null;
+        elsif (we = '1') then
             case sel_track is
                 when "01" =>
                     track_1(to_integer(addr_change)) <= data_change;

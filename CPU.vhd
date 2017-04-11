@@ -550,7 +550,11 @@ begin
     begin
         if rising_edge(clk) then
             if (rst = '1') then
+                CURR_POS <= "000000001000000001";
+                NEXT_POS <= "000000001000000001";
                 MOVE_REQ <= '0';
+                SEL_SOUND <= '0';
+                SEL_TRACK <= "00";
             else
                 if (move_resp = '1') then
                     CURR_POS <= NEXT_POS;
