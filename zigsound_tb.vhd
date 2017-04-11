@@ -9,9 +9,10 @@ ARCHITECTURE behavior OF zigsound_tb IS
 
     --Component Declaration for the Unit Under Test (UUT)
     COMPONENT zigsound
+    
         PORT(
-            clk                         : in std_logic;
-            rst                         : in std_logic;
+            clk                     : in std_logic;
+            rst                     : in std_logic;
             -- VGA_MOTOR out
             vgaRed		        	: out std_logic_vector(2 downto 0);
             vgaGreen	        	        : out std_logic_vector(2 downto 0);
@@ -20,8 +21,11 @@ ARCHITECTURE behavior OF zigsound_tb IS
             Vsync		        	: out std_logic;
             -- KBD_ENC out
             PS2KeyboardCLK          : in std_logic;  -- USB keyboard PS2 clock
-            PS2KeyboardData         : in std_logic  -- USB keyboard PS2 data
+            PS2KeyboardData         : in std_logic;  -- USB keyboard PS2 data
+            -- Test
+            test_diod               : out std_logic  -- Test diod
             );
+            
     END COMPONENT;
 
     --Inputs
@@ -31,25 +35,17 @@ ARCHITECTURE behavior OF zigsound_tb IS
     signal PS2KeyboardData : std_logic := '1'; -- USB keyboard PS2 data
     signal tb_running : boolean := true;
     
-  
-
-
-    --Clock period definitions
-    
 
 BEGIN
     -- Instantiate the Unit Under Test (UUT)
     uut: zigsound PORT MAP (
         clk => clk,
         rst => rst,
-        --vgaRed => vgaRed,
-        --vgaGreen => vgaGreen,
-        --vgaBlue => vgaBlue,
-        --Hsync => Hsync,
-        --VSync => VSync,
         PS2KeyboardCLK => PS2KeyboardCLK,
         PS2KeyboardData => PS2KeyboardData
     );
+    
+    rst <= '1', '0' after 1.7 us;
 		
     -- Clock process definitions
     clk_gen : process
@@ -77,17 +73,17 @@ BEGIN
     
     
     ps2_code_gen : process
-    begin -- Send in two space presses
-        wait for 40000 ns;
+    begin
+        wait for 2000 ns;
         PS2KeyboardData <= '0';
+        wait for 2000 ns;
+        PS2KeyboardData <= '1';
         wait for 2000 ns;
         PS2KeyboardData <= '1';
         wait for 2000 ns;
         PS2KeyboardData <= '0';
         wait for 2000 ns;
         PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '1';
         wait for 2000 ns;
         PS2KeyboardData <= '0';
         wait for 2000 ns;
@@ -100,21 +96,21 @@ BEGIN
         PS2KeyboardData <= '0';
         wait for 2000 ns;
         PS2KeyboardData <= '1';  
-        
-        wait for 40000 ns;
+
+        wait for 2000 ns;
+        PS2KeyboardData <= '0';
+        wait for 2000 ns;
+        PS2KeyboardData <= '0';
+        wait for 2000 ns;
         PS2KeyboardData <= '0';
         wait for 2000 ns;
         PS2KeyboardData <= '1';
         wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
+        PS2KeyboardData <= '1';
         wait for 2000 ns;
         PS2KeyboardData <= '1';
         wait for 2000 ns;
         PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '1';
         wait for 2000 ns;
         PS2KeyboardData <= '0';
         wait for 2000 ns;

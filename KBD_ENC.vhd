@@ -54,10 +54,13 @@ architecture behavioral of KBD_ENC is
                                                                    
                                                                     
 begin
-
+    
+    --*************
+    --* TEST DIOD *
+    --*************
+    
     --test_diod <= rst;
-
-    -- TEST DIOD COUNTER
+    
     process(clk)
     begin
     if rising_edge(clk) then
@@ -89,9 +92,9 @@ begin
     end if;
     end process;
     
-    --control_signal <= '1' when (test_signal = '1' or working = '1') else '0';
-
-    -- Synchronize PS2-KBD signals
+    --*******************************
+    --* PS2 signals synchronization *
+    --*******************************
     process(clk)
     begin
     if rising_edge(clk) then
@@ -105,9 +108,9 @@ begin
     end if;
     end process;
 
-	
-    -- Generate one cycle pulse from PS2 clock, negative edge
-
+	--**********************************************************************
+    --* PS2Clk_op : Generate one cycle pulse from PS2 clock, negative edge *
+    --**********************************************************************
     process(clk)
     begin
     if rising_edge(clk) then
@@ -123,15 +126,9 @@ begin
 	
     PS2Clk_op <= (not PS2Clk_Q1) and (not PS2Clk_Q2);
 
-  
-    -- PS2 data shift register
-
-    -- ***********************************
-    -- *                                 *
-    -- *  VHDL for :                     *
-    -- *  PS2_data_shift_reg             *
-    -- *                                 *
-    -- ***********************************
+    -- *****************************************************
+    -- * PS2Data_sr : Shift Register for taking in PS2Data *
+    -- *****************************************************
     process(clk)
     begin
     if rising_edge(clk) then
@@ -144,17 +141,10 @@ begin
     end process;
 
     ScanCode <= PS2Data_sr(9 downto 2);
-	
-    -- PS2 bit counter
-    -- The purpose of the PS2 bit counter is to tell the PS2 state machine when to change state
 
-    -- ***********************************
-    -- *                                 *
-    -- *  VHDL for :                     *
-    -- *  PS2_bit_Counter                *
-    -- *                                 *
-    -- ***********************************
-
+    -- **************************************
+    -- * PS2BitCounter : Counter for states *
+    -- **************************************
 	process(clk)
 	begin
 	if rising_edge(clk) then
@@ -168,7 +158,9 @@ begin
 	end if;
 	end process;
 
-
+    --*************************************************
+    --* State handler : Changes state and sets PS2cmd *
+    --*************************************************
     process(clk)
     begin
     if rising_edge(clk) then
@@ -188,7 +180,7 @@ begin
 	                end if;
                 when others =>
 	                if PS2BitCounter = 11 then
-		                if ScanCode = "11110000" then
+		                if (ScanCode = x"F0") then
 			                PS2state <= BREAK;
 		                else
                             PS2cmd <= keyPressed;
@@ -201,7 +193,20 @@ begin
         end if;
     end if;
     end process;
-
+    
+    --******************************************************************
+    --* keyPressed : Translates ScanCode into signal to be sent to CPU *
+    --******************************************************************
+    with ScanCode select
+        keyPressed <= 
+            "000000000000000001" when x"1D",	-- W (UP)
+            "000000000000000010" when x"1C",	-- A (LEFT)
+            "000000000000000011" when x"1B",	-- S (DOWN)
+            "000000000000000100" when x"23",	-- D (RIGHT)
+            "000000000000000101" when x"29",	-- space
+            (others =>'0') when others;
+						 
+    
     -- SABSEKOD
 
     --process(clk)
@@ -265,20 +270,7 @@ begin
     --    end if;
     --end if;
     --end process;
-    
-    -- SLUT SABSEKOD
-    
-    -- Scan Code -> KeyPressed mapping
-    -- Translates the ScanCode to relevant key pressed codes.
-    with ScanCode select
-        keyPressed <= 
-            "000000000000000001" when x"1D",	-- W (UP)
-            "000000000000000010" when x"1C",	-- A (LEFT)
-            "000000000000000011" when x"1B",	-- S (DOWN)
-            "000000000000000100" when x"23",	-- D (RIGHT)
-            "000000000000000101" when x"29",	-- space
-            (others =>'0') when others;
-						 
+   
 
     -- Sets the out signal PS2cmd when
     -- the PSstate is make
@@ -297,5 +289,7 @@ begin
     --    end if;
     --end if;
     --end process;
+    
+    -- SLUT SABSEKOD
   
 end behavioral;

@@ -21,7 +21,7 @@ entity zigsound is
         PS2KeyboardData         : in std_logic;  -- USB keyboard PS2 data
         
         --Test-diod out 
-        test_diod   		     : out std_logic
+        test_diod   		    : buffer std_logic
         );
         
 end zigsound;
@@ -48,8 +48,6 @@ architecture Behavioral of zigsound is
 		    next_pos_out    : out signed(17 downto 0);
 		    sel_track_out   : out unsigned(1 downto 0);
 		    sel_sound_out   : out std_logic
-		    
-		    
 		    );
   	end component;
 
@@ -254,6 +252,5 @@ begin
 	            PS2cmd => PS2cmd_con,
 	            test_diod => test_diod
 	            );
-
 
 end Behavioral;

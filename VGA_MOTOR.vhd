@@ -16,7 +16,7 @@ entity VGA_MOTOR is
     port (
     clk	    	    		: in std_logic;
     rst		        		: in std_logic;
-	data		    		: in unsigned(7 downto 0);
+    data		    		: in unsigned(7 downto 0);
     addr		    		: out unsigned(10 downto 0);
     vgaRed		        	: out std_logic_vector(2 downto 0);
     vgaGreen	        	: out std_logic_vector(2 downto 0);
@@ -43,7 +43,7 @@ architecture Behavioral of VGA_MOTOR is
     -- Tile memory
     signal tileMem : ram_t := 
         ( 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  -- space (BG)
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"00" BG
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -52,7 +52,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"00",x"00",x"00",x"FF",x"FF",x"FF",    -- A
+        x"FF",x"FF",x"00",x"00",x"00",x"FF",x"FF",x"FF",    -- x"01" A
         x"FF",x"00",x"00",x"FF",x"00",x"00",x"FF",x"FF",
         x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",
         x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",
@@ -61,7 +61,7 @@ architecture Behavioral of VGA_MOTOR is
         x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"00",x"00",x"00",x"00",x"00",x"00",x"FF",x"FF",    -- B
+        x"00",x"00",x"00",x"00",x"00",x"00",x"FF",x"FF",    -- x"02" B
         x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",
         x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",
         x"00",x"00",x"00",x"00",x"00",x"00",x"FF",x"FF",
@@ -70,7 +70,7 @@ architecture Behavioral of VGA_MOTOR is
         x"00",x"00",x"00",x"00",x"00",x"00",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"00",x"00",x"00",x"00",x"00",x"FF",x"FF",    -- C
+        x"FF",x"00",x"00",x"00",x"00",x"00",x"FF",x"FF",    -- x"03" C
         x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",
         x"00",x"00",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"00",x"00",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -79,7 +79,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"00",x"00",x"00",x"00",x"00",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- D
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"04" D
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -88,7 +88,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
               
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- E
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"05" E
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -97,7 +97,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- F
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"06" F
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -106,7 +106,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- G
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"07" G
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -115,7 +115,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- H
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"08" H
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -124,7 +124,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- I
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"09" I
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -133,7 +133,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- J
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"0A" J
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -142,7 +142,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- K
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"0B" K
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -151,7 +151,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- L
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"0C" L
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -160,7 +160,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- M
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"0D" M
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -169,7 +169,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- N
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"0E" N
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -178,7 +178,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- O
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"0F" O
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -187,7 +187,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- P
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"10" P
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -196,7 +196,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- Q
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"11" Q
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -205,7 +205,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- R
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"12" R
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -214,7 +214,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- S
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"13" S
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -223,7 +223,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- T
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"14" T
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -232,7 +232,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- U
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"15" U
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -241,7 +241,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- V
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"16" V
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -250,7 +250,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- W
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"17" W
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -259,7 +259,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"E0",x"E0",x"FF",x"FF",x"FF",x"E0",x"E0",x"FF",	-- X
+        x"E0",x"E0",x"FF",x"FF",x"FF",x"E0",x"E0",x"FF",	-- x"18" X
         x"FF",x"E0",x"E0",x"FF",x"E0",x"E0",x"FF",x"FF",
         x"FF",x"FF",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",
@@ -268,7 +268,7 @@ architecture Behavioral of VGA_MOTOR is
         x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"E0",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    -- Y
+        x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    -- x"19" Y
         x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",
         x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",
         x"FF",x"FF",x"1C",x"1C",x"1C",x"1C",x"FF",x"FF",
@@ -277,7 +277,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"03",x"03",x"03",x"03",x"03",x"03",x"03",x"FF",    -- Z
+        x"03",x"03",x"03",x"03",x"03",x"03",x"03",x"FF",    -- x"1A" Z
         x"FF",x"FF",x"FF",x"FF",x"03",x"03",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"03",x"03",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"03",x"03",x"FF",x"FF",x"FF",x"FF",
@@ -286,7 +286,7 @@ architecture Behavioral of VGA_MOTOR is
         x"03",x"03",x"03",x"03",x"03",x"03",x"03",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"00",x"FF",x"FF",x"FF",x"FF",    -- �
+        x"FF",x"FF",x"FF",x"00",x"FF",x"FF",x"FF",x"FF",    -- x"1B" �
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"00",x"00",x"00",x"00",x"00",x"FF",x"FF",
         x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",
@@ -295,7 +295,7 @@ architecture Behavioral of VGA_MOTOR is
         x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"00",x"FF",x"00",x"FF",x"FF",x"FF",    -- �
+        x"FF",x"FF",x"00",x"FF",x"00",x"FF",x"FF",x"FF",    -- x"1C" �
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"00",x"00",x"00",x"00",x"00",x"FF",x"FF",
         x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",
@@ -304,7 +304,7 @@ architecture Behavioral of VGA_MOTOR is
         x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"00",x"FF",x"00",x"FF",x"FF",x"FF",    -- �
+        x"FF",x"FF",x"00",x"FF",x"00",x"FF",x"FF",x"FF",    -- x"1D" �
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"00",x"00",x"00",x"00",x"00",x"FF",x"FF",
         x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",
@@ -313,7 +313,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"00",x"00",x"00",x"00",x"00",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- ???
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"1E" White
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
@@ -322,7 +322,7 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"27",x"27",x"27",x"27",x"FF",x"FF",    -- PACMAN CURSOR
+        x"FF",x"FF",x"27",x"27",x"27",x"27",x"FF",x"FF",    -- x"1F" Character
         x"FF",x"27",x"27",x"27",x"27",x"27",x"27",x"FF",    
         x"27",x"27",x"27",x"27",x"E0",x"27",x"FF",x"FF",
         x"27",x"27",x"27",x"27",x"27",x"FF",x"FF",x"FF",
