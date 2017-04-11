@@ -48,7 +48,9 @@ architecture behavioral of KBD_ENC is
     
     -- TEST                             
     signal test_led_counter             : unsigned(24 downto 0);
-    --signal test_toggle_led              : std_logic := '0';
+    signal test_signal                  : std_logic := '0';
+    signal control_signal               : std_logic;
+    signal working                      : std_logic := '0';
                                                                    
                                                                     
 begin
@@ -59,14 +61,24 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        test_led_counter <= test_led_counter + 1;
-        if (test_led_counter(24) = '1') then
+        if (control_signal = '1') then
+            if (test_signal = '1') then
+                test_led_counter <= (others => '0');
+            end if;
+            working <= '1';
             test_diod <= '1';
-        else 
-            test_diod <= '0';
+            test_led_counter <= test_led_counter + 1;
+            if (test_led_counter(24) = '1') then
+                test_led_counter <= (others => '0');
+                test_diod <= '0';
+                working <= '0';
+            end if;
         end if;
     end if;
     end process;
+    
+    
+    control_signal <= test_signal or working;
 
     -- Synchronize PS2-KBD signals
     process(clk)
@@ -83,7 +95,7 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        if rst='1' then
+        if rst = '1' then
             PS2Clk_Q1 <= '1';
             PS2Clk_Q2 <= '0';
         else
@@ -107,7 +119,7 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        if rst='1' then
+        if rst = '1' then
             PS2Data_sr <= (others =>'0');
         elsif PS2Clk_op = '1' then
             PS2Data_sr <= PS2Data & PS2Data_sr(10 downto 1);
@@ -127,21 +139,72 @@ begin
     -- *                                 *
     -- ***********************************
 
+	process(clk)
+	begin
+		if rst = '1' then 
+			PS2BitCounter <= (others => '0');
+		elsif rising_edge(clk) then
+			if PS2BitCounter = 11 then
+				test_signal <= '0';
+				PS2BitCounter <= (others => '0');
+			elsif PS2Clk_op = '1' then
+			    test_signal <= '1';
+				PS2BitCounter <= PS2BitCounter + 1;
+			end if;
+		end if;
+	end process;
+
+
     process(clk)
     begin
     if rising_edge(clk) then
-        if rst='1' then
-            PS2BitCounter <= (others =>'0');
-        elsif BC11 = '1' then
-            PS2BitCounter <= (others =>'0');
-        elsif PS2Clk_op = '1' then
-            PS2BitCounter <= PS2BitCounter + 1;
+        if rst = '1' then
+            PS2state <= IDLE;
+        else
+            case PS2state is
+                when MAKE => 
+                    --test_signal <= '0';
+	                PS2state <= IDLE;
+                when BREAK => 
+	                if PS2BitCounter = 11 then
+		                PS2state <= IDLE;
+	                else
+		                PS2state <= BREAK;
+	                end if;
+                when others =>
+	                if PS2BitCounter = 11 then
+		                if ScanCode = "11110000" then
+			                PS2state <= BREAK;
+		                else
+		                    --test_signal <= '1';
+                            PS2cmd <= keyPressed;
+			                PS2state <= MAKE;
+		                end if;
+	                else
+		                PS2state <= IDLE;
+	                end if;
+            end case;
         end if;
     end if;
     end process;
 
-    BC11  <= '1' when (PS2BitCounter = "1011") else '0';
+    -- SABSEKOD
 
+    --process(clk)
+    --begin
+    --if rising_edge(clk) then
+    --    if rst='1' then
+    --        PS2BitCounter <= (others =>'0');
+    --    elsif BC11 = '1' then
+    --        PS2BitCounter <= (others =>'0');
+    --    elsif PS2Clk_op = '1' then
+    --        PS2BitCounter <= PS2BitCounter + 1;
+    --    end if;
+    --end if;
+    --end process;
+
+    --BC11  <= '1' when (PS2BitCounter = "1011") else '0';
+  
   
     -- PS2 state
     -- Either MAKE or BREAK state is identified from the scancode
@@ -156,35 +219,40 @@ begin
     -- ***********************************
 
   
-    process(clk)
-    begin
-    if rising_edge(clk) then
-        if rst='1' then
-            PS2state <= IDLE;
-        else
-            case PS2state is
-                when IDLE =>
-                    if ((BC11 = '1') and (not (ScanCode = x"F0"))) then
-                        PS2state <= MAKE;
-                    elsif ((BC11 = '1') and (ScanCode = x"F0")) then
-                        PS2state <= BREAK;
-                    else
-                        PS2state <= IDLE;
-                    end if;
-                when MAKE =>
-                    PS2state <= IDLE;
-                when BREAK =>
-                    if BC11 = '1' then
-                        PS2state <= IDLE;
-                    else
-                        PS2state <= BREAK;
-                    end if;
-                when others =>
-                    PS2state <= IDLE;
-            end case;
-        end if;
-    end if;
-    end process;
+    --process(clk)
+    --begin
+    --if rising_edge(clk) then
+    --    if rst='1' then
+    --       PS2state <= IDLE;
+    --    else
+    --        case PS2state is
+    --            when IDLE =>
+    --                if ((BC11 = '1') and (not ScanCode = x"F0")) then
+    --                    test_signal <= '1';
+    --                    PS2cmd <= keyPressed;                    
+    --                    PS2state <= MAKE;
+    --                elsif ((BC11 = '1') and (ScanCode = x"F0")) then
+    --                    PS2state <= BREAK;
+    --                else
+    --                    PS2state <= IDLE;
+    --                end if;
+    --            when MAKE =>
+    --                PS2cmd <= (others =>'0');
+    --                PS2state <= IDLE;
+    --            when BREAK =>
+    --                if BC11 = '1' then
+    --                    PS2state <= IDLE;
+    --               else
+    --                    PS2state <= BREAK;
+    --                end if;
+    --            when others =>
+    --               PS2state <= IDLE;
+    --        end case;
+    --    end if;
+    --end if;
+    --end process;
+    
+    -- SLUT SABSEKOD
 
     
     -- Scan Code -> KeyPressed mapping
@@ -202,19 +270,19 @@ begin
     -- Sets the out signal PS2cmd when
     -- the PSstate is make
 
-    process(clk)
-    begin
-    if rising_edge(clk) then
-        if rst = '1' then
-            PS2cmd <= (others =>'0');
-        else
-            if (PS2state = MAKE) then
-                PS2cmd <= keyPressed;
-            else
-                PS2cmd <= (others =>'0');
-            end if;
-        end if;
-    end if;
-    end process;
+    --PS2cmd <= keyPressed when (PS2state = MAKE) else (others =>'0');
+
+    --process(clk)
+    --begin
+    --if rising_edge(clk) then
+    --    if rst = '1' then
+    --        PS2cmd <= (others =>'0');
+    --    elsif (PS2state = MAKE) then
+    --        PS2cmd <= keyPressed;
+    --    else
+    --        PS2cmd <= (others =>'0');
+    --    end if;
+    --end if;
+    --end process;
   
 end behavioral;
