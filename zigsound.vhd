@@ -66,19 +66,19 @@ architecture Behavioral of zigsound is
     -- GPU : Graphics control component 
 	component GPU
 		port(
-        clk                 : in std_logic;			-- system clock (100 MHz)
-        rst	        		: in std_logic;			-- reset signal
+        clk                 : in std_logic;  -- system clock (100 MHz)
+        rst	        		: in std_logic;  -- reset signal
         -- TO/FROM CPU
-        move_req            : in std_logic;         -- move request
-        curr_pos            : in signed(17 downto 0); -- current position
-        next_pos            : in signed(17 downto 0); -- next position
-        move_resp			: out std_logic;		-- response to move request
+        move_req            : in std_logic;  -- move request
+        curr_pos            : in signed(17 downto 0);  -- current position
+        next_pos            : in signed(17 downto 0);  -- next position
+        move_resp			: out std_logic;  -- response to move request
         -- TO/FROM PIC_MEM
         data_nextpos        : in unsigned(7 downto 0);  -- tile data at nextpos
-        addr_nextpos        : out unsigned(10 downto 0); -- tile addr of nextpos
-        data_change			: out unsigned(7 downto 0);	-- tile data for change
-        addr_change			: out unsigned(10 downto 0); -- tile address for change
-        we_picmem			: out std_logic		-- write enable for PIC_MEM
+        addr_nextpos        : out unsigned(10 downto 0);  -- tile addr of nextpos
+        data_change			: out unsigned(7 downto 0);  -- tile data for change
+        addr_change			: out unsigned(10 downto 0);  -- tile address for change
+        we_picmem			: out std_logic  -- write enable for PIC_MEM
 		);
 	end component;
 
@@ -123,8 +123,10 @@ architecture Behavioral of zigsound is
 		rst	        		: in std_logic;
 		PS2KeyboardCLK      : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData     : in std_logic;  -- USB keyboard PS2 data
-        PS2cmd              : out unsigned(17 downto 0);
+        --PS2cmd					        : out unsigned(17 downto 0);
+        
         --TEST
+        PS2cmd				: buffer unsigned(17 downto 0);  -- TEST ONLY, UNCOMMENT ABOVE WHEN DONE
 	    test_diod		    : out std_logic  
 		);
 	end component;
@@ -151,10 +153,10 @@ architecture Behavioral of zigsound is
     
     -- GPU signals
     signal move_resp_con        : std_logic;  -- Move request response
-    signal addr_nextpos_con     : unsigned(10 downto 0);    -- tile addr of nextpos
-    signal data_change_con      : unsigned(7 downto 0);	    -- tile data for change
-    signal addr_change_con      : unsigned(10 downto 0);            -- tile address for change
-    signal we_picmem_con        : std_logic;		                -- write enable for PIC_MEM
+    signal addr_nextpos_con     : unsigned(10 downto 0);  -- tile addr of nextpos
+    signal data_change_con      : unsigned(7 downto 0);  -- tile data for change
+    signal addr_change_con      : unsigned(10 downto 0);  -- tile address for change
+    signal we_picmem_con        : std_logic;  -- write enable for PIC_MEM
 	
 	-- PIC_MEM signals
     signal data_nextpos_con     : unsigned(7 downto 0); -- data PIC_MEM -> GPU
