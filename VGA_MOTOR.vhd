@@ -448,11 +448,11 @@ begin
 
 
     -- Tile memory address composite
-    tileAddr <= unsigned(data(4 downto 0)) & Ypixel(4 downto 2) & Xpixel(4 downto 2);
-
+    tileAddr <= unsigned(data(4 downto 0)) & Ypixel(3 downto 1) & Xpixel(3 downto 1);
 
     -- Picture memory address composite
-    addr <= to_unsigned(20, 7) * Ypixel(8 downto 5) + Xpixel(9 downto 5);
+    --addr <= to_unsigned(20, 7) * Ypixel(8 downto 5) + Xpixel(9 downto 5);
+    addr <= to_unsigned(40, 6) * Ypixel(8 downto 4) + Xpixel(9 downto 4);
 
 
     -- VGA generation

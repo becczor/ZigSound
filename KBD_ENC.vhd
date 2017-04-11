@@ -47,10 +47,26 @@ architecture behavioral of KBD_ENC is
     signal keyPressed			        : unsigned(17 downto 0);  --Which_key_that_has_been_pressed
     
     -- TEST                             
-    signal test_toggle_led              : std_logic := '0';
+    signal test_led_counter             : unsigned(24 downto 0);
+    --signal test_toggle_led              : std_logic := '0';
                                                                    
                                                                     
 begin
+
+    --test_diod <= test_toggle_led;
+
+    -- TEST DIOD COUNTER
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        test_led_counter <= test_led_counter + 1;
+        if (test_led_counter(24) = '1') then
+            test_diod <= '1';
+        else 
+            test_diod <= '0';
+        end if;
+    end if;
+    end process;
 
     -- Synchronize PS2-KBD signals
     process(clk)
@@ -193,7 +209,6 @@ begin
             PS2cmd <= (others =>'0');
         else
             if (PS2state = MAKE) then
-                test_toggle_led <= not test_toggle_led;
                 PS2cmd <= keyPressed;
             else
                 PS2cmd <= (others =>'0');
@@ -201,7 +216,5 @@ begin
         end if;
     end if;
     end process;
-    
-    test_diod <= test_toggle_led;
   
 end behavioral;

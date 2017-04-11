@@ -43,8 +43,8 @@ architecture behavioral of GPU is
     type wr_type is (IDLE, DRAW);  -- declare state types for write cycle
     signal WRstate : wr_type;  -- write cycle state
 
-    type ch_type is (WAITING, CHECK);  -- declare state types for write cycle
-    signal CHstate : ch_type;  -- write cycle state
+    --type ch_type is (WAITING, CHECK);  -- declare state types for write cycle
+    --signal CHstate : ch_type;  -- write cycle state
 
 begin
 	
@@ -100,9 +100,11 @@ begin
     end if;
     end process;
     
-
+    --*********************
+    --* Signal assignment *
+    --*********************
 	addr_nextpos <= unsigned(next_pos(14 downto 9)) + (to_unsigned(40, 6) * unsigned(next_pos(4 downto 0)));
-    -- Sets variables. Takes x- and y-pos from curr_pos if we're in CLEAR,
+    -- Takes x- and y-pos from curr_pos if we're in CLEAR,
     -- otherwise from next_pos.
     xpos <= unsigned(curr_pos(14 downto 9)) when (WRstate = IDLE) else unsigned(next_pos(14 downto 9));
     ypos <= unsigned(curr_pos(4 downto 0)) when (WRstate = IDLE) else unsigned(next_pos(4 downto 0));

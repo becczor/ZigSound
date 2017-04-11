@@ -127,7 +127,7 @@ architecture Behavioral of zigsound is
         PS2KeyboardData     : in std_logic;  -- USB keyboard PS2 data
         PS2cmd              : out unsigned(17 downto 0);
         --TEST
-	    test_diod		            : out std_logic  
+	    test_diod		    : out std_logic  
 		);
 	end component;
 	

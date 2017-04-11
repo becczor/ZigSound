@@ -37,7 +37,7 @@ architecture Behavioral of PIC_MEM is
     -- Track memory type
     type ram_t is array (0 to 2047) of unsigned(7 downto 0);
     
-    -- SÄTT VÅRA BANOR HÄR! JUST NU SÄTTS CURSOR PÅ INDEX 1, RESTEN SPACE
+    -- SÄTT VÅRA BANOR HÄR! JUST NU SÄTTS CURSOR PÅ INDEX 0, RESTEN SPACE
 
     -- TRACK 1 initialization
     signal track_1 : ram_t := (0 => x"1F", others => (others => '0')); 
