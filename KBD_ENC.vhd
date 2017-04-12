@@ -19,11 +19,10 @@ entity KBD_ENC is
         rst		        		        : in std_logic;  -- reset signal
         PS2KeyboardCLK                  : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData			        : in std_logic;  -- USB keyboard PS2 data
-        --PS2cmd					        : out unsigned(17 downto 0);
-        PS2cmd					        : buffer unsigned(17 downto 0);  -- TEST ONLY, UNCOMMENT ABOVE WHEN DONE
+        PS2cmd					        : out unsigned(17 downto 0);
         
         --TEST
-        test_diod                       : buffer std_logic
+        test_diod                       : out std_logic
         );		
 
 end KBD_ENC;
@@ -48,10 +47,10 @@ architecture behavioral of KBD_ENC is
     signal key_code			            : unsigned(17 downto 0);  --Which_key_that_has_been_pressed
     
     -- TEST                             
-    signal test_led_counter             : unsigned(50 downto 0);
-    signal test_signal                  : std_logic;
+    --signal test_led_counter             : unsigned(50 downto 0);
+    --signal test_signal                  : std_logic;
     --signal control_signal               : std_logic;
-    signal working                      : std_logic;
+    --signal working                      : std_logic;
                                                                    
                                                                     
 begin

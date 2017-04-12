@@ -20,8 +20,10 @@ entity zigsound is
         PS2KeyboardCLK          : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData         : in std_logic;  -- USB keyboard PS2 data
         
-        --Test-diod out 
-        test_diod   		    : buffer std_logic
+        --Test
+        debug_PS2CLK            : out std_logic;
+        debug_PS2Data           : out std_logic;
+        test_diod   		    : out std_logic
         );
         
 end zigsound;
@@ -123,10 +125,9 @@ architecture Behavioral of zigsound is
 		rst	        		: in std_logic;
 		PS2KeyboardCLK      : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData     : in std_logic;  -- USB keyboard PS2 data
-        --PS2cmd					        : out unsigned(17 downto 0);
+        PS2cmd					        : out unsigned(17 downto 0);
         
         --TEST
-        PS2cmd				: buffer unsigned(17 downto 0);  -- TEST ONLY, UNCOMMENT ABOVE WHEN DONE
 	    test_diod		    : out std_logic  
 		);
 	end component;
@@ -169,6 +170,9 @@ architecture Behavioral of zigsound is
     signal PS2cmd_con           : unsigned(17 downto 0);
 	
 begin
+
+    debug_PS2CLK <= PS2KeyboardCLK;
+    debug_PS2Data <= PS2KeyboardData;
 
     --****************
     --* Port Mapping *
