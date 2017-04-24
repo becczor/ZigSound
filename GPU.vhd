@@ -42,13 +42,21 @@ architecture behavioral of GPU is
 
     type wr_type is (IDLE, DRAW);  -- declare state types for write cycle
     signal WRstate : wr_type;  -- write cycle state
+    
+    --********************
+    --* Position aliases *
+    --********************
+    alias CURR_XPOS     : signed(5 downto 0) is curr_pos(14 downto 9);
+    alias CURR_YPOS     : signed(4 downto 0) is curr_pos(4 downto 0);
+    alias NEXT_XPOS     : signed(5 downto 0) is next_pos(14 downto 9);
+    alias NEXT_YPOS     : signed(4 downto 0) is next_pos(4 downto 0);
 
 begin
 	
     --*************************************************************
     --* Check if we have a move request and if it can be approved *
     --*************************************************************
-    move <= '1' when move_req = '1' and data_nextpos = x"00" else '0';
+    --move <= '1' when move_req = '1' and data_nextpos = x"00" else '0';
     
     --*******************************************************************
     --* Move handler : Sets address, data and enable-signal for PIC_MEM *
@@ -65,7 +73,7 @@ begin
         else
             case WRstate is
                 when IDLE =>
-                    if (move = '1') then  -- We should move.
+                    if (move_req = '1' and data_nextpos = x"00") then  -- We should move.
                         addr_change <= xpos + (to_unsigned(40, 6) * ypos); -- Translates curr x- and y-pos into PIC_MEM-address.
                         data_change <= tile;    -- Sets data to BG-tile.
                         move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
@@ -89,10 +97,10 @@ begin
     --*********************
     --* Signal assignment *
     --*********************
-	addr_nextpos <= unsigned(next_pos(14 downto 9)) + (to_unsigned(40, 6) * unsigned(next_pos(4 downto 0)));
+	addr_nextpos <= unsigned(NEXT_XPOS) + (to_unsigned(40, 6) * unsigned(NEXT_YPOS));
     -- Takes x- and y-pos from curr_pos if we're in CLEAR, else from next_pos.
-    xpos <= unsigned(curr_pos(14 downto 9)) when (WRstate = IDLE) else unsigned(next_pos(14 downto 9));
-    ypos <= unsigned(curr_pos(4 downto 0)) when (WRstate = IDLE) else unsigned(next_pos(4 downto 0));
+    xpos <= unsigned(CURR_XPOS) when (WRstate = IDLE) else unsigned(NEXT_XPOS);
+    ypos <= unsigned(CURR_YPOS) when (WRstate = IDLE) else unsigned(NEXT_YPOS);
     tile <= x"00" when (WRstate = IDLE) else x"1F";
   
     end behavioral;

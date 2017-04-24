@@ -561,19 +561,19 @@ begin
                 end if;
                 case to_integer(PS2cmd) is
                     when 1 =>  -- UP (W)
-                        NEXT_POS <= CURR_POS;
+                        NEXT_XPOS <= CURR_XPOS;
                         NEXT_YPOS <= CURR_YPOS - 1;
                         MOVE_REQ <= '1';
                     when 2 =>  -- LEFT (A)
-                        NEXT_POS <= CURR_POS;
+                        NEXT_YPOS <= CURR_YPOS;
                         NEXT_XPOS <= CURR_XPOS - 1;
                         MOVE_REQ <= '1';
                     when 3 =>  -- DOWN (S)
-                        NEXT_POS <= CURR_POS;
+                        NEXT_XPOS <= CURR_XPOS;
                         NEXT_YPOS <= CURR_YPOS + 1;
                         MOVE_REQ <= '1';
                     when 4 =>  -- RIGHT (D)
-                        NEXT_POS <= CURR_POS;
+                        NEXT_YPOS <= CURR_YPOS;
                         NEXT_XPOS <= CURR_XPOS + 1;
                         MOVE_REQ <= '1';
                     when 5 => -- SOUND TOGGLE (SPACE)
