@@ -23,7 +23,8 @@ entity zigsound is
         --Test
         debug_PS2CLK            : out std_logic;
         debug_PS2Data           : out std_logic;
-        test_diod   		    : out std_logic
+        test_diod   		    : out std_logic;
+        switch                  : in std_logic
         );
         
 end zigsound;
@@ -49,7 +50,9 @@ architecture Behavioral of zigsound is
 		    curr_pos_out    : out signed(17 downto 0);
 		    next_pos_out    : out signed(17 downto 0);
 		    sel_track_out   : out unsigned(1 downto 0);
-		    sel_sound_out   : out std_logic
+		    sel_sound_out   : out std_logic;
+		    test_diod   	: out std_logic;
+		    switch          : in std_logic
 		    );
   	end component;
 
@@ -125,10 +128,9 @@ architecture Behavioral of zigsound is
 		rst	        		: in std_logic;
 		PS2KeyboardCLK      : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData     : in std_logic;  -- USB keyboard PS2 data
-        PS2cmd					        : out unsigned(17 downto 0);
-        
+        PS2cmd				: out unsigned(17 downto 0)
         --TEST
-	    test_diod		    : out std_logic  
+	    --test_diod		    : out std_logic  
 		);
 	end component;
 	
@@ -165,6 +167,8 @@ architecture Behavioral of zigsound is
 	
 	-- VGA MOTOR signals 
     signal addr_vga_con         : unsigned(10 downto 0);
+    --TEST
+    signal vgaGreen_dummy   	: std_logic_vector(2 downto 0);
     
     -- KBD_ENC signals
     signal PS2cmd_con           : unsigned(17 downto 0);
@@ -192,7 +196,9 @@ begin
                 curr_pos_out => curr_pos_con,
                 next_pos_out => next_pos_con,
                 sel_track_out => sel_track_con,
-                sel_sound_out => sel_sound_con
+                sel_sound_out => sel_sound_con,
+                test_diod => test_diod,
+                switch => switch 
                 );
 
     -- uMem Component Connection
@@ -243,11 +249,14 @@ begin
 	            data => data_vga_con,
 	            addr => addr_vga_con,
 	            vgaRed => vgaRed,
-	            vgaGreen => vgaGreen,
+	            --vgaGreen => vgaGreen,
+	            vgaGreen => vgaGreen_dummy,
 	            vgaBlue => vgaBlue,
 	            Hsync => Hsync,
 	            Vsync => Vsync
 	            );
+	            
+	vgaGreen <= PS2KeyboardData & "00";
 	            
 	-- KBD_ENC Component Connection            
     U6 : KBD_ENC port map(
@@ -255,8 +264,7 @@ begin
 	            rst => rst,
 	            PS2KeyboardCLK => PS2KeyboardCLK,
 	            PS2KeyboardData => PS2KeyboardData,
-	            PS2cmd => PS2cmd_con,
-	            test_diod => test_diod
+	            PS2cmd => PS2cmd_con
 	            );
 
 end Behavioral;

@@ -19,7 +19,10 @@ entity CPU is
 		curr_pos_out    : out signed(17 downto 0);
 		next_pos_out    : out signed(17 downto 0);
 		sel_track_out   : out unsigned(1 downto 0);
-		sel_sound_out   : out std_logic
+		sel_sound_out   : out std_logic;
+		--TEST
+        test_diod       : out std_logic;
+        switch          : in std_logic
         );
 end CPU;
 
@@ -99,6 +102,11 @@ architecture Behavioral of CPU is
     alias CURR_YPOS     : signed(4 downto 0) is CURR_POS(4 downto 0);
     alias NEXT_XPOS     : signed(5 downto 0) is NEXT_POS(14 downto 9);
     alias NEXT_YPOS     : signed(4 downto 0) is NEXT_POS(4 downto 0);
+
+    -- TEST                             
+    signal test_led_counter             : unsigned(25 downto 0);
+    signal test_signal                  : std_logic;
+    signal working                      : std_logic;
 
     --****************************************************************************
 	--* uAddr_instr : Array of uAddresses where each instruction begins in uMem. *
@@ -542,6 +550,34 @@ begin
     --CURR_POS                    when (TB = "110" and GRX = "110") else 
     DATA_BUS;
     
+    --*************
+    --* TEST DIOD *
+    --*************
+    
+    --test_diod <= PS2KeyboardData;
+    
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if (rst = '1') then
+            test_led_counter <= (others => '0');
+            test_diod <= '0';
+            working <= '0';
+        elsif (test_signal = '1' or working = '1') then
+            working <= '1';
+            test_diod <= '1';
+            test_led_counter <= test_led_counter + 1;
+            if (test_led_counter(20) = '1') then
+                test_led_counter <= (others => '0');
+                test_diod <= '0';
+                working <= '0';
+            end if;
+        end if;
+    end if;
+    end process;
+    
+    test_signal <= switch;
+    
     
     --*************************
     --* PS2cmd Interpretation *
@@ -561,25 +597,31 @@ begin
                 end if;
                 case to_integer(PS2cmd) is
                     when 1 =>  -- UP (W)
+                        --test_signal <= '1';
                         NEXT_XPOS <= CURR_XPOS;
                         NEXT_YPOS <= CURR_YPOS - 1;
                         MOVE_REQ <= '1';
                     when 2 =>  -- LEFT (A)
+                        --test_signal <= '1';
                         NEXT_YPOS <= CURR_YPOS;
                         NEXT_XPOS <= CURR_XPOS - 1;
                         MOVE_REQ <= '1';
                     when 3 =>  -- DOWN (S)
+                        --test_signal <= '1';
                         NEXT_XPOS <= CURR_XPOS;
                         NEXT_YPOS <= CURR_YPOS + 1;
                         MOVE_REQ <= '1';
                     when 4 =>  -- RIGHT (D)
+                        --test_signal <= '1';
                         NEXT_YPOS <= CURR_YPOS;
                         NEXT_XPOS <= CURR_XPOS + 1;
                         MOVE_REQ <= '1';
                     when 5 => -- SOUND TOGGLE (SPACE)
+                        --test_signal <= '1';
                         SEL_SOUND <= not SEL_SOUND;
                         MOVE_REQ <= '0';
                     when others =>
+                        --test_signal <= '0';
                         MOVE_REQ <= '0';
                 end case;
             end if;

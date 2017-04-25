@@ -19,10 +19,10 @@ entity KBD_ENC is
         rst		        		        : in std_logic;  -- reset signal
         PS2KeyboardCLK                  : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData			        : in std_logic;  -- USB keyboard PS2 data
-        PS2cmd					        : out unsigned(17 downto 0);
+        PS2cmd					        : out unsigned(17 downto 0)
         
         --TEST
-        test_diod                       : out std_logic
+        --test_diod                       : out std_logic
         );		
 
 end KBD_ENC;
@@ -59,7 +59,7 @@ begin
     --* TEST DIOD *
     --*************
     
-    test_diod <= PS2KeyboardData;
+    --test_diod <= PS2KeyboardData;
     
     --process(clk)
     --begin
@@ -90,8 +90,8 @@ begin
     begin
     if rising_edge(clk) then
         if (rst = '1') then
-            PS2Clk <= '0';
-            PS2Data <= '0';
+            PS2Clk <= '1';
+            PS2Data <= '1';
         else
             PS2Clk <= PS2KeyboardCLK;
             PS2Data <= PS2KeyboardData;
@@ -124,7 +124,7 @@ begin
     begin
     if rising_edge(clk) then
         if rst = '1' then
-            PS2Data_sr <= (others =>'0');
+            PS2Data_sr <= (others => '0');
         elsif PS2Clk_op = '1' then
             PS2Data_sr <= PS2Data & PS2Data_sr(10 downto 1);
         end if;

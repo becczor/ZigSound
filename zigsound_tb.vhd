@@ -33,7 +33,7 @@ ARCHITECTURE behavior OF zigsound_tb IS
     signal rst : std_logic := '0';
     signal PS2KeyboardCLK : std_logic := '1';  -- USB keyboard PS2 clock
     signal PS2KeyboardData : std_logic := '1'; -- USB keyboard PS2 data
-    signal tb_running : boolean := true;
+    signal tb_running : boolean := true;   
     
 
 BEGIN
@@ -59,68 +59,149 @@ BEGIN
         wait;
     end process;
 
-
-    ps2_clk_gen : process
-    begin
-        while tb_running loop
-            PS2KeyboardCLK <= '1';
-            wait for 1000 ns;
-            PS2KeyboardCLK <= '0';
-            wait for 1000 ns;
-        end loop;
-        wait;
-    end process;
-    
     
     ps2_code_gen : process
     begin
         wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '1';
-        wait for 2000 ns;
-        PS2KeyboardData <= '1';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '1';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '1';  
-
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '1';
-        wait for 2000 ns;
-        PS2KeyboardData <= '1';
-        wait for 2000 ns;
-        PS2KeyboardData <= '1';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '0';
-        wait for 2000 ns;
-        PS2KeyboardData <= '1';  
-        wait;
         
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '1';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '1';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '1';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '1';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardCLK <= '1';
+        wait for 3000 ns;
+        
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '1';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '1';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '1';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '0';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        
+        PS2KeyboardData <= '1';
+        PS2KeyboardCLK <= '1';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '0';
+        wait for 1000 ns;
+        PS2KeyboardCLK <= '1';
+        
+        wait;
         
     end process;
     
