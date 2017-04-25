@@ -19,10 +19,10 @@ entity KBD_ENC is
         rst		        		        : in std_logic;  -- reset signal
         PS2KeyboardCLK                  : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData			        : in std_logic;  -- USB keyboard PS2 data
-        PS2cmd					        : out unsigned(17 downto 0)
+        PS2cmd					        : out unsigned(17 downto 0);
         
         --TEST
-        --test_diod                       : out std_logic
+        test_diod                       : buffer std_logic
         );		
 
 end KBD_ENC;
@@ -184,6 +184,8 @@ begin
         end if;
     end if;
     end process;
+    
+    test_diod <= '1' when (key_code = x"1D" or test_diod = '1') else '0';
     
     --******************************************************************
     --* keyPressed : Translates ScanCode into signal to be sent to CPU *

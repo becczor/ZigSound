@@ -21,7 +21,7 @@ entity CPU is
 		sel_track_out   : out unsigned(1 downto 0);
 		sel_sound_out   : out std_logic;
 		--TEST
-        test_diod       : out std_logic;
+        --test_diod       : out std_logic;
         switch          : in std_logic
         );
 end CPU;
@@ -102,6 +102,7 @@ architecture Behavioral of CPU is
     alias CURR_YPOS     : signed(4 downto 0) is CURR_POS(4 downto 0);
     alias NEXT_XPOS     : signed(5 downto 0) is NEXT_POS(14 downto 9);
     alias NEXT_YPOS     : signed(4 downto 0) is NEXT_POS(4 downto 0);
+    alias key_code      : unsigned(2 downto 0) is PS2cmd(2 downto 0);
 
     -- TEST                             
     signal test_led_counter             : unsigned(25 downto 0);
@@ -542,27 +543,27 @@ begin
     
     --test_diod <= PS2KeyboardData;
     
-    process(clk)
-    begin
-    if rising_edge(clk) then
-        if (rst = '1') then
-            test_led_counter <= (others => '0');
-            test_diod <= '0';
-            working <= '0';
-        elsif (test_signal = '1' or working = '1') then
-            working <= '1';
-            test_diod <= '1';
-            test_led_counter <= test_led_counter + 1;
-            if (test_led_counter(20) = '1') then
-                test_led_counter <= (others => '0');
-                test_diod <= '0';
-                working <= '0';
-            end if;
-        end if;
-    end if;
-    end process;
+    --process(clk)
+    --begin
+    --if rising_edge(clk) then
+    --    if (rst = '1') then
+    --        test_led_counter <= (others => '0');
+    --        test_diod <= '0';
+    --        working <= '0';
+    --    elsif (test_signal = '1' or working = '1') then
+    --        working <= '1';
+    --        test_diod <= '1';
+    --        test_led_counter <= test_led_counter + 1;
+    --        if (test_led_counter(20) = '1') then
+    --            test_led_counter <= (others => '0');
+    --            test_diod <= '0';
+    --            working <= '0';
+    --        end if;
+    --    end if;
+    --end if;
+    --end process;
     
-    test_signal <= switch;
+    --test_signal <= switch;
     
     
     --*************************
@@ -581,28 +582,28 @@ begin
                 if (move_resp = '1') then
                     CURR_POS <= NEXT_POS;
                 end if;
-                case to_integer(PS2cmd) is
-                    when 1 =>  -- UP (W)
+                case key_code is
+                    when "001" =>  -- UP (W)
                         --test_signal <= '1';
                         NEXT_XPOS <= CURR_XPOS;
                         NEXT_YPOS <= CURR_YPOS - 1;
                         MOVE_REQ <= '1';
-                    when 2 =>  -- LEFT (A)
+                    when "010" =>  -- LEFT (A)
                         --test_signal <= '1';
                         NEXT_YPOS <= CURR_YPOS;
                         NEXT_XPOS <= CURR_XPOS - 1;
                         MOVE_REQ <= '1';
-                    when 3 =>  -- DOWN (S)
+                    when "011" =>  -- DOWN (S)
                         --test_signal <= '1';
                         NEXT_XPOS <= CURR_XPOS;
                         NEXT_YPOS <= CURR_YPOS + 1;
                         MOVE_REQ <= '1';
-                    when 4 =>  -- RIGHT (D)
+                    when "100" =>  -- RIGHT (D)
                         --test_signal <= '1';
                         NEXT_YPOS <= CURR_YPOS;
                         NEXT_XPOS <= CURR_XPOS + 1;
                         MOVE_REQ <= '1';
-                    when 5 => -- SOUND TOGGLE (SPACE)
+                    when "101" => -- SOUND TOGGLE (SPACE)
                         --test_signal <= '1';
                         SEL_SOUND <= not SEL_SOUND;
                         MOVE_REQ <= '0';

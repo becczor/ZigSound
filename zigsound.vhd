@@ -12,7 +12,7 @@ entity zigsound is
         rst                     : in std_logic;
         -- VGA_MOTOR out
         vgaRed		        	: out std_logic_vector(2 downto 0);
-        vgaGreen	        	: out std_logic_vector(2 downto 0);
+        vgaGreen	        	: buffer std_logic_vector(2 downto 0);
         vgaBlue		        	: out std_logic_vector(2 downto 1);
         Hsync		        	: out std_logic;
         Vsync		        	: out std_logic;
@@ -51,7 +51,7 @@ architecture Behavioral of zigsound is
 		    next_pos_out    : out signed(17 downto 0);
 		    sel_track_out   : out unsigned(1 downto 0);
 		    sel_sound_out   : out std_logic;
-		    test_diod   	: out std_logic;
+		    --test_diod   	: out std_logic;
 		    switch          : in std_logic
 		    );
   	end component;
@@ -128,9 +128,9 @@ architecture Behavioral of zigsound is
 		rst	        		: in std_logic;
 		PS2KeyboardCLK      : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData     : in std_logic;  -- USB keyboard PS2 data
-        PS2cmd				: out unsigned(17 downto 0)
+        PS2cmd				: out unsigned(17 downto 0);
         --TEST
-	    --test_diod		    : out std_logic  
+	    test_diod		    : buffer std_logic  
 		);
 	end component;
 	
@@ -197,7 +197,7 @@ begin
                 next_pos_out => next_pos_con,
                 sel_track_out => sel_track_con,
                 sel_sound_out => sel_sound_con,
-                test_diod => test_diod,
+                --test_diod => test_diod,
                 switch => switch 
                 );
 
@@ -256,7 +256,7 @@ begin
 	            Vsync => Vsync
 	            );
 	            
-	vgaGreen <= (others => PS2cmd_con(2));
+	vgaGreen <= "111" when PS2cmd_con(2) = '1' or vgaGreen = "111" else "000";
 	            
 	-- KBD_ENC Component Connection            
     U6 : KBD_ENC port map(
@@ -264,7 +264,8 @@ begin
 	            rst => rst,
 	            PS2KeyboardCLK => PS2KeyboardCLK,
 	            PS2KeyboardData => PS2KeyboardData,
-	            PS2cmd => PS2cmd_con
+	            PS2cmd => PS2cmd_con,
+	            test_diod => test_diod
 	            );
 
 end Behavioral;
