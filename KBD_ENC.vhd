@@ -131,7 +131,7 @@ begin
     end if;
     end process;
 
-    ScanCode <= PS2Data_sr(9 downto 2);
+    ScanCode <= PS2Data_sr(8 downto 1);
 
     -- **************************************
     -- * PS2BitCounter : Counter for states *

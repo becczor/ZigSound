@@ -179,7 +179,6 @@ begin
         if (rst = '1') then
             null;
         elsif (we = '1') then
-            track_1(1) <= x"02";
             case sel_track is
                 when "01" =>
                     track_1(to_integer(addr_change)) <= data_change;
@@ -191,7 +190,7 @@ begin
                     null;
             end case;
         else
-            track_1(0) <= x"01";
+            null;
         end if;  
     end if;
     end process;
@@ -202,13 +201,13 @@ begin
         track_1(to_integer(addr_nextpos)) when "01",
         track_2(to_integer(addr_nextpos)) when "10",
         track_3(to_integer(addr_nextpos)) when "11",
-        "00000000" when others;
+        (others => '0') when others;
     with sel_track select
         data_vga <= 
         track_1(to_integer(addr_vga)) when "01",
         track_2(to_integer(addr_vga)) when "10",
         track_3(to_integer(addr_vga)) when "11",
-        "00000000" when others;
+        (others => '0') when others;
 
 end Behavioral;
 

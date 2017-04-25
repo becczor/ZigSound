@@ -168,7 +168,7 @@ architecture Behavioral of zigsound is
 	-- VGA MOTOR signals 
     signal addr_vga_con         : unsigned(10 downto 0);
     --TEST
-    signal vgaGreen_dummy   	: std_logic_vector(2 downto 0);
+    --signal vgaGreen_dummy   	: std_logic_vector(2 downto 0);
     
     -- KBD_ENC signals
     signal PS2cmd_con           : unsigned(17 downto 0);
@@ -249,14 +249,14 @@ begin
 	            data => data_vga_con,
 	            addr => addr_vga_con,
 	            vgaRed => vgaRed,
-	            --vgaGreen => vgaGreen,
-	            vgaGreen => vgaGreen_dummy,
+	            vgaGreen => vgaGreen,
+	            --vgaGreen => vgaGreen_dummy,
 	            vgaBlue => vgaBlue,
 	            Hsync => Hsync,
 	            Vsync => Vsync
 	            );
 	            
-	vgaGreen <= "111" when PS2cmd_con(2) = '1' or vgaGreen = "111" else "000";
+	--vgaGreen <= "111" when PS2cmd_con(2) = '1' or vgaGreen = "111" else "000";
 	            
 	-- KBD_ENC Component Connection            
     U6 : KBD_ENC port map(
