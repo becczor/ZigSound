@@ -34,7 +34,8 @@ PART=xc6slx16-3-csg324
 
 
 
-zigsound.%: S=zigsound.vhd uMem.vhd pMem.vhd GPU.vhd PIC_MEM.vhd VGA_MOTOR.vhd KBD_ENC.vhd CPU.vhd
+zigsound.%: S=zigsound.vhd GPU.vhd PIC_MEM.vhd VGA_MOTOR.vhd KBD_ENC.vhd CPU.vhd 
+# uMem.vhd pMem.vhd
 zigsound.%: T=zigsound_tb.vhd
 zigsound.%: U=Nexys3_Master.ucf
 

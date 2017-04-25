@@ -40,10 +40,10 @@ architecture Behavioral of zigsound is
     	port(
             clk             : in std_logic;
 		    rst             : in std_logic;
-		    uAddr           : out unsigned(7 downto 0);
-		    uData           : in unsigned(24 downto 0);
-		    pAddr           : out signed(7 downto 0);
-		    pData           : in signed(17 downto 0);
+		    --uAddr           : out unsigned(7 downto 0);
+		    --uData           : in unsigned(24 downto 0);
+		    --pAddr           : out signed(7 downto 0);
+		    --pData           : in signed(17 downto 0);
 		    PS2cmd          : in unsigned(17 downto 0);
             move_req_out    : out std_logic;
 		    move_resp       : in std_logic;
@@ -57,16 +57,16 @@ architecture Behavioral of zigsound is
   	end component;
 
     -- uMem : Micro Memory Component
-    component uMem
-        port(uAddr          : in unsigned(7 downto 0);
-             uData          : out unsigned(24 downto 0));
-    end component;
+    --component uMem
+    --    port(uAddr          : in unsigned(7 downto 0);
+    --         uData          : out unsigned(24 downto 0));
+    --end component;
 
     -- pMem : Program Memory Component
-	component pMem
-		port(pAddr          : in signed(7 downto 0);
-			 pData          : out signed(17 downto 0));
-	end component;
+	--component pMem
+	--	port(pAddr          : in signed(7 downto 0);
+	--		 pData          : out signed(17 downto 0));
+	--end component;
 	
     -- GPU : Graphics control component 
 	component GPU
@@ -140,8 +140,8 @@ architecture Behavioral of zigsound is
     --**********************  
     
     -- CPU signals
-    signal pAddr_con        : signed(7 downto 0);
-    signal uAddr_con        : unsigned(7 downto 0);
+    --signal pAddr_con        : signed(7 downto 0);
+    --signal uAddr_con        : unsigned(7 downto 0);
     signal move_req_con     : std_logic;
     signal curr_pos_con     : signed(17 downto 0);
 	signal next_pos_con     : signed(17 downto 0);
@@ -149,10 +149,10 @@ architecture Behavioral of zigsound is
 	signal sel_sound_con    : std_logic;
     
     -- uMem signals
-    signal uData_con        : unsigned(24 downto 0);
+    --signal uData_con        : unsigned(24 downto 0);
     
     -- pMem signals
-    signal pData_con        : signed(17 downto 0);
+    --signal pData_con        : signed(17 downto 0);
     
     -- GPU signals
     signal move_resp_con        : std_logic;  -- Move request response
@@ -186,10 +186,10 @@ begin
     U0 : CPU port map(
                 clk => clk, 
                 rst => rst, 
-                uAddr => uAddr_con, 
-                uData => uData_con, 
-                pAddr => pAddr_con, 
-                pData => pData_con,
+                --uAddr => uAddr_con, 
+                --uData => uData_con, 
+                --pAddr => pAddr_con, 
+                --pData => pData_con,
                 PS2cmd => PS2cmd_con,
                 move_req_out => move_req_con,
                 move_resp => move_resp_con,
@@ -202,16 +202,16 @@ begin
                 );
 
     -- uMem Component Connection
-    U1 : uMem port map(
-                uAddr => uAddr_con, 
-                uData => uData_con
-                );
+    --U1 : uMem port map(
+    --            uAddr => uAddr_con, 
+    --            uData => uData_con
+    --            );
 
     -- pMem Component Connection
-    U2 : pMem port map(
-                pAddr => pAddr_con, 
-                pData => pData_con
-                );
+    --U2 : pMem port map(
+    --            pAddr => pAddr_con, 
+    --            pData => pData_con
+    --            );
                 
     -- GPU Component Connection
 	U3 : GPU port map(
@@ -256,7 +256,7 @@ begin
 	            Vsync => Vsync
 	            );
 	            
-	vgaGreen <= PS2KeyboardData & "00";
+	vgaGreen <= (others => PS2cmd_con(2));
 	            
 	-- KBD_ENC Component Connection            
     U6 : KBD_ENC port map(
