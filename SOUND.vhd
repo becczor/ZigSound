@@ -25,30 +25,30 @@ end SOUND;
 -- architecture
 architecture behavioral of SOUND is
     
-    signal goal_x       : std_logic_vector(5 downto 0);
-    signal curr_x       : std_logic_vector(5 downto 0);
+    signal goal_x       : signed(5 downto 0);
+    signal curr_x       : signed(5 downto 0);
    
-    signal goal_y       : std_logic_vector(4 downto 0);
-    signal curr_y       : std_logic_vector(4 downto 0);
+    signal goal_y       : signed(4 downto 0);
+    signal curr_y       : signed(4 downto 0);
 
-    signal x            : std_logic_vector(5 downto 0);         -- x-position for playing
-    signal y            : std_logic_vector(4 downto 0);         -- y-position for playing
+    signal x            : signed(5 downto 0);         -- x-position for playing
+    signal y            : signed(4 downto 0);         -- y-position for playing
 
-    signal beat         : std_logic_vector(19 downto 0);        -- Divided value for desired frequency for beat at position
-    signal freq         : std_logic_vector(10 downto 0);        -- Divided value for desired frequency for freq at position
+    signal beat         : signed(19 downto 0);        -- Divided value for desired frequency for beat at position
+    signal freq         : signed(10 downto 0);        -- Divided value for desired frequency for freq at position
 
-    signal clk_div_beat : std_logic_vector(19 downto 0);        -- Dividing clock for beat
-    signal clk_div_freq : std_logic_vector(10 downto 0);        -- Dividing clock for freq
+    signal clk_div_beat : signed(19 downto 0);        -- Dividing clock for beat
+    signal clk_div_freq : signed(10 downto 0);        -- Dividing clock for freq
 
     signal clk_beat     : std_logic;                            -- Clock signal for beat
     signal clk_freq     : std_logic;                            -- Clock signal for freq
 
     -- Flip flops
-    signal q_beat       : std_logic := 0;                       -- Beat flip flop
-    signal q_beat_plus  : std_logic := 0;    
+    signal q_beat       : std_logic := '0';                       -- Beat flip flop
+    signal q_beat_plus  : std_logic := '0';    
     
-    signal q_freq       : std_logic := 0;                       -- Freq flip flop
-    signal q_freq_plus  : std_logic := 0;     
+    signal q_freq       : std_logic := '0';                       -- Freq flip flop
+    signal q_freq_plus  : std_logic := '0';     
 
 begin
 
@@ -57,8 +57,8 @@ begin
     begin
         if rising_edge(clk) then
             if rst='1' then
-                x <= 0;
-                y <= 0;
+                x <= "000000";
+                y <= "00000";
             elsif channel = '1' then
                 x <= goal_x;
                 y <= goal_y;
