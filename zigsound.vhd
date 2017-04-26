@@ -12,7 +12,7 @@ entity zigsound is
         rst                     : in std_logic;
         -- VGA_MOTOR out
         vgaRed		        	: out std_logic_vector(2 downto 0);
-        vgaGreen	        	: buffer std_logic_vector(2 downto 0);
+        vgaGreen	        	: out std_logic_vector(2 downto 0);
         vgaBlue		        	: out std_logic_vector(2 downto 1);
         Hsync		        	: out std_logic;
         Vsync		        	: out std_logic;

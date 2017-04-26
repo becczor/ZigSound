@@ -14,13 +14,13 @@ entity CPU is
         pAddr           : out signed(7 downto 0);
         pData           : in signed(17 downto 0);
         PS2cmd          : in unsigned(17 downto 0);
-		move_req_out    : out std_logic;
-		move_resp       : in std_logic;
-		curr_pos_out    : out signed(17 downto 0);
-		next_pos_out    : out signed(17 downto 0);
-		sel_track_out   : out unsigned(1 downto 0);
-		sel_sound_out   : out std_logic;
-		--TEST
+        move_req_out    : out std_logic;
+        move_resp       : in std_logic;
+        curr_pos_out    : out signed(17 downto 0);
+        next_pos_out    : out signed(17 downto 0);
+        sel_track_out   : out unsigned(1 downto 0);
+        sel_sound_out   : out std_logic;
+        --TEST--
         --test_diod       : out std_logic;
         switch          : in std_logic
         );
@@ -267,33 +267,33 @@ begin
         end if;
     end process;
     
-    --*************************************
-    --* NEXT_POS : Next Position Register *
-    --*************************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                NEXT_POS <= "000000001000000001";  -- Character starts at (1,1)
-            elsif (FB = "110" and GRX = "101") then
-                NEXT_POS <= DATA_BUS;
-            end if;
-        end if;
-    end process;
+    ----*************************************
+    ----* NEXT_POS : Next Position Register *
+    ----*************************************
+    --process(clk)
+    --begin
+    --    if rising_edge(clk) then
+    --        if (rst = '1') then
+    --            NEXT_POS <= "000000001000000001";  -- Character starts at (1,1)
+    --        elsif (FB = "110" and GRX = "101") then
+    --            NEXT_POS <= DATA_BUS;
+    --        end if;
+    --    end if;
+    --end process;
     
-    --****************************************
-    --* CURR_POS : Current Position Register *
-    --****************************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                CURR_POS <= (others => '0');
-            elsif (FB = "110" and GRX = "110") then
-                CURR_POS <= DATA_BUS;
-            end if;
-        end if;
-    end process;
+    ----****************************************
+    ----* CURR_POS : Current Position Register *
+    ----****************************************
+    --process(clk)
+    --begin
+    --    if rising_edge(clk) then
+    --        if (rst = '1') then
+    --            CURR_POS <= (others => '0');
+    --        elsif (FB = "110" and GRX = "110") then
+    --            CURR_POS <= DATA_BUS;
+    --        end if;
+    --    end if;
+    --end process;
     
 
     --*******************************
@@ -533,8 +533,8 @@ begin
     GR2                         when (TB = "110" and GRX = "010") else 
     GR3                         when (TB = "110" and GRX = "011") else 
     GOAL_POS                    when (TB = "110" and GRX = "100") else 
-    NEXT_POS                    when (TB = "110" and GRX = "101") else 
-    CURR_POS                    when (TB = "110" and GRX = "110") else 
+    --NEXT_POS                    when (TB = "110" and GRX = "101") else 
+    --CURR_POS                    when (TB = "110" and GRX = "110") else 
     DATA_BUS;
     
     --*************
