@@ -25,7 +25,7 @@ entity zigsound is
         --Test
         debug_PS2CLK            : out std_logic;
         debug_PS2Data           : out std_logic;
-        --test_diod   		    : out std_logic;
+        test_diod   		    : out std_logic;
         switch                  : in std_logic
         );
         
