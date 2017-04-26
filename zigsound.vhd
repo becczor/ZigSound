@@ -23,8 +23,8 @@ entity zigsound is
         JB1                     : in std_logic;   -- the pmod is plugged in to the upper row of second slot
         
         --Test
-        --debug_PS2CLK            : out std_logic;
-        --debug_PS2Data           : out std_logic;
+        debug_PS2CLK            : out std_logic;
+        debug_PS2Data           : out std_logic;
         test_diod   		    : out std_logic;
         switch                  : in std_logic
         );
@@ -142,10 +142,11 @@ architecture Behavioral of zigsound is
         port (
         clk                 : in std_logic;                      -- system clock (100 MHz)
         rst                 : in std_logic;                      -- reset signal
-        goal_pos            : in std_logic_vector(17 downto 0);  -- goal position
-        curr_pos            : in std_logic_vector(17 downto 0);  -- current position
+        goal_pos            : in signed(17 downto 0);  -- goal position
+        curr_pos            : in signed(17 downto 0);  -- current position
         channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = curr, 1 = goal.
-        sound_data          : out std_logic);
+        sound_data          : out std_logic
+        );
     end component;
 
     --**********************
@@ -188,6 +189,7 @@ architecture Behavioral of zigsound is
     signal PS2cmd_con           : unsigned(17 downto 0);
 
     -- SOUND signals
+    signal sound_data_con       : std_logic;
     
 
 	
@@ -196,7 +198,7 @@ begin
     debug_PS2CLK <= PS2KeyboardCLK;
     debug_PS2Data <= PS2KeyboardData;
 
-    JB1 <= sound_data;
+    JB1 <= sound_data_con;
 
     --****************
     --* Port Mapping *
@@ -293,7 +295,8 @@ begin
                 rst => rst,
                 goal_pos => goal_pos_con,
                 curr_pos => curr_pos_con,
-                channel => sel_sound_con
+                channel => sel_sound_con,
+                sound_data => sound_data_con
                 );
 
   end Behavioral;
