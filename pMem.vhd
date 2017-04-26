@@ -8,7 +8,7 @@ use IEEE.NUMERIC_STD.all;
 entity pMem is
   port(
     pAddr : in signed(7 downto 0);
-    pData : out unsigned(17 downto 0));
+    pData : out signed(17 downto 0));
 end pMem;
 
 architecture Behavioral of pMem is
@@ -16,7 +16,8 @@ architecture Behavioral of pMem is
 --**************************
 --* p_mem : Program Memory *
 --**************************
-type p_mem_t is array (0 to 1) of unsigned(17 downto 0);
+type p_mem_t is array (0 to 1) of signed(17 downto 0);
+-- Maximum array length is 256, change when adding/deleting from pMem.
 constant p_mem_c : p_mem_t := (
     -- OP_GRx_M _ADDR
     -- 55555_333_22_88888888

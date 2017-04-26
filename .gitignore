@@ -8,4 +8,10 @@ CPU_notforuse.vhd
 ZigSoundGraphics.cr.mti
 ZigSoundGraphics.mpf
 vsim.wlf
+
 work/
+transcript
+ZigSoundDemo.mpf
+ZigSoundDemo.cr.mti
+
+
