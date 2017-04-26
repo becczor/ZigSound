@@ -2,39 +2,37 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use IEEE.NUMERIC_STD.all;
 
--- pMem interface
+--******************
+--* pMem Interface *
+--******************
 entity pMem is
   port(
-    pAddr : in unsigned(15 downto 0);
-    pData : out unsigned(15 downto 0));
+    pAddr : in signed(7 downto 0);
+    pData : out signed(17 downto 0));
 end pMem;
 
 architecture Behavioral of pMem is
 
--- program Memory
-type p_mem_t is array (0 to 15) of unsigned(15 downto 0);
-constant p_mem_c : p_mem_t :=
-  (x"0042",
-   x"00A0",
-   x"70FF",
-   x"1337",
-   x"0000",
-   x"0000",
-   x"0000",
-   x"0000",
-   x"0000",
-   x"0000",
-   x"0000",
-   x"0000",
-   x"0000",
-   x"0000",
-   x"0000",
-   x"0000");
+--**************************
+--* p_mem : Program Memory *
+--**************************
+type p_mem_t is array (0 to 1) of signed(17 downto 0);
+-- Maximum array length is 256, change when adding/deleting from pMem.
+constant p_mem_c : p_mem_t := (
+    -- OP_GRx_M _ADDR
+    -- 55555_333_22_88888888
+	-- Paste assembled code here:
+    b"00000_000_00_00000000",
+    b"00000_000_00_00000000"
+	);
 
   signal p_mem : p_mem_t := p_mem_c;
 
+begin  
 
-begin  -- pMem
-  pData <= p_mem(to_integer(pAddr));
+    --********************
+    --* pData Assignment *
+    --********************
+    pData <= p_mem(to_integer(pAddr));
 
 end Behavioral;

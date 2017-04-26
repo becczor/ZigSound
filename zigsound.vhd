@@ -2,137 +2,299 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
---CPU interface
+--**********************
+--* Computer Interface *
+--**********************
 entity zigsound is
-    port(clk: in std_logic;
-  	 rst: in std_logic;
-         JA1: in std_logic      -- the pmod is plugged in to the upper row of
-         );                     -- connector JA.  Uses only pin1 for data.
-end zigsound ;
+    port(
+        clk                     : in std_logic;
+        rst                     : in std_logic;
+        -- VGA_MOTOR out
+        vgaRed		        	: out std_logic_vector(2 downto 0);
+        vgaGreen	        	: buffer std_logic_vector(2 downto 0);
+        vgaBlue		        	: out std_logic_vector(2 downto 1);
+        Hsync		        	: out std_logic;
+        Vsync		        	: out std_logic;
+        -- KBD_ENC out
+        PS2KeyboardCLK          : in std_logic;  -- USB keyboard PS2 clock
+        PS2KeyboardData         : in std_logic;  -- USB keyboard PS2 data
+
+        -- Sound
+        JB1                     : in std_logic   -- the pmod is plugged in to the upper row of second slot
+        
+        --Test
+        debug_PS2CLK            : out std_logic;
+        debug_PS2Data           : out std_logic;
+        test_diod   		    : out std_logic;
+        switch                  : in std_logic
+        );
+        
+end zigsound;
 
 architecture Behavioral of zigsound is
+    
+    --**************
+    --* Components *
+    --**************
+    
+    -- CPU component
+	component CPU
+    	port(
+            clk             : in std_logic;
+		    rst             : in std_logic;
+		    --uAddr           : out unsigned(7 downto 0);
+		    --uData           : in unsigned(24 downto 0);
+		    --pAddr           : out signed(7 downto 0);
+		    --pData           : in signed(17 downto 0);
+		    PS2cmd          : in unsigned(17 downto 0);
+            move_req_out    : out std_logic;
+		    move_resp       : in std_logic;
+		    curr_pos_out    : out signed(17 downto 0);
+		    next_pos_out    : out signed(17 downto 0);
+		    sel_track_out   : out unsigned(1 downto 0);
+		    sel_sound_out   : out std_logic;
+		    --test_diod   	: out std_logic;
+		    switch          : in std_logic;
+            sound_channel   : out std_logic
+		    );
+  	end component;
 
+    -- uMem : Micro Memory Component
+    --component uMem
+    --    port(uAddr          : in unsigned(7 downto 0);
+    --         uData          : out unsigned(24 downto 0));
+    --end component;
 
-    -- micro Memory component
-    component uMem
-        port(
-            uAddr : in unsigned(5 downto 0);
-            uData : out unsigned(15 downto 0));
-    end component;
+    -- pMem : Program Memory Component
+	--component pMem
+	--	port(pAddr          : in signed(7 downto 0);
+	--		 pData          : out signed(17 downto 0));
+	--end component;
+	
+    -- GPU : Graphics control component 
+	component GPU
+		port(
+        clk                 : in std_logic;  -- system clock (100 MHz)
+        rst	        		: in std_logic;  -- reset signal
+        -- TO/FROM CPU
+        move_req            : in std_logic;  -- move request
+        curr_pos            : in signed(17 downto 0);  -- current position
+        next_pos            : in signed(17 downto 0);  -- next position
+        move_resp			: out std_logic;  -- response to move request
+        -- TO/FROM PIC_MEM
+        data_nextpos        : in unsigned(7 downto 0);  -- tile data at nextpos
+        addr_nextpos        : out unsigned(10 downto 0);  -- tile addr of nextpos
+        data_change			: out unsigned(7 downto 0);  -- tile data for change
+        addr_change			: out unsigned(10 downto 0);  -- tile address for change
+        we_picmem			: out std_logic  -- write enable for PIC_MEM
+		);
+	end component;
 
-    -- program Memory component
-    component pMem
-        port(
-            pAddr : in unsigned(15 downto 0);
-            pData : out unsigned(15 downto 0));
-    end component;
+	-- PIC_MEM : Picture memory component
+	component PIC_MEM
+		port(
+        clk		        	: in std_logic;
+        rst		            : in std_logic;
+        -- CPU
+        sel_track       	: in unsigned(1 downto 0);
+        -- GPU
+        we		        	: in std_logic;
+        data_nextpos    	: out unsigned(7 downto 0);
+        addr_nextpos    	: in unsigned(10 downto 0);
+        data_change	    	: in unsigned(7 downto 0);
+        addr_change	    	: in unsigned(10 downto 0);
+        -- VGA MOTOR
+        data_vga        	: out unsigned(7 downto 0);
+        addr_vga	    	: in unsigned(10 downto 0)
+		);
+	end component;
 
+	-- VGA_MOTOR : VGA motor component
+	component VGA_MOTOR
+		port(
+		clk					: in std_logic;
+		rst	        		: in std_logic;
+		data	    		: in unsigned(7 downto 0);
+		addr	    		: out unsigned(10 downto 0);
+		vgaRed	       		: out std_logic_vector(2 downto 0);
+		vgaGreen	    	: out std_logic_vector(2 downto 0);
+		vgaBlue		    	: out std_logic_vector(2 downto 1);
+		Hsync		    	: out std_logic;
+		Vsync		    	: out std_logic
+		);
+	end component;
+	
+	-- KBD_ENC : Keyboard encoder
+	component KBD_ENC
+		port(
+		clk					: in std_logic;
+		rst	        		: in std_logic;
+		PS2KeyboardCLK      : in std_logic;  -- USB keyboard PS2 clock
+        PS2KeyboardData     : in std_logic;  -- USB keyboard PS2 data
+        PS2cmd				: out unsigned(17 downto 0);
+        --TEST
+	    test_diod		    : buffer std_logic  
+		);
+	end component;
+	
     -- Sound component
     component SOUND
         port (
-            clk                 : in std_logic;                      -- system clock (100 MHz)
-            rst                 : in std_logic;                      -- reset signal
-            goal_pos            : in std_logic_vector(17 downto 0);  -- goal position
-            curr_pos            : in std_logic_vector(17 downto 0);  -- current position
-            channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = curr, 1 = goal.
-            sound_data          : out std_logic);
-    end component;       
-    
-    -- micro memory signals
-    signal uM : unsigned(15 downto 0); -- micro Memory output
-    signal uPC : unsigned(5 downto 0); -- micro Program Counter
-    signal uPCsig : std_logic; -- (0:uPC++, 1:uPC=uAddr)
-    signal uAddr : unsigned(5 downto 0); -- micro Address
-    signal TB : unsigned(2 downto 0); -- To Bus field
-    signal FB : unsigned(2 downto 0); -- From Bus field
-  	
-    -- program memory signals
-    signal PM : unsigned(15 downto 0); -- Program Memory output
-    signal PC : unsigned(15 downto 0); -- Program Counter
-    signal Pcsig : std_logic; -- 0:PC=PC, 1:PC++
-    signal ASR : unsigned(15 downto 0); -- Address Register
-    signal IR : unsigned(15 downto 0); -- Instruction Register
-    signal DATA_BUS : unsigned(15 downto 0); -- Data Bus
-  	
+        clk                 : in std_logic;                      -- system clock (100 MHz)
+        rst                 : in std_logic;                      -- reset signal
+        goal_pos            : in std_logic_vector(17 downto 0);  -- goal position
+        curr_pos            : in std_logic_vector(17 downto 0);  -- current position
+        channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = curr, 1 = goal.
+        sound_data          : out std_logic);
+    end component;
 
+    --**********************
+    --* Connecting signals *
+    --**********************  
+    
+    -- CPU signals
+    --signal pAddr_con        : signed(7 downto 0);
+    --signal uAddr_con        : unsigned(7 downto 0);
+    signal move_req_con     : std_logic;
+    signal curr_pos_con     : signed(17 downto 0);
+	signal next_pos_con     : signed(17 downto 0);
+	signal sel_track_con    : unsigned(1 downto 0);
+	signal sel_sound_con    : std_logic;
+    
+    -- uMem signals
+    --signal uData_con        : unsigned(24 downto 0);
+    
+    -- pMem signals
+    --signal pData_con        : signed(17 downto 0);
+    
+    -- GPU signals
+    signal move_resp_con        : std_logic;  -- Move request response
+    signal addr_nextpos_con     : unsigned(10 downto 0);  -- tile addr of nextpos
+    signal data_change_con      : unsigned(7 downto 0);  -- tile data for change
+    signal addr_change_con      : unsigned(10 downto 0);  -- tile address for change
+    signal we_picmem_con        : std_logic;  -- write enable for PIC_MEM
+	
+	-- PIC_MEM signals
+    signal data_nextpos_con     : unsigned(7 downto 0); -- data PIC_MEM -> GPU
+    signal data_vga_con         : unsigned(7 downto 0); -- data PIC_MEM -> VGA
+	
+	-- VGA MOTOR signals 
+    signal addr_vga_con         : unsigned(10 downto 0);
+    --TEST
+    --signal vgaGreen_dummy   	: std_logic_vector(2 downto 0);
+    
+    -- KBD_ENC signals
+    signal PS2cmd_con           : unsigned(17 downto 0);
+
+    -- SOUND signals
+    --signal goal_pos_con         : std_logic_vector(17 downto 0);
+    signal curr_pos_con         : std_logic_vector(17 downto 0);
+    signal channel_con          : std_logic;
+	
 begin
 
-    -- mPC : micro Program Counter
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                uPC <= (others => '0');
-            elsif (uPCsig = '1') then
-                uPC <= uAddr;
-            else
-                uPC <= uPC + 1;
-            end if;
-        end if;
-    end process;
-  	
-    -- PC : Program Counter
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                PC <= (others => '0');
-            elsif (FB = "011") then
-                PC <= DATA_BUS;
-            elsif (PCsig = '1') then
-                PC <= PC + 1;
-            end if;
-        end if;
-    end process;
-  	
-    -- IR : Instruction Register
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                IR <= (others => '0');
-            elsif (FB = "001") then
-                IR <= DATA_BUS;
-            end if;
-        end if;
-    end process;
-  	
-    -- ASR : Address Register
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                ASR <= (others => '0');
-            elsif (FB = "100") then
-                ASR <= DATA_BUS;
-            end if;
-        end if;
-    end process;
-  	
-    -- micro memory component connection
-    U0 : uMem port map(uAddr=>uPC, uData=>uM);
+    debug_PS2CLK <= PS2KeyboardCLK;
+    debug_PS2Data <= PS2KeyboardData;
 
-    -- program memory component connection
-    U1 : pMem port map(pAddr=>ASR, pData=>PM);
+    JB1 <= sound_data;
 
-    -- sound component connection
-    -- Connection here between CPU and sound
-    --U5 : SOUND port map();    
-  	
-    -- micro memory signal assignments
-    uAddr <= uM(5 downto 0);
-    uPCsig <= uM(6);
-    PCsig <= uM(7);
-    FB <= uM(10 downto 8);
-    TB <= uM(13 downto 11);
-  	
-    -- data bus assignment
-    DATA_BUS <= IR when (TB = "001") else
-        PM when (TB = "010") else
-        PC when (TB = "011") else
-        ASR when (TB = "100") else
-        (others => '0');
+    --****************
+    --* Port Mapping *
+    --****************
+    
+    -- CPU Component Connection
+    U0 : CPU port map(
+                clk => clk, 
+                rst => rst, 
+                --uAddr => uAddr_con, 
+                --uData => uData_con, 
+                --pAddr => pAddr_con, 
+                --pData => pData_con,
+                PS2cmd => PS2cmd_con,
+                move_req_out => move_req_con,
+                move_resp => move_resp_con,
+                curr_pos_out => curr_pos_con,
+                next_pos_out => next_pos_con,
+                sel_track_out => sel_track_con,
+                sel_sound_out => sel_sound_con,
+                --test_diod => test_diod,
+                switch => switch,
+                sound_channel => channel_con
+                );
 
-    -- JA1 <= sound_data;
+    -- uMem Component Connection
+    --U1 : uMem port map(
+    --            uAddr => uAddr_con, 
+    --            uData => uData_con
+    --            );
+
+    -- pMem Component Connection
+    --U2 : pMem port map(
+    --            pAddr => pAddr_con, 
+    --            pData => pData_con
+    --            );
+                
+    -- GPU Component Connection
+	U3 : GPU port map(
+	            clk => clk, 
+	            rst => rst, 
+	            move_req => move_req_con,
+	            move_resp => move_resp_con,
+	            curr_pos => curr_pos_con,
+	            next_pos => next_pos_con,
+                data_nextpos => data_nextpos_con,
+                addr_nextpos => addr_nextpos_con,
+                data_change => data_change_con,
+                addr_change => addr_change_con,
+                we_picmem => we_picmem_con
+	            );
+	
+	-- PIC_MEM Component Connection
+	U4 : PIC_MEM port map(
+	            clk => clk,
+	            rst => rst,
+	            we => we_picmem_con,
+	            data_nextpos => data_nextpos_con,
+	            addr_nextpos => addr_nextpos_con,
+	            data_change => data_change_con,
+	            addr_change => addr_change_con,
+	            data_vga => data_vga_con,
+	            addr_vga => addr_vga_con,
+	            sel_track => sel_track_con
+	            );
+	
+	-- VGA_MOTOR Component Connection
+	U5 : VGA_MOTOR port map(
+	            clk => clk,
+	            rst => rst,
+	            data => data_vga_con,
+	            addr => addr_vga_con,
+	            vgaRed => vgaRed,
+	            vgaGreen => vgaGreen,
+	            --vgaGreen => vgaGreen_dummy,
+	            vgaBlue => vgaBlue,
+	            Hsync => Hsync,
+	            Vsync => Vsync
+	            );
+	            
+	--vgaGreen <= "111" when PS2cmd_con(2) = '1' or vgaGreen = "111" else "000";
+	            
+	-- KBD_ENC Component Connection            
+    U6 : KBD_ENC port map(
+	            clk => clk,
+	            rst => rst,
+	            PS2KeyboardCLK => PS2KeyboardCLK,
+	            PS2KeyboardData => PS2KeyboardData,
+	            PS2cmd => PS2cmd_con,
+	            test_diod => test_diod
+	            );
+
+    U7 : SOUND port map(
+                clk => clk,
+                rst => rst,
+                --goal_pos => goal_pos_con,
+                curr_pos => curr_pos_con,
+                channel => channel_con
+                );
 
   end Behavioral;
