@@ -51,11 +51,11 @@ architecture Behavioral of zigsound is
 		    move_resp       : in std_logic;
 		    curr_pos_out    : out signed(17 downto 0);
 		    next_pos_out    : out signed(17 downto 0);
+            goal_pos_out    : out signed(17 downto 0);
 		    sel_track_out   : out unsigned(1 downto 0);
 		    sel_sound_out   : out std_logic;
 		    --test_diod   	: out std_logic;
-		    switch          : in std_logic;
-            sound_channel   : out std_logic
+		    switch          : in std_logic
 		    );
   	end component;
 
@@ -158,6 +158,7 @@ architecture Behavioral of zigsound is
     signal move_req_con     : std_logic;
     signal curr_pos_con     : signed(17 downto 0);
 	signal next_pos_con     : signed(17 downto 0);
+    signal goal_pos_con     : signed(17 downto 0);
 	signal sel_track_con    : unsigned(1 downto 0);
 	signal sel_sound_con    : std_logic;
     
@@ -187,9 +188,8 @@ architecture Behavioral of zigsound is
     signal PS2cmd_con           : unsigned(17 downto 0);
 
     -- SOUND signals
-    --signal goal_pos_con         : std_logic_vector(17 downto 0);
-    signal curr_pos_con         : std_logic_vector(17 downto 0);
-    signal channel_con          : std_logic;
+    
+
 	
 begin
 
@@ -218,8 +218,7 @@ begin
                 sel_track_out => sel_track_con,
                 sel_sound_out => sel_sound_con,
                 --test_diod => test_diod,
-                switch => switch,
-                sound_channel => channel_con
+                switch => switch
                 );
 
     -- uMem Component Connection
@@ -292,9 +291,9 @@ begin
     U7 : SOUND port map(
                 clk => clk,
                 rst => rst,
-                --goal_pos => goal_pos_con,
+                goal_pos => goal_pos_con,
                 curr_pos => curr_pos_con,
-                channel => channel_con
+                channel => sel_sound_con
                 );
 
   end Behavioral;
