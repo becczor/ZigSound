@@ -270,30 +270,30 @@ begin
     ----*************************************
     ----* NEXT_POS : Next Position Register *
     ----*************************************
-    --process(clk)
-    --begin
-    --    if rising_edge(clk) then
-    --        if (rst = '1') then
-    --            NEXT_POS <= "000000001000000001";  -- Character starts at (1,1)
-    --        elsif (FB = "110" and GRX = "101") then
-    --            NEXT_POS <= DATA_BUS;
-    --        end if;
-    --    end if;
-    --end process;
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if (rst = '1') then
+                NEXT_POS <= "000000001000000001";  -- Character starts at (1,1)
+            elsif (FB = "110" and GRX = "101") then
+                NEXT_POS <= DATA_BUS;
+            end if;
+        end if;
+    end process;
     
     ----****************************************
     ----* CURR_POS : Current Position Register *
     ----****************************************
-    --process(clk)
-    --begin
-    --    if rising_edge(clk) then
-    --        if (rst = '1') then
-    --            CURR_POS <= (others => '0');
-    --        elsif (FB = "110" and GRX = "110") then
-    --            CURR_POS <= DATA_BUS;
-    --        end if;
-    --    end if;
-    --end process;
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if (rst = '1') then
+                CURR_POS <= (others => '0');
+            elsif (FB = "110" and GRX = "110") then
+                CURR_POS <= DATA_BUS;
+            end if;
+        end if;
+    end process;
     
 
     --*******************************
@@ -569,51 +569,51 @@ begin
     --*************************
     --* PS2cmd Interpretation *
     --*************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                CURR_POS <= "000000001000000001";
-                NEXT_POS <= "000000001000000001";
-                MOVE_REQ <= '0';
-                SEL_SOUND <= '0';
-                SEL_TRACK <= "01";
-            else
-                if (move_resp = '1') then
-                    CURR_POS <= NEXT_POS;
-                end if;
-                case key_code is
-                    when "001" =>  -- UP (W)
-                        --test_signal <= '1';
-                        NEXT_XPOS <= CURR_XPOS;
-                        NEXT_YPOS <= CURR_YPOS - 1;
-                        MOVE_REQ <= '1';
-                    when "010" =>  -- LEFT (A)
-                        --test_signal <= '1';
-                        NEXT_YPOS <= CURR_YPOS;
-                        NEXT_XPOS <= CURR_XPOS - 1;
-                        MOVE_REQ <= '1';
-                    when "011" =>  -- DOWN (S)
-                        --test_signal <= '1';
-                        NEXT_XPOS <= CURR_XPOS;
-                        NEXT_YPOS <= CURR_YPOS + 1;
-                        MOVE_REQ <= '1';
-                    when "100" =>  -- RIGHT (D)
-                        --test_signal <= '1';
-                        NEXT_YPOS <= CURR_YPOS;
-                        NEXT_XPOS <= CURR_XPOS + 1;
-                        MOVE_REQ <= '1';
-                    when "101" => -- SOUND TOGGLE (SPACE)
-                        --test_signal <= '1';
-                        SEL_SOUND <= not SEL_SOUND;
-                        MOVE_REQ <= '0';
-                    when others =>
-                        --test_signal <= '0';
-                        MOVE_REQ <= '0';
-                end case;
-            end if;
-        end if;
-    end process;
+    --process(clk)
+    --begin
+    --    if rising_edge(clk) then
+    --        if (rst = '1') then
+    --            CURR_POS <= "000000001000000001";
+    --            NEXT_POS <= "000000001000000001";
+    --            MOVE_REQ <= '0';
+    --            SEL_SOUND <= '0';
+    --            SEL_TRACK <= "01";
+    --        else
+    --            if (move_resp = '1') then
+    --                CURR_POS <= NEXT_POS;
+    --            end if;
+    --            case key_code is
+    --                when "001" =>  -- UP (W)
+    --                    --test_signal <= '1';
+    --                    NEXT_XPOS <= CURR_XPOS;
+    --                    NEXT_YPOS <= CURR_YPOS - 1;
+    --                    MOVE_REQ <= '1';
+    --                when "010" =>  -- LEFT (A)
+    --                    --test_signal <= '1';
+    --                    NEXT_YPOS <= CURR_YPOS;
+    --                    NEXT_XPOS <= CURR_XPOS - 1;
+    --                    MOVE_REQ <= '1';
+    --                when "011" =>  -- DOWN (S)
+    --                    --test_signal <= '1';
+    --                    NEXT_XPOS <= CURR_XPOS;
+    --                    NEXT_YPOS <= CURR_YPOS + 1;
+    --                    MOVE_REQ <= '1';
+    --                when "100" =>  -- RIGHT (D)
+    --                    --test_signal <= '1';
+    --                    NEXT_YPOS <= CURR_YPOS;
+    --                    NEXT_XPOS <= CURR_XPOS + 1;
+    --                    MOVE_REQ <= '1';
+    --                when "101" => -- SOUND TOGGLE (SPACE)
+    --                    --test_signal <= '1';
+    --                    SEL_SOUND <= not SEL_SOUND;
+    --                    MOVE_REQ <= '0';
+    --                when others =>
+    --                    --test_signal <= '0';
+    --                    MOVE_REQ <= '0';
+    --            end case;
+    --        end if;
+    --    end if;
+    --end process;
  
     --*******************************
     --* Outgoing signals assignment *
