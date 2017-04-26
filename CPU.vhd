@@ -64,9 +64,9 @@ architecture Behavioral of CPU is
     --signal uPC          : unsigned(7 downto 0); -- Micro Program Counter (uAddr)
     -- To GPU
     signal MOVE_REQ     : std_logic := '0';  -- Move request (move_req_out)
-    signal CURR_POS     : signed(17 downto 0) := "000000001_000000001"; -- Current Position (curr_pos_out)
-    signal NEXT_POS     : signed(17 downto 0) := "000000001_000000001";  -- Next Postition (next_pos_out)
-    signal GOAL_POS     : signed(17 downto 0) := "000010100_000001111";  -- Goal position (goal_pos_out)
+    signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
+    signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
+    signal GOAL_POS     : signed(17 downto 0) := "000010100000001111";  -- Goal position (goal_pos_out)
     signal SEL_TRACK    : unsigned(1 downto 0) := "01";  -- Track select (sel_track_out) 
     -- To SOUND
     signal SEL_SOUND    : std_logic := '0'; -- Sound select (sel_sound_out)
