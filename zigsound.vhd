@@ -11,7 +11,7 @@ entity zigsound is
         rst                     : in std_logic;
         -- VGA_MOTOR out
         vgaRed		        	: out std_logic_vector(2 downto 0);
-        vgaGreen	        	: buffer std_logic_vector(2 downto 0);
+        vgaGreen	        	: out std_logic_vector(2 downto 0);
         vgaBlue		        	: out std_logic_vector(2 downto 1);
         Hsync		        	: out std_logic;
         Vsync		        	: out std_logic;
@@ -20,12 +20,12 @@ entity zigsound is
         PS2KeyboardData         : in std_logic;  -- USB keyboard PS2 data
 
         -- Sound
-        JB1                     : in std_logic;   -- the pmod is plugged in to the upper row of second slot
+        JB1                     : out std_logic;   -- the pmod is plugged in to the upper row of second slot
         
         --Test
         debug_PS2CLK            : out std_logic;
         debug_PS2Data           : out std_logic;
-        test_diod   		    : out std_logic;
+        --test_diod   		    : out std_logic;
         switch                  : in std_logic
         );
         
