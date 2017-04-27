@@ -43,14 +43,22 @@ architecture Behavioral of VGA_MOTOR is
     -- Tile memory
     signal tileMem : ram_t := 
         ( 
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"00" BG
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"00" BG
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    --HALVVÄGS
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
         x"FF",x"FF",x"00",x"00",x"00",x"FF",x"FF",x"FF",    -- x"01" A
         x"FF",x"00",x"00",x"FF",x"00",x"00",x"FF",x"FF",
@@ -259,14 +267,22 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"E0",x"E0",x"FF",x"FF",x"FF",x"E0",x"E0",x"FF",	-- x"18" X
-        x"FF",x"E0",x"E0",x"FF",x"E0",x"E0",x"FF",x"FF",
-        x"FF",x"FF",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",
-        x"FF",x"E0",x"E0",x"FF",x"E0",x"E0",x"FF",x"FF",
-        x"E0",x"E0",x"FF",x"FF",x"FF",x"E0",x"E0",x"FF",
-        x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"E0",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"E0",x"E0",x"FF",x"FF",x"FF",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",	-- x"18" X
+        x"FF",x"E0",x"E0",x"FF",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"E0",x"E0",x"FF",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"E0",x"E0",x"FF",x"FF",x"FF",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- HALVVÄGS
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
         x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    -- x"19" Y
         x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",
@@ -322,14 +338,22 @@ architecture Behavioral of VGA_MOTOR is
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FF",x"FF",x"27",x"27",x"27",x"27",x"FF",x"FF",    -- x"1F" Character
-        x"FF",x"27",x"27",x"27",x"27",x"27",x"27",x"FF",    
-        x"27",x"27",x"27",x"27",x"E0",x"27",x"FF",x"FF",
-        x"27",x"27",x"27",x"27",x"27",x"FF",x"FF",x"FF",
-        x"27",x"27",x"27",x"27",x"27",x"FF",x"FF",x"FF",
-        x"27",x"27",x"27",x"27",x"27",x"27",x"FF",x"FF",
-        x"FF",x"27",x"27",x"27",x"27",x"27",x"27",x"FF",
-        x"FF",x"FF",x"27",x"27",x"27",x"27",x"FF",x"FF"
+        x"FF",x"FF",x"27",x"27",x"27",x"27",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"1F" Character
+        x"FF",x"27",x"27",x"27",x"27",x"27",x"27",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"27",x"27",x"27",x"27",x"E0",x"27",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"27",x"27",x"27",x"27",x"27",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"27",x"27",x"27",x"27",x"27",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"27",x"27",x"27",x"27",x"27",x"27",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"27",x"27",x"27",x"27",x"27",x"27",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"27",x"27",x"27",x"27",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- HALVVÄGS
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
         );
 		  
 begin
@@ -450,7 +474,7 @@ begin
 
 
     -- Tile memory address composite
-    tileAddr <= unsigned(data(4 downto 0)) & Ypixel(3 downto 1) & Xpixel(3 downto 1);
+    tileAddr <= unsigned(data(4 downto 0)) & Ypixel(3 downto 0) & Xpixel(3 downto 0);
 
     -- Picture memory address composite
     --addr <= to_unsigned(20, 7) * Ypixel(8 downto 5) + Xpixel(9 downto 5);
