@@ -197,22 +197,24 @@ begin
 
 
     -- Beat flip flop
-    process(clk_beat) begin
-        if rising_edge(clk_beat) then
-            if rst='1' then
+    process(clk) begin
+        if rising_edge(clk) then
+            if rst = '1' then
                 q_beat <= '0';
-            else
+            elsif clk_beat = '1' then
                 q_beat <= q_beat_plus;
             end if;
         end if;
     end process;
+                
+
 
     -- Freq flip flop
-    process(clk_freq) begin
-        if rising_edge(clk_beat) then
+    process(clk) begin
+        if rising_edge(clk) then
             if rst='1' then
                 q_freq <= '0';
-            else
+            elsif clk_freq = '1' then
                 q_freq <= q_freq_plus;
             end if;
         end if;
