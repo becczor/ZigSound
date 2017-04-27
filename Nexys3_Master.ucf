@@ -42,8 +42,8 @@ Net "debug_PS2Data" LOC = V12 | IOSTANDARD = LVCMOS33; #Bank = 2, pin name = IO_
 
 # Pmod
 ##JB
-#Net "JB<0>" LOC = K2 | IOSTANDARD = LVCMOS33; #Bank = 3, pin name = IO_L38P_M3DQ2, Sch name = JB1
-Net "JB1" LOC = K1 | IOSTANDARD = LVCMOS33; #Bank = 3, pin name = IO_L38N_M3DQ3, Sch name = JB2
+Net "JB1" LOC = K2 | IOSTANDARD = LVCMOS33; #Bank = 3, pin name = IO_L38P_M3DQ2, Sch name = JB1
+#Net "JB<1>" LOC = K1 | IOSTANDARD = LVCMOS33; #Bank = 3, pin name = IO_L38N_M3DQ3, Sch name = JB2
 #Net "JB<2>" LOC = L4 | IOSTANDARD = LVCMOS33; #Bank = 3, pin name = IO_L39P_M3LDQS, Sch name = JB3
 #Net "JB<3>" LOC = L3 | IOSTANDARD = LVCMOS33; #Bank = 3, pin name = IO_L39N_M3LDQSN, Sch name = JB4
 #Net "JB<4>" LOC = J3 | IOSTANDARD = LVCMOS33; #Bank = 3, pin name = IO_L40P_M3DQ6, Sch name = JB7
