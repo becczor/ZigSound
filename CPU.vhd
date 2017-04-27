@@ -534,6 +534,8 @@ begin
     GR3                         when (TB = "110" and GRX = "011") else 
     GOAL_POS                    when (TB = "110" and GRX = "100") else 
     SEL_TRACK                   when (TB = "111" and GRX = "000") else
+    MOVE_REQ                    when (TB = "111" and GRX = "001") else
+    SEL_SOUND                   when (TB = "111" and GRX = "010") else
     --NEXT_POS                    when (TB = "110" and GRX = "101") else 
     --CURR_POS                    when (TB = "110" and GRX = "110") else 
     DATA_BUS;
