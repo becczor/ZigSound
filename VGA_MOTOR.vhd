@@ -396,7 +396,7 @@ begin
 
 
     -- Tile memory address composite
-    tileAddr <= unsigned(data(4 downto 0)) & Ypixel(3 downto 0) & Xpixel(3 downto 0);
+    tileAddr <= unsigned(data(4 downto 0)) & Ypixel(2 downto 0) & Xpixel(2 downto 0);
 
     -- Picture memory address composite
     --addr <= to_unsigned(20, 7) * Ypixel(8 downto 5) + Xpixel(9 downto 5);
