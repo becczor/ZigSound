@@ -45,12 +45,13 @@ architecture Behavioral of zigsound is
 	        pAddr           : out signed(7 downto 0);
 	        pData           : in signed(17 downto 0);
 	        PS2cmd          : in unsigned(17 downto 0);
-                move_req_out    : out std_logic;
+            move_req_out    : out std_logic;
 	        move_resp       : in std_logic;
 	        curr_pos_out    : out signed(17 downto 0);
 	        next_pos_out    : out signed(17 downto 0);
 	        sel_track_out   : out unsigned(1 downto 0);
 	        sel_sound_out   : out std_logic;
+	        rst_track_out   : out std_logic;
 	        --test_diod   	: out std_logic;
 	        switch          : in std_logic
 	        );
@@ -90,12 +91,13 @@ architecture Behavioral of zigsound is
 	-- PIC_MEM : Picture memory component
 	component PIC_MEM
 		port(
-        clk		        	: in std_logic;
-        rst		            : in std_logic;
+        clk    	            : in std_logic;
+        rst	                : in std_logic;
         -- CPU
         sel_track       	: in unsigned(1 downto 0);
+        rst_track           : in std_logic;
         -- GPU
-        we		        	: in std_logic;
+        we		            : in std_logic;
         data_nextpos    	: out unsigned(7 downto 0);
         addr_nextpos    	: in unsigned(10 downto 0);
         data_change	    	: in unsigned(7 downto 0);
@@ -109,8 +111,8 @@ architecture Behavioral of zigsound is
 	-- VGA_MOTOR : VGA motor component
 	component VGA_MOTOR
 		port(
-		clk					: in std_logic;
-		rst	        		: in std_logic;
+		clk			        : in std_logic;
+		rst	        	    : in std_logic; 
 		data	    		: in unsigned(7 downto 0);
 		addr	    		: out unsigned(10 downto 0);
 		vgaRed	       		: out std_logic_vector(2 downto 0);
@@ -147,6 +149,7 @@ architecture Behavioral of zigsound is
 	signal next_pos_con     : signed(17 downto 0);
 	signal sel_track_con    : unsigned(1 downto 0);
 	signal sel_sound_con    : std_logic;
+	signal rst_track_con    : std_logic;
     
     -- uMem signals
     signal uData_con        : unsigned(24 downto 0);
@@ -197,6 +200,7 @@ begin
                 next_pos_out => next_pos_con,
                 sel_track_out => sel_track_con,
                 sel_sound_out => sel_sound_con,
+                rst_track_out => rst_track_con,
                 --test_diod => test_diod,
                 switch => switch 
                 );

@@ -97,7 +97,7 @@ begin
     --*********************
     --* Signal assignment *
     --*********************
-	addr_nextpos <= unsigned(NEXT_XPOS) + (to_unsigned(40, 6) * unsigned(NEXT_YPOS));
+    addr_nextpos <= unsigned(NEXT_XPOS) + (to_unsigned(40, 6) * unsigned(NEXT_YPOS));
     -- Takes x- and y-pos from curr_pos if we're in CLEAR, else from next_pos.
     xpos <= unsigned(CURR_XPOS) when (WRstate = IDLE) else unsigned(NEXT_XPOS);
     ypos <= unsigned(CURR_YPOS) when (WRstate = IDLE) else unsigned(NEXT_YPOS);

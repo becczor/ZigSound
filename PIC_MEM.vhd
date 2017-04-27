@@ -18,6 +18,7 @@ entity PIC_MEM is
         rst		            : in std_logic;
         -- CPU
         sel_track       	: in unsigned(1 downto 0);
+        rst_track           : in std_logic;
         -- GPU
         we		        	: in std_logic;
         data_nextpos    	: out unsigned(7 downto 0);
@@ -33,6 +34,9 @@ end PIC_MEM;
 	
 -- Architecture
 architecture Behavioral of PIC_MEM is
+
+
+    signal addr_last		: unsigned(10 downto 0) := to_unsigned(41,11); -- Last character address
 
     -- Track memory type
     type ram_t is array (0 to 1199) of unsigned(7 downto 0);
@@ -176,8 +180,21 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        if (rst = '1') then
-            null;
+        if ((rst = '1') or (rst_track = '1')) then
+            case sel_track is
+                when "01" =>
+                    track_1(to_integer(addr_last)) <= x"00";
+                    track_1(to_integer(to_unsigned(41,11)) <= x"1F";
+                when "10" =>
+                    track_2(to_integer(addr_last)) <= x"00";
+                    track_2(to_integer(to_unsigned(41,11)) <= x"1F";
+                when "11" =>
+                    track_3(to_integer(addr_last)) <= x"00";
+                    track_3(to_integer(to_unsigned(41,11)) <= x"1F";
+                when others =>
+                    null;
+            end case; 
+            addr_last <= to_unsigned(41,11);
         elsif (we = '1') then
             case sel_track is
                 when "01" =>
@@ -189,6 +206,7 @@ begin
                 when others =>
                     null;
             end case;
+            addr_last <= addr_change;
         else
             null;
         end if;  
@@ -208,6 +226,9 @@ begin
         track_2(to_integer(addr_vga)) when "10",
         track_3(to_integer(addr_vga)) when "11",
         (others => '0') when others;
+        
+        
+
 
 end Behavioral;
 
