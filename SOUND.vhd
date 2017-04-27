@@ -177,9 +177,9 @@ begin
                 clk_div_beat <= (others => '0');
                 clk_div_freq <= (others => '0');
             elsif clk_div_beat = beat then
-                clk_div_beat <= 0;
+                clk_div_beat <= (others => '0');
             elsif clk_div_freq = beat then
-                clk_div_freq <= 0;
+                clk_div_freq <= (others => '0');
             else
                 clk_div_beat <= clk_div_beat + 1;
                 clk_div_freq <= clk_div_freq + 1;
@@ -188,15 +188,15 @@ begin
     end process;
 
     -- Toggle sound clocks to get 50% duty cycle
-    clk_beat <= not clk_beat when (clk_beat_div < beat) else clk_beat;
-    clk_freq <= not clk_freq when (clk_freq_div < freq) else clk_freq;
+    clk_beat <= not clk_beat when (clk_div_beat < beat) else clk_beat;
+    clk_freq <= not clk_freq when (clk_div_freq < freq) else clk_freq;
 
 
     -- Beat flip flop
     process(clk_beat) begin
         if rising_edge(clk_beat) then
             if rst='1' then
-                q_beat <= 0;
+                q_beat <= '0';
             else
                 q_beat <= q_beat_plus;
             end if;
@@ -207,7 +207,7 @@ begin
     process(clk_freq) begin
         if rising_edge(clk_beat) then
             if rst='1' then
-                q_freq <= 0;
+                q_freq <= '0';
             else
                 q_freq <= q_freq_plus;
             end if;
