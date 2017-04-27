@@ -37,6 +37,7 @@ architecture Behavioral of PIC_MEM is
 
 
     signal addr_last		: unsigned(10 downto 0) := to_unsigned(41,11); -- Last character address
+    signal curr_track		: unsigned(1 downto 0) := "01"; -- Last character address
 
     -- Track memory type
     type ram_t is array (0 to 1199) of unsigned(7 downto 0);
@@ -181,20 +182,21 @@ begin
     begin
     if rising_edge(clk) then
         if ((rst = '1') or (rst_track = '1')) then
-            case sel_track is
+            case curr_track is
                 when "01" =>
                     track_1(to_integer(addr_last)) <= x"00";
-                    track_1(to_integer(to_unsigned(41,11)) <= x"1F";
+                    track_1(41) <= x"1F";
                 when "10" =>
                     track_2(to_integer(addr_last)) <= x"00";
-                    track_2(to_integer(to_unsigned(41,11)) <= x"1F";
+                    track_2(41) <= x"1F";
                 when "11" =>
                     track_3(to_integer(addr_last)) <= x"00";
-                    track_3(to_integer(to_unsigned(41,11)) <= x"1F";
+                    track_3(41) <= x"1F";
                 when others =>
                     null;
             end case; 
             addr_last <= to_unsigned(41,11);
+            curr_track <= sel_track;
         elsif (we = '1') then
             case sel_track is
                 when "01" =>

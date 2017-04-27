@@ -20,9 +20,9 @@ entity CPU is
         next_pos_out    : out signed(17 downto 0);
         sel_track_out   : out unsigned(1 downto 0);
         sel_sound_out   : out std_logic;
-        rst_track       : out std_logic;
+        rst_track_out   : out std_logic;
         --TEST--
-        --test_diod       : out std_logic;
+        --test_diod     : out std_logic;
         switch          : in std_logic
         );
 end CPU;
@@ -66,9 +66,10 @@ architecture Behavioral of CPU is
     signal MOVE_REQ     : std_logic := '0';  -- Move request (move_req_out)
     signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
     signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
-    signal SEL_TRACK    : unsigned(1 downto 0) := "01";  -- Track select (sel_track_out) 
+    signal SEL_TRACK    : signed(1 downto 0) := "01";  -- Track select (sel_track_out) 
     -- To SOUND
     signal SEL_SOUND    : std_logic := '0'; -- Sound select (sel_sound_out)
+    --signal rst_track_signal    : std_logic := '0'; -- Sound select (sel_sound_out)
 	
     --**************************
 	--* Program Memory Signals *
@@ -151,7 +152,8 @@ architecture Behavioral of CPU is
     signal uAddr_instr : uAddr_instr_t := uAddr_instr_c;
 
 begin 
-
+    
+    
 	--*****************************
     --* IR : Instruction Register *
     --*****************************
@@ -268,47 +270,47 @@ begin
         end if;
     end process;
     
-    ----*************************************
-    ----* NEXT_POS : Next Position Register *
-    ----*************************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                NEXT_POS <= "000000001000000001";  -- Character starts at (1,1)
-            elsif (FB = "110" and GRX = "101") then
-                NEXT_POS <= DATA_BUS;
-            end if;
-        end if;
-    end process;
+    ------*************************************
+    ------* NEXT_POS : Next Position Register *
+    ------*************************************
+    --process(clk)
+    --begin
+    --    if rising_edge(clk) then
+    --        if (rst = '1') then
+    --            NEXT_POS <= "000000001000000001";  -- Character starts at (1,1)
+    --        elsif (FB = "110" and GRX = "101") then
+    --            NEXT_POS <= DATA_BUS;
+    --        end if;
+    --    end if;
+    --end process;
+    
+    ------****************************************
+    ------* CURR_POS : Current Position Register *
+    ------****************************************
+    --process(clk)
+    --begin
+    --    if rising_edge(clk) then
+    --        if (rst = '1') then
+    --            CURR_POS <= (others => '0');
+    --        elsif (FB = "110" and GRX = "110") then
+    --            CURR_POS <= DATA_BUS;
+    --        end if;
+    --    end if;
+    --end process;
     
     ----****************************************
-    ----* CURR_POS : Current Position Register *
+    ----* MOVE_REQ : Move-request Register * CLK CYKLAR
     ----****************************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                CURR_POS <= (others => '0');
-            elsif (FB = "110" and GRX = "110") then
-                CURR_POS <= DATA_BUS;
-            end if;
-        end if;
-    end process;
-    
-    ----****************************************
-    ----* MOVE_REQ : Move-request Register *
-    ----****************************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                MOVE_REQ <= "0";
-            elsif (FB = "100" and GRX = "000") then
-                MOVE_REQ <= DATA_BUS(0);
-            end if;
-        end if;
-    end process;
+    --process(clk)
+    --begin
+    --    if rising_edge(clk) then
+    --        if (rst = '1') then
+    --            MOVE_REQ <= '0';
+    --        elsif (FB = "100" and GRX = "000") then
+    --           MOVE_REQ <= DATA_BUS(0);
+    --        end if;
+    --    end if;
+    --end process;
     
     ----****************************************
     ----* SEL_TRACK : Track-selection Register *
@@ -317,12 +319,16 @@ begin
     begin
         if rising_edge(clk) then
             if (rst = '1') then
-                SEL_TRACK <= (others => '0');
+                SEL_TRACK <= "01";
             elsif (FB = "001" and GRX = "001") then
+                rst_track_out <= '1';
                 SEL_TRACK <= DATA_BUS(1 downto 0);
+            else
+                rst_track_out <= '0';    
             end if;
         end if;
     end process;
+    
     
     ----****************************************
     ----* SEL_SOUND : Sound-selection Register *
@@ -331,7 +337,7 @@ begin
     begin
         if rising_edge(clk) then
             if (rst = '1') then
-                SEL_SOUND <= (others => '0');
+                SEL_SOUND <= '0';
             elsif (FB = "001" and GRX = "010") then
                 SEL_SOUND <= DATA_BUS(0);
             end if;
@@ -567,17 +573,17 @@ begin
     DATA_BUS <= 
     IR                          when (TB = "001") else
     PM                          when (TB = "010") else
-    (to_signed(0,10) & PC)      when (TB = "011") else
+    to_signed(0,10) & PC        when (TB = "011") else
     AR                          when (TB = "100") else
-    (to_signed(0,10) & ASR)     when (TB = "101") else
+    to_signed(0,10) & ASR       when (TB = "101") else
     GR0                         when (TB = "110" and GRX = "000") else 
     GR1                         when (TB = "110" and GRX = "001") else 
     GR2                         when (TB = "110" and GRX = "010") else 
     GR3                         when (TB = "110" and GRX = "011") else 
     GOAL_POS                    when (TB = "110" and GRX = "100") else 
-    SEL_TRACK                   when (TB = "111" and GRX = "000") else
-    MOVE_REQ                    when (TB = "111" and GRX = "001") else
-    SEL_SOUND                   when (TB = "111" and GRX = "010") else
+    to_signed(0,16) & SEL_TRACK when (TB = "111" and GRX = "000") else
+    to_signed(0,17) & MOVE_REQ  when (TB = "111" and GRX = "001") else
+    to_signed(0,17) & SEL_SOUND when (TB = "111" and GRX = "010") else
     --NEXT_POS                    when (TB = "110" and GRX = "101") else 
     --CURR_POS                    when (TB = "110" and GRX = "110") else 
     DATA_BUS;
@@ -614,51 +620,51 @@ begin
     --*************************
     --* PS2cmd Interpretation *
     --*************************
-    --process(clk)
-    --begin
-    --    if rising_edge(clk) then
-    --        if (rst = '1') then
-    --            CURR_POS <= "000000001000000001";
-    --            NEXT_POS <= "000000001000000001";
-    --            MOVE_REQ <= '0';
-    --            SEL_SOUND <= '0';
-    --            SEL_TRACK <= "01";
-    --        else
-    --            if (move_resp = '1') then
-    --                CURR_POS <= NEXT_POS;
-    --            end if;
-    --            case key_code is
-    --                when "001" =>  -- UP (W)
-    --                    --test_signal <= '1';
-    --                    NEXT_XPOS <= CURR_XPOS;
-    --                    NEXT_YPOS <= CURR_YPOS - 1;
-    --                    MOVE_REQ <= '1';
-    --                when "010" =>  -- LEFT (A)
-    --                    --test_signal <= '1';
-    --                    NEXT_YPOS <= CURR_YPOS;
-    --                    NEXT_XPOS <= CURR_XPOS - 1;
-    --                    MOVE_REQ <= '1';
-    --                when "011" =>  -- DOWN (S)
-    --                    --test_signal <= '1';
-    --                    NEXT_XPOS <= CURR_XPOS;
-    --                    NEXT_YPOS <= CURR_YPOS + 1;
-    --                    MOVE_REQ <= '1';
-    --                when "100" =>  -- RIGHT (D)
-    --                    --test_signal <= '1';
-    --                    NEXT_YPOS <= CURR_YPOS;
-    --                    NEXT_XPOS <= CURR_XPOS + 1;
-    --                    MOVE_REQ <= '1';
-    --                when "101" => -- SOUND TOGGLE (SPACE)
-    --                    --test_signal <= '1';
-    --                    SEL_SOUND <= not SEL_SOUND;
-    --                    MOVE_REQ <= '0';
-    --                when others =>
-    --                    --test_signal <= '0';
-    --                    MOVE_REQ <= '0';
-    --            end case;
-    --        end if;
-    --    end if;
-    --end process;
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if (rst = '1') then
+                CURR_POS <= "000000001000000001";
+                NEXT_POS <= "000000001000000001";
+                MOVE_REQ <= '0';
+                --SEL_SOUND <= '0';
+                --SEL_TRACK <= "01";
+            else
+                if (move_resp = '1') then
+                    CURR_POS <= NEXT_POS;
+                end if;
+                case key_code is
+                    when "001" =>  -- UP (W)
+                        --test_signal <= '1';
+                        NEXT_XPOS <= CURR_XPOS;
+                        NEXT_YPOS <= CURR_YPOS - 1;
+                        MOVE_REQ <= '1';
+                    when "010" =>  -- LEFT (A)
+                        --test_signal <= '1';
+                        NEXT_YPOS <= CURR_YPOS;
+                        NEXT_XPOS <= CURR_XPOS - 1;
+                        MOVE_REQ <= '1';
+                    when "011" =>  -- DOWN (S)
+                        --test_signal <= '1';
+                        NEXT_XPOS <= CURR_XPOS;
+                        NEXT_YPOS <= CURR_YPOS + 1;
+                        MOVE_REQ <= '1';
+                    when "100" =>  -- RIGHT (D)
+                        --test_signal <= '1';
+                        NEXT_YPOS <= CURR_YPOS;
+                        NEXT_XPOS <= CURR_XPOS + 1;
+                        MOVE_REQ <= '1';
+                    when "101" => -- SOUND TOGGLE (SPACE)
+                        --test_signal <= '1';
+                        --SEL_SOUND <= not SEL_SOUND;
+                        MOVE_REQ <= '0';
+                    when others =>
+                        --test_signal <= '0';
+                        MOVE_REQ <= '0';
+                end case;
+            end if;
+        end if;
+    end process;
  
     --*******************************
     --* Outgoing signals assignment *
@@ -667,7 +673,7 @@ begin
     uAddr <= uPC; 
     curr_pos_out <= CURR_POS;
     next_pos_out <= NEXT_POS;
-    sel_track_out <= SEL_TRACK;
+    sel_track_out <= unsigned(SEL_TRACK);
     sel_sound_out <= SEL_SOUND;
     move_req_out <= MOVE_REQ;
     
