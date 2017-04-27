@@ -20,10 +20,10 @@ entity CPU is
 		next_pos_out    : out signed(17 downto 0);
         goal_pos_out    : out signed(17 downto 0);
 		sel_track_out   : out unsigned(1 downto 0);
-		sel_sound_out   : out std_logic;
+		sel_sound_out   : out std_logic
 		--TEST
         --test_diod       : out std_logic;
-        switch          : in std_logic
+        --switch          : in std_logic
         );
 end CPU;
 

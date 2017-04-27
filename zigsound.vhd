@@ -26,8 +26,8 @@ entity zigsound is
         debug_PS2CLK            : out std_logic;
         debug_PS2Data           : out std_logic;
         test_diod   		    : out std_logic;
-        test2_diod   		    : out std_logic;
-        switch                  : in std_logic
+        test2_diod   		    : out std_logic
+        --switch                  : in std_logic
         );
         
 end zigsound;
@@ -54,9 +54,9 @@ architecture Behavioral of zigsound is
 		    next_pos_out    : out signed(17 downto 0);
             goal_pos_out    : out signed(17 downto 0);
 		    sel_track_out   : out unsigned(1 downto 0);
-		    sel_sound_out   : out std_logic;
+		    sel_sound_out   : out std_logic
 		    --test_diod   	: out std_logic;
-		    switch          : in std_logic
+		    --switch          : in std_logic
 		    );
   	end component;
 
@@ -221,9 +221,9 @@ begin
                 curr_pos_out => curr_pos_con,
                 next_pos_out => next_pos_con,
                 sel_track_out => sel_track_con,
-                sel_sound_out => sel_sound_con,
+                sel_sound_out => sel_sound_con
                 --test_diod => test_diod,
-                switch => switch
+                --switch => switch
                 );
 
     -- uMem Component Connection
