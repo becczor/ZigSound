@@ -34,7 +34,7 @@ architecture Behavioral of VGA_MOTOR is
     signal ClkDiv	        : unsigned(1 downto 0);		-- Clock divisor, to generate 25 MHz signal
     signal Clk25			: std_logic;			    -- One pulse width 25 MHz signal
     signal tilePixel        : std_logic_vector(7 downto 0);	-- Tile pixel data
-    signal tileAddr         : unsigned(10 downto 0);	-- Tile address
+    signal tileAddr         : unsigned(12 downto 0);	-- Tile address
     signal blank            : std_logic;                -- blanking signal
 	
     -- Tile memory type
@@ -396,7 +396,7 @@ begin
 
 
     -- Tile memory address composite
-    tileAddr <= unsigned(data(4 downto 0)) & Ypixel(2 downto 0) & Xpixel(2 downto 0);
+    tileAddr <= unsigned(data(4 downto 0)) & Ypixel(3 downto 0) & Xpixel(3 downto 0);
 
     -- Picture memory address composite
     --addr <= to_unsigned(20, 7) * Ypixel(8 downto 5) + Xpixel(9 downto 5);
