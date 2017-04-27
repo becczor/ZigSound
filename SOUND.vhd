@@ -18,8 +18,12 @@ port (
     goal_pos            : in signed(17 downto 0);  -- goal position
     curr_pos            : in signed(17 downto 0);  -- current position
     channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = curr, 1 = goal.
-    sound_data          : out std_logic);                    -- output to speaker
+    sound_data          : out std_logic;
+    test_diod           : buffer std_logic;
+    test2_diod           : buffer std_logic
+    );                    -- output to speaker
     --sound_enable        : in std_logic;                      -- possible for later to add on/off for sound
+    
 end SOUND;
 
 -- architecture
@@ -217,5 +221,8 @@ begin
     --q_beat_plus <= sound_enable and not q_beat;
     q_beat_plus <= not q_beat;
     q_freq_plus <= q_beat and not q_freq;
+    
+    test_diod <= q_beat;
+    test2_diod <= clk_beat;
   
 end behavioral;

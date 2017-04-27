@@ -26,6 +26,7 @@ entity zigsound is
         debug_PS2CLK            : out std_logic;
         debug_PS2Data           : out std_logic;
         test_diod   		    : out std_logic;
+        test2_diod   		    : out std_logic;
         switch                  : in std_logic
         );
         
@@ -131,9 +132,9 @@ architecture Behavioral of zigsound is
 		rst	        		: in std_logic;
 		PS2KeyboardCLK      : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData     : in std_logic;  -- USB keyboard PS2 data
-        PS2cmd				: out unsigned(17 downto 0);
+        PS2cmd				: out unsigned(17 downto 0)
         --TEST
-	    test_diod		    : buffer std_logic  
+	    --test_diod		    : buffer std_logic  
 		);
 	end component;
 	
@@ -145,7 +146,9 @@ architecture Behavioral of zigsound is
         goal_pos            : in signed(17 downto 0);  -- goal position
         curr_pos            : in signed(17 downto 0);  -- current position
         channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = curr, 1 = goal.
-        sound_data          : out std_logic
+        sound_data          : out std_logic;
+        test_diod		    : buffer std_logic;
+        test2_diod          : buffer std_logic
         );
     end component;
 
@@ -286,8 +289,8 @@ begin
 	            rst => rst,
 	            PS2KeyboardCLK => PS2KeyboardCLK,
 	            PS2KeyboardData => PS2KeyboardData,
-	            PS2cmd => PS2cmd_con,
-	            test_diod => test_diod
+	            PS2cmd => PS2cmd_con
+	            --test_diod => test_diod
 	            );
 
     U7 : SOUND port map(
@@ -296,7 +299,9 @@ begin
                 goal_pos => goal_pos_con,
                 curr_pos => curr_pos_con,
                 channel => sel_sound_con,
-                sound_data => sound_data_con
+                sound_data => sound_data_con,
+                test_diod => test_diod,
+                test2_diod => test2_diod
                 );
 
   end Behavioral;
