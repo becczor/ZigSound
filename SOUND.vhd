@@ -41,11 +41,11 @@ architecture behavioral of SOUND is
     signal beat         : signed(19 downto 0);        -- Divided value for desired frequency for beat at position
     signal freq         : signed(10 downto 0);        -- Divided value for desired frequency for freq at position
 
-    signal clk_div_beat : signed(19 downto 0);        -- Dividing clock for beat
-    signal clk_div_freq : signed(10 downto 0);        -- Dividing clock for freq
+    signal clk_div_beat : unsigned(19 downto 0);        -- Dividing clock for beat
+    signal clk_div_freq : unsigned(10 downto 0);        -- Dividing clock for freq
 
-    signal clk_beat     : std_logic;                            -- Clock signal for beat
-    signal clk_freq     : std_logic;                            -- Clock signal for freq
+    signal clk_beat     : std_logic := '0';                            -- Clock signal for beat
+    signal clk_freq     : std_logic := '0';                            -- Clock signal for freq
 
     -- Flip flops
     signal q_beat       : std_logic := '0';                       -- Beat flip flop
@@ -180,9 +180,9 @@ begin
             if rst='1' then
                 clk_div_beat <= (others => '0');
                 clk_div_freq <= (others => '0');
-            elsif clk_div_beat = beat then
+            elsif clk_div_beat = unsigned(beat) then
                 clk_div_beat <= (others => '0');
-            elsif clk_div_freq = beat then
+            elsif clk_div_freq = unsigned(beat) then
                 clk_div_freq <= (others => '0');
             else
                 clk_div_beat <= clk_div_beat + 1;
@@ -192,8 +192,8 @@ begin
     end process;
 
     -- Toggle sound clocks to get 50% duty cycle
-    clk_beat <= not clk_beat when (clk_div_beat < beat) else clk_beat;
-    clk_freq <= not clk_freq when (clk_div_freq < freq) else clk_freq;
+    clk_beat <= not clk_beat when (clk_div_beat < unsigned(beat)) else clk_beat;
+    clk_freq <= not clk_freq when (clk_div_freq < unsigned(freq)) else clk_freq;
 
 
     -- Beat flip flop

@@ -26,7 +26,7 @@ ARCHITECTURE behavior OF zigsound_tb IS
             test_diod               : buffer std_logic;  -- Test diod
             test2_diod              : buffer std_logic;
             -- Sound
-            sound                   : out std_logic
+            JB1              : out std_logic
             );
             
     END COMPONENT;
