@@ -69,7 +69,7 @@ architecture Behavioral of CPU is
     signal SEL_TRACK    : signed(1 downto 0) := "01";  -- Track select (sel_track_out) 
     -- To SOUND
     signal SEL_SOUND    : std_logic := '0'; -- Sound select (sel_sound_out)
-    --signal rst_track_signal    : std_logic := '0'; -- Sound select (sel_sound_out)
+    --signal rst_track_signal    : std_logic := '0';
 	
     --**************************
 	--* Program Memory Signals *
@@ -192,7 +192,7 @@ begin
         if rising_edge(clk) then
             if (rst = '1') then
                 ASR <= (others => '0');
-            elsif (FB = "111") then -- STOD 100 VILKET SKA VARA ODEFINERAT?? JENNIFERRRR
+            elsif (FB = "111") then 
                 ASR <= DATA_BUS(7 downto 0);
             end if;
         end if;
@@ -455,10 +455,10 @@ begin
                 when "0001" => -- AR := DATA_BUS (No flags)
                     AR <= DATA_BUS;
                     
-                when "0010" =>  -- ONES' COMPLEMENT, UNUSED (No flags)
+                when "0010" =>  -- ONES' COMPLEMENT, (No flags) ***UNUSED***
                     AR <= (others => '0'); 
                     
-                when "0011" =>  -- SET TO ZERO (Z/N)
+                when "0011" =>  -- SET TO ZERO (Z/N)            ***UNUSED***
                     AR <= (others => '0'); 
                     flag_N <= '0';
                     flag_Z <= '1';
@@ -501,7 +501,7 @@ begin
                         end if;    
                     end if;
                         
-                 when "0111" => -- AR := AR or DATA_BUS (Z/N)
+                 when "0111" => -- AR := AR or DATA_BUS (Z/N)       ***UNUSED***
                     AR <= AR or DATA_BUS;
                     if (AR(17) = '1' or DATA_BUS(17) = '1') then
                         flag_N <= '1';
@@ -514,10 +514,10 @@ begin
                         flag_Z <= '0';
                     end if;
                     
-                when "1000" => -- AR := AR + BUSS (No flags)
+                when "1000" => -- AR := AR + BUSS (No flags)        ***UNUSED***
                     AR <= AR + DATA_BUS;
                     
-                when "1001" => -- AR LSL, zero is shifted in, bit shifted out to C. (Z/N(C)
+                when "1001" => -- AR LSL, zero is shifted in, bit shifted out to C. (Z/N(C) ***UNUSED***
                     AR <= AR(16 downto 0) & '0';
                     flag_C <= AR(17);
                     flag_N <= AR(16);
@@ -527,10 +527,10 @@ begin
                         flag_Z <= '0';
                     end if;
                     
-                when "1010" => -- AR LSL, 32-bit, UNUSED
+                when "1010" => -- AR LSL, 32-bit,                   ***UNUSED***
                     AR <= (others => '0'); 
                     
-                when "1011" => -- AR ASR, sign bit is shifted in, bit shifted out to C. (Z/N/C)
+                when "1011" => -- AR ASR, sign bit is shifted in, bit shifted out to C. (Z/N/C) ***UNUSED***
                     AR <= AR(17) & AR(17 downto 1);
                     flag_C <= AR(0);
                     flag_N <= AR(17);
@@ -540,7 +540,7 @@ begin
                         flag_Z <= '0';
                     end if;
                 
-                when "1100" => -- ARHR ASR, UNUSED
+                when "1100" => -- ARHR ASR,                         ***UNUSED***
                     AR <= (others => '0'); 
                 
                 when "1101" => -- AR LSR, zero is shifted in, bit shifted out to C. (Z/N/C)
@@ -553,10 +553,10 @@ begin
                         flag_Z <= '0';
                     end if;
                 
-                when "1110" => -- Rotate AR to the left, UNUSED
+                when "1110" => -- Rotate AR to the left,            ***UNUSED***
                     AR <= (others => '0');
                 
-                when "1111" => -- Rotate ARHR to the left (32-bit), UNUSED
+                when "1111" => -- Rotate ARHR to the left (32-bit), ***UNUSED***
                     AR <= (others => '0'); 
                 
                 when others =>

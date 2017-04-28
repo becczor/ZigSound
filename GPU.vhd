@@ -39,6 +39,8 @@ architecture behavioral of GPU is
     signal ypos             : unsigned(4 downto 0);  -- curr y position
     signal xpos             : unsigned(5 downto 0);  -- curr x position
     signal tile		        : unsigned(7 downto 0);	-- tile index
+    
+    signal addr_change_calc		: unsigned(10 downto 0);
 
     type wr_type is (IDLE, DRAW);  -- declare state types for write cycle
     signal WRstate : wr_type;  -- write cycle state
@@ -74,7 +76,7 @@ begin
             case WRstate is
                 when IDLE =>
                     if (move_req = '1' and data_nextpos = x"00") then  -- We should move.
-                        addr_change <= xpos + (to_unsigned(40, 6) * ypos); -- Translates curr x- and y-pos into PIC_MEM-address.
+                        addr_change <= addr_change_calc; -- Translates curr x- and y-pos into PIC_MEM-address.
                         data_change <= tile;    -- Sets data to BG-tile.
                         move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
                         we_picmem <= '1';   -- PIC_MEM can now use address and data to clear curr_pos.
@@ -83,7 +85,7 @@ begin
                         we_picmem <= '0';
                     end if;
                 when DRAW =>
-                    addr_change <= xpos + (to_unsigned(40, 6) * ypos); -- Translates x- and y-pos into PIC_MEM-address.
+                    addr_change <= addr_change_calc; -- Translates x- and y-pos into PIC_MEM-address.
                     data_change <= tile;  -- Sets data to character tile.
                     move_resp <= '0'; 
                     WRstate <= IDLE;
@@ -97,6 +99,9 @@ begin
     --*********************
     --* Signal assignment *
     --*********************
+    
+    addr_change_calc <= xpos + (to_unsigned(40, 6) * ypos);
+    
     addr_nextpos <= unsigned(NEXT_XPOS) + (to_unsigned(40, 6) * unsigned(NEXT_YPOS));
     -- Takes x- and y-pos from curr_pos if we're in CLEAR, else from next_pos.
     xpos <= unsigned(CURR_XPOS) when (WRstate = IDLE) else unsigned(NEXT_XPOS);

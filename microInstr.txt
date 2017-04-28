@@ -1,0 +1,90 @@
+******* ALU: *******
+  0000 - Hämtfas, LOAD, STORE, ADD, SUB, AND, LSR, BRA, BNE, BGT, BGE, HALT
+  0001 - Hämtfas, ADD, SUB, AND, LSR, BRA, CMP
+  0010-----
+  0011-----
+  0100 - Hämtfas, ADD, BRA
+  0101 - SUB, CMP
+  0110 - AND
+  0111-----
+  1000-----
+  1001-----
+  1010-----
+  1011-----
+  1100-----
+  1101 - LSR
+  1110-----
+  1111-----
+
+
+******* TB: *******
+  000 - Hämtfas, LSR, BNE, BGT, BGE, HALT
+  001 - Hämtfas, LSR, BRA
+  010 - Hämtfas, LOAD, ADD, SUB, AND, CMP
+  011 - Hämtfas, BRA
+  100 - Hämtfas, ADD, SUB, AND, LSR, BRA
+  101-----
+  110 - Hämtfas, STORE, ADD, SUB, AND, LSR, CMP
+  111-----
+
+
+******* FB: *******
+  000 - Hämtfas, ADD, SUB, AND, LSR, BRA, CMP, BNE, BGT, BGE, HALT
+  001 - Hämtfas
+  010 - STORE
+  011 - BRA
+  100-----
+  101-----
+  110 - LOAD, ADD, SUB, AND, LSR
+  111 - Hämtfas
+
+
+******* S: *******
+  0 - Hämtfas, LOAD, STORE, ADD, SUB, AND, LSR, BRA, CMP, BNE, BGT, BGE, HALT
+  1 - Hämtfas
+
+
+******* P: *******
+  0 - Hämtfas, LOAD, STORE, ADD, SUB, AND, LSR, BRA, CMP, BGT, BGE, HALT
+  1 - Hämtfas
+
+
+******* LC: *******
+  00 - Hämtfas, LOAD, STORE, ADD, SUB, AND, LSR, BRA, CMP, BNE, BGT, BGE, HALT
+  01 - LSR
+  10 - LSR
+  11-----
+
+
+******* SEQ: *******
+  0000 - Hämtfas, ADD, SUB, AND, LSR, BRA, CMP
+  0001 - Hämtfas
+  0010-----
+  0011 - LOAD, STORE, ADD, SUB, AND, LSR, BRA, CMP, BGT, BGE
+  0100 - BGT
+  0101 - LSR, BNE
+  0110-----
+  0111-----
+  1000 - BNE
+  1001 - BGT, BGE
+  1010-----
+  1011 - BGT, BGE
+  1100 - LSR
+  1101-----
+  1110 - BGT, BGE
+  1111 - HALT
+
+
+******* uADDR: *******
+  0000000 - Hämtfas, LOAD, STORE, ADD, SUB, AND, LSR, BRA, CMP, BNE, BGT, BGE, HALT
+  0011010 - LSR(Internt)
+  0010111 - LSR(Internt)
+  0011011 - BNE(Externt, -> BRA), BGT(Externt, -> BRA), BGE(Externt, -> BRA)
+  0100100 - BGT(Internt)
+  0100111 - BGT(Internt)
+  0101100 - BGE(Internt)
+
+
+
+BRA x3
+Hämtfas x12
