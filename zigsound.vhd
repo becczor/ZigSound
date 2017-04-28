@@ -147,8 +147,8 @@ architecture Behavioral of zigsound is
         curr_pos            : in signed(17 downto 0);  -- current position
         channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = curr, 1 = goal.
         sound_data          : out std_logic;
-        test_diod		    : buffer std_logic;
-        test2_diod          : buffer std_logic
+        test_diod		    : out std_logic;
+        test2_diod          : out std_logic
         );
     end component;
 
@@ -220,6 +220,7 @@ begin
                 move_resp => move_resp_con,
                 curr_pos_out => curr_pos_con,
                 next_pos_out => next_pos_con,
+                goal_pos_out => goal_pos_con,
                 sel_track_out => sel_track_con,
                 sel_sound_out => sel_sound_con
                 --test_diod => test_diod,
