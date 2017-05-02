@@ -191,8 +191,28 @@ begin
     end process;
 
     -- Toggle sound clocks to get 50% duty cycle
-    clk_beat <= not clk_beat when (clk_div_beat = unsigned(beat)) else clk_beat;
-    clk_freq <= not clk_freq when (clk_div_freq = unsigned(freq)) else clk_freq;
+    process(clk) begin
+        if rising_edge(clk) then
+            if rst = '1' then
+                clk_beat <= '0';
+            elsif clk_div_beat = unsigned(beat) then
+                clk_beat <= not clk_beat;
+            end if;
+        end if;
+    end process;
+    
+    process(clk) begin
+        if rising_edge(clk) then
+            if rst = '1' then
+                clk_freq <= '0';
+            elsif clk_div_freq = unsigned(freq) then
+                clk_freq <= not clk_freq;
+            end if;
+        end if;
+    end process;
+    
+    --clk_beat <= not clk_beat when (clk_div_beat = unsigned(beat)) else clk_beat;
+    --clk_freq <= not clk_freq when (clk_div_freq = unsigned(freq)) else clk_freq;
 
 
     -- Beat flip flop
@@ -221,7 +241,7 @@ begin
         
     --q_beat_plus <= sound_enable and not q_beat;
     q_beat_plus <= not q_beat;
-    q_freq_plus <= q_beat and not q_freq;
+    q_freq_plus <= q_beat and (not q_freq);
     
     test_diod <= q_beat;
     test2_diod <= clk_beat;
