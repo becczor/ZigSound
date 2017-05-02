@@ -201,22 +201,40 @@ architecture Behavioral of VGA_MOTOR is
         x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"D0",x"D0",x"BE",x"90",x"DA",x"DA",x"BE",x"BE",x"90",
 
 
-        x"BE",x"BE",x"94",x"BE",x"94",x"DA",x"90",x"BE",x"BE",x"DA",x"90",x"DA",x"DA",x"DA",x"90",x"90",    -- x"04" ROCK
-        x"90",x"DA",x"DA",x"94",x"90",x"DA",x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"BE",x"BE",x"DA",x"94",    -- WITH GRASS
-        x"94",x"BE",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"90",x"BE",x"90",x"94",x"BE",x"DA",x"BE",x"94",
-        x"94",x"94",x"BE",x"90",x"BE",x"BE",x"90",x"DA",x"94",x"BE",x"90",x"90",x"BE",x"94",x"DA",x"DA",    
-        x"DA",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"DA",x"94",x"DA",x"90",
-        x"94",x"DA",x"94",x"94",x"94",x"DA",x"90",x"DA",x"94",x"DA",x"DA",x"94",x"DA",x"DA",x"94",x"DA",
-        x"DA",x"90",x"90",x"DA",x"90",x"DA",x"90",x"BE",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"94",x"DA",    
-        x"BE",x"94",x"90",x"DA",x"94",x"90",x"BE",x"BE",x"DA",x"90",x"90",x"94",x"BE",x"BE",x"DA",x"94",
-        x"BE",x"DA",x"DA",x"90",x"94",x"90",x"94",x"DA",x"BE",x"94",x"94",x"94",x"94",x"DA",x"DA",x"94",
-        x"DA",x"DA",x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"90",x"DA",x"DA",x"94",x"94",x"90",x"DA",    
-        x"90",x"94",x"DA",x"94",x"DA",x"BE",x"BE",x"94",x"90",x"90",x"94",x"DA",x"94",x"DA",x"90",x"DA",
-        x"DA",x"90",x"DA",x"90",x"90",x"94",x"FF",x"DA",x"90",x"94",x"94",x"BE",x"DA",x"DA",x"94",x"94",
-        x"DA",x"94",x"90",x"94",x"90",x"94",x"FF",x"DA",x"DA",x"DA",x"94",x"BE",x"DA",x"90",x"DA",x"DA",
-        x"DA",x"90",x"90",x"94",x"94",x"90",x"DA",x"94",x"DA",x"DA",x"BE",x"90",x"90",x"94",x"DA",x"94",
-        x"90",x"DA",x"DA",x"BE",x"DA",x"94",x"DA",x"94",x"94",x"DA",x"90",x"94",x"90",x"DA",x"DA",x"DA",
-        x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"DA",x"BE",x"BE",x"90",x"DA",x"DA",x"BE",x"BE",x"90",
+        --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"92",x"9A",x"9A",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  -- x"04" ROCK
+        --x"FF",x"FF",x"FF",x"FF",x"FF",x"92",x"9A",x"9A",x"9A",x"92",x"9A",x"FF",x"FF",x"FF",x"FF",x"FF",  -- W/O GRASS
+        --x"FF",x"FF",x"92",x"9A",x"FF",x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"FF",x"FF",x"FF",x"FF",
+        --x"FF",x"FF",x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",x"9A",x"9A",x"9A",x"FF",x"FF",x"FF",
+        --x"FF",x"92",x"9A",x"9A",x"92",x"9A",x"92",x"92",x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"FF",x"FF",
+        --x"FF",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"FF",
+        --x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",x"92",x"92",x"9A",x"92",x"9A",x"9A",x"9A",x"FF",
+        --x"9A",x"9A",x"9A",x"9A",x"9A",x"9A",x"9A",x"9A",x"9A",x"92",x"92",x"9A",x"9A",x"9A",x"92",x"9A",
+        --x"9A",x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",
+        --x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",x"9A",x"92",x"9A",x"92",x"9A",x"92",x"9A",x"9A",
+        --x"92",x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",x"9A",x"92",x"9A",
+        --x"92",x"92",x"9A",x"92",x"9A",x"9A",x"9A",x"92",x"92",x"9A",x"9A",x"9A",x"9A",x"92",x"92",x"FF",
+        --x"FF",x"92",x"92",x"9A",x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"92",x"9A",x"92",x"92",x"9A",x"FF",
+        --x"FF",x"92",x"92",x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",x"92",x"92",x"9A",x"FF",x"FF",
+        --x"FF",x"FF",x"92",x"92",x"92",x"9A",x"92",x"92",x"9A",x"9A",x"92",x"92",x"9A",x"FF",x"FF",x"FF",
+        --x"FF",x"FF",x"FF",x"92",x"92",x"92",x"92",x"9A",x"9A",x"92",x"92",x"9A",x"FF",x"FF",x"FF",x"FF",
+
+        x"BE",x"BE",x"94",x"BE",x"94",x"DA",x"92",x"9A",x"9A",x"DA",x"90",x"DA",x"DA",x"DA",x"90",x"90",  -- x"04" ROCK
+        x"90",x"DA",x"DA",x"94",x"90",x"92",x"9A",x"9A",x"9A",x"92",x"9A",x"DA",x"BE",x"BE",x"DA",x"94",  -- WITH GRASS
+        x"94",x"BE",x"92",x"9A",x"BE",x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"BE",x"DA",x"BE",x"94",
+        x"94",x"94",x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",x"9A",x"9A",x"9A",x"94",x"DA",x"DA",
+        x"DA",x"92",x"9A",x"9A",x"92",x"9A",x"92",x"92",x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"DA",x"90",
+        x"94",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"DA",
+        x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",x"92",x"92",x"9A",x"92",x"9A",x"9A",x"9A",x"DA",
+        x"9A",x"9A",x"9A",x"9A",x"9A",x"9A",x"9A",x"9A",x"9A",x"92",x"92",x"9A",x"9A",x"9A",x"92",x"9A",
+        x"9A",x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",
+        x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",x"9A",x"92",x"9A",x"92",x"9A",x"92",x"9A",x"9A",
+        x"92",x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",x"9A",x"92",x"9A",
+        x"92",x"92",x"9A",x"92",x"9A",x"9A",x"9A",x"92",x"92",x"9A",x"9A",x"9A",x"9A",x"92",x"92",x"94",
+        x"DA",x"92",x"92",x"9A",x"9A",x"9A",x"9A",x"92",x"9A",x"9A",x"92",x"9A",x"92",x"92",x"9A",x"DA",
+        x"DA",x"92",x"92",x"92",x"9A",x"9A",x"92",x"9A",x"9A",x"9A",x"9A",x"92",x"92",x"9A",x"DA",x"94",
+        x"90",x"DA",x"DA",x"92",x"92",x"9A",x"92",x"92",x"9A",x"9A",x"92",x"92",x"9A",x"DA",x"DA",x"DA",
+        x"90",x"90",x"DA",x"92",x"92",x"92",x"92",x"9A",x"9A",x"92",x"92",x"9A",x"DA",x"BE",x"BE",x"90",
+
 
         x"BE",x"BE",x"94",x"BE",x"94",x"DA",x"90",x"BE",x"BE",x"DA",x"90",x"DA",x"DA",x"DA",x"90",x"90",    -- x"05" GRASS
         x"90",x"DA",x"DA",x"94",x"90",x"DA",x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"BE",x"BE",x"DA",x"94",
