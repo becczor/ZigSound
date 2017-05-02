@@ -6,9 +6,11 @@ use IEEE.NUMERIC_STD.all;
 --* pMem Interface *
 --******************
 entity pMem is
-  port(
-    pAddr : in signed(7 downto 0);
-    pData : out signed(17 downto 0));
+    port(
+        pAddr       : in signed(7 downto 0);
+        pData       : out signed(17 downto 0)
+        --clk         : in std_logic
+        );
 end pMem;
 
 architecture Behavioral of pMem is

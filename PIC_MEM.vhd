@@ -216,18 +216,44 @@ begin
     end process;
 
     -- Sets data_nextpos to data at addr_nextpos and data_vga to data at addr_vga.
-    with sel_track select
-        data_nextpos <= 
-        track_1(to_integer(addr_nextpos)) when "01",
-        track_2(to_integer(addr_nextpos)) when "10",
-        track_3(to_integer(addr_nextpos)) when "11",
-        (others => '0') when others;
-    with sel_track select
-        data_vga <= 
-        track_1(to_integer(addr_vga)) when "01",
-        track_2(to_integer(addr_vga)) when "10",
-        track_3(to_integer(addr_vga)) when "11",
-        (others => '0') when others;
+    
+    
+    -- Is not correct! Just changed to see if LUT utilazation decreses 
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        case sel_track is
+            when "01" =>
+                data_nextpos <= track_1(to_integer(addr_nextpos));
+                data_vga <= track_1(to_integer(addr_vga));
+            when "10" =>
+                data_nextpos <= track_2(to_integer(addr_nextpos));
+                data_vga <= track_2(to_integer(addr_vga));
+            when "11" =>
+               data_nextpos <= track_3(to_integer(addr_nextpos));
+               data_vga <= track_3(to_integer(addr_vga));
+            when others =>
+                null;
+        end case;
+    else
+        null;
+    end if;
+    end process; 
+
+
+    
+    --with sel_track select
+    --    data_nextpos <= 
+    --    track_1(to_integer(addr_nextpos)) when "01",
+    --    track_2(to_integer(addr_nextpos)) when "10",
+    --    track_3(to_integer(addr_nextpos)) when "11",
+    --    (others => '0') when others;
+    --with sel_track select
+    --    data_vga <= 
+    --    track_1(to_integer(addr_vga)) when "01",
+    --    track_2(to_integer(addr_vga)) when "10",
+    --    track_3(to_integer(addr_vga)) when "11",
+    --    (others => '0') when others;
         
         
 

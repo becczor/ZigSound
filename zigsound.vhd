@@ -59,8 +59,10 @@ architecture Behavioral of zigsound is
 
     --uMem : Micro Memory Component
     component uMem
-        port(uAddr          : in unsigned(7 downto 0);
-             uData          : out unsigned(24 downto 0));
+        port(
+         clk            : in std_logic;   
+         uAddr          : in unsigned(7 downto 0);
+         uData          : out unsigned(24 downto 0));
     end component;
 
     --pMem : Program Memory Component
@@ -207,12 +209,14 @@ begin
 
     -- uMem Component Connection
     U1 : uMem port map(
+                clk => clk,
                 uAddr => uAddr_con,
                 uData => uData_con
                 );
 
     -- pMem Component Connection
     U2 : pMem port map(
+                
                 pAddr => pAddr_con,
                 pData => pData_con
                 );

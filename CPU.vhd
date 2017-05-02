@@ -394,12 +394,12 @@ begin
                     else 
                         uPC <= uPC + 1;
                     end if;
-                when "1010" =>
-                    if (flag_C = '1') then
-                        uPC <= MICROADDR;
-                    else 
-                        uPC <= uPC + 1;
-                    end if;
+                --when "1010" =>
+                --    if (flag_C = '1') then
+                --        uPC <= MICROADDR;
+                --    else 
+                --        uPC <= uPC + 1;
+                --    end if;
                 when "1011" =>
                     if (flag_O = '1') then
                         uPC <= MICROADDR;
@@ -412,12 +412,12 @@ begin
                     else 
                         uPC <= uPC + 1;
                     end if;  
-                when "1101" =>
-                    if (flag_C = '0') then
-                        uPC <= MICROADDR;
-                    else 
-                        uPC <= uPC + 1;
-                    end if; 
+                --when "1101" =>
+                --    if (flag_C = '0') then
+                --        uPC <= MICROADDR;
+                --    else 
+                --        uPC <= uPC + 1;
+                --    end if; 
                 when "1110" =>
                     if (flag_O = '0') then
                         uPC <= MICROADDR;
@@ -455,13 +455,13 @@ begin
                 when "0001" => -- AR := DATA_BUS (No flags)
                     AR <= DATA_BUS;
                     
-                when "0010" =>  -- ONES' COMPLEMENT, (No flags) ***UNUSED***
-                    AR <= (others => '0'); 
+                --when "0010" =>  -- ONES' COMPLEMENT, (No flags) ***UNUSED***
+                --    AR <= (others => '0'); 
                     
-                when "0011" =>  -- SET TO ZERO (Z/N)            ***UNUSED***
-                    AR <= (others => '0'); 
-                    flag_N <= '0';
-                    flag_Z <= '1';
+                --when "0011" =>  -- SET TO ZERO (Z/N)            ***UNUSED***
+                --    AR <= (others => '0'); 
+                --    flag_N <= '0';
+                --    flag_Z <= '1';
                     
                 when "0100" => -- AR := AR + DATA_BUS (Z/N/O/C)
                     AR <= AR + DATA_BUS;
@@ -501,47 +501,47 @@ begin
                         end if;    
                     end if;
                         
-                 when "0111" => -- AR := AR or DATA_BUS (Z/N)       ***UNUSED***
-                    AR <= AR or DATA_BUS;
-                    if (AR(17) = '1' or DATA_BUS(17) = '1') then
-                        flag_N <= '1';
-                    else
-                        flag_N <= '0';
-                    end if;
-                    if (to_integer(AR or DATA_BUS) = 0) then
-                        flag_Z <= '1';
-                    else
-                        flag_Z <= '0';
-                    end if;
+                 --when "0111" => -- AR := AR or DATA_BUS (Z/N)       ***UNUSED***
+                 --   AR <= AR or DATA_BUS;
+                 --   if (AR(17) = '1' or DATA_BUS(17) = '1') then
+                 --       flag_N <= '1';
+                 --   else
+                 --       flag_N <= '0';
+                 --   end if;
+                 --   if (to_integer(AR or DATA_BUS) = 0) then
+                 --       flag_Z <= '1';
+                 --   else
+                 --       flag_Z <= '0';
+                 --   end if;
                     
-                when "1000" => -- AR := AR + BUSS (No flags)        ***UNUSED***
-                    AR <= AR + DATA_BUS;
+                --when "1000" => -- AR := AR + BUSS (No flags)        ***UNUSED***
+                --    AR <= AR + DATA_BUS;
                     
-                when "1001" => -- AR LSL, zero is shifted in, bit shifted out to C. (Z/N(C) ***UNUSED***
-                    AR <= AR(16 downto 0) & '0';
-                    flag_C <= AR(17);
-                    flag_N <= AR(16);
-                    if (to_integer(AR(16 downto 0)) = 0) then
-                        flag_Z <= '1';
-                    else
-                        flag_Z <= '0';
-                    end if;
+                --when "1001" => -- AR LSL, zero is shifted in, bit shifted out to C. (Z/N(C) ***UNUSED***
+                --    AR <= AR(16 downto 0) & '0';
+                --    flag_C <= AR(17);
+                --    flag_N <= AR(16);
+                --    if (to_integer(AR(16 downto 0)) = 0) then
+                --        flag_Z <= '1';
+                --    else
+                --        flag_Z <= '0';
+                --    end if;
                     
-                when "1010" => -- AR LSL, 32-bit,                   ***UNUSED***
-                    AR <= (others => '0'); 
+                --when "1010" => -- AR LSL, 32-bit,                   ***UNUSED***
+                --    AR <= (others => '0'); 
                     
-                when "1011" => -- AR ASR, sign bit is shifted in, bit shifted out to C. (Z/N/C) ***UNUSED***
-                    AR <= AR(17) & AR(17 downto 1);
-                    flag_C <= AR(0);
-                    flag_N <= AR(17);
-                    if (to_integer(AR(17) & AR(17 downto 1)) = 0) then
-                        flag_Z <= '1';
-                    else
-                        flag_Z <= '0';
-                    end if;
+                --when "1011" => -- AR ASR, sign bit is shifted in, bit shifted out to C. (Z/N/C) ***UNUSED***
+                --    AR <= AR(17) & AR(17 downto 1);
+                --    flag_C <= AR(0);
+                --    flag_N <= AR(17);
+                --    if (to_integer(AR(17) & AR(17 downto 1)) = 0) then
+                --        flag_Z <= '1';
+                --    else
+                --        flag_Z <= '0';
+                --    end if;
                 
-                when "1100" => -- ARHR ASR,                         ***UNUSED***
-                    AR <= (others => '0'); 
+                --when "1100" => -- ARHR ASR,                         ***UNUSED***
+                --    AR <= (others => '0'); 
                 
                 when "1101" => -- AR LSR, zero is shifted in, bit shifted out to C. (Z/N/C)
                     AR <= '0' & AR(17 downto 1);
@@ -553,11 +553,11 @@ begin
                         flag_Z <= '0';
                     end if;
                 
-                when "1110" => -- Rotate AR to the left,            ***UNUSED***
-                    AR <= (others => '0');
+                --when "1110" => -- Rotate AR to the left,            ***UNUSED***
+                --    AR <= (others => '0');
                 
-                when "1111" => -- Rotate ARHR to the left (32-bit), ***UNUSED***
-                    AR <= (others => '0'); 
+                --when "1111" => -- Rotate ARHR to the left (32-bit), ***UNUSED***
+                --    AR <= (others => '0'); 
                 
                 when others =>
                     null;

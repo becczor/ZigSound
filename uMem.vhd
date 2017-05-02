@@ -7,8 +7,10 @@ use IEEE.NUMERIC_STD.all;
 --******************
 entity uMem is
   port (
+    clk   : in std_logic;
     uAddr : in unsigned(7 downto 0);
     uData : out unsigned(24 downto 0));
+
 end uMem;
 
 architecture Behavioral of uMem is
@@ -113,8 +115,15 @@ begin
     --********************
     --* uData Assignment *
     --********************
-    uData <= u_mem(to_integer(uAddr));
-
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            uData <= u_mem(to_integer(uAddr));
+        else
+            null;
+        end if;
+    end process;
+    
 end Behavioral;
 
 

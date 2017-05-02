@@ -59,7 +59,7 @@
 ******* SEQ: *******
   0000 - Hämtfas, ADD, SUB, AND, LSR, BRA, CMP
   0001 - Hämtfas
-  0010-----
+  0010 - Hämtfas
   0011 - LOAD, STORE, ADD, SUB, AND, LSR, BRA, CMP, BGT, BGE
   0100 - BGT
   0101 - LSR, BNE
