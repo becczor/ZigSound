@@ -2,7 +2,6 @@
 -- SOUND
 -- Rebecca Lindblom
 -- 31-mars-2017
--- Version 1.0
 
 
 -- library declaration
@@ -19,8 +18,8 @@ port (
     curr_pos            : in signed(17 downto 0);  -- current position
     channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = curr, 1 = goal.
     sound_data          : out std_logic;
-    test_diod           : buffer std_logic;
-    test2_diod           : buffer std_logic
+    test_diod           : out std_logic;
+    test2_diod          : out std_logic
     );                    -- output to speaker
     --sound_enable        : in std_logic;                      -- possible for later to add on/off for sound
     
@@ -29,11 +28,11 @@ end SOUND;
 -- architecture
 architecture behavioral of SOUND is
     
-    signal goal_x       : signed(5 downto 0);
-    signal curr_x       : signed(5 downto 0);
-   
-    signal goal_y       : signed(4 downto 0);
-    signal curr_y       : signed(4 downto 0);
+    alias goal_x : signed(5 downto 0) is goal_pos(14 downto 9);
+    alias goal_y : signed(4 downto 0) is goal_pos(4 downto 0);
+    
+    alias curr_x : signed(5 downto 0) is curr_pos(14 downto 9);
+    alias curr_y : signed(4 downto 0) is curr_pos(4 downto 0);
 
     signal x            : signed(5 downto 0);         -- x-position for playing
     signal y            : signed(4 downto 0);         -- y-position for playing
@@ -52,7 +51,7 @@ architecture behavioral of SOUND is
     signal q_beat_plus  : std_logic := '0';    
     
     signal q_freq       : std_logic := '0';                       -- Freq flip flop
-    signal q_freq_plus  : std_logic := '0';     
+    signal q_freq_plus  : std_logic := '0';
 
 begin
 
@@ -74,16 +73,16 @@ begin
     end process;
 
     -- Transfer position data to internal signals
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            -- Should look at registers all the time, even at reset
-            goal_x <= goal_pos(14 downto 9);
-            goal_y <= goal_pos(4 downto 0);
-            curr_x <= curr_pos(14 downto 9);
-            curr_y <= curr_pos(4 downto 0);
-        end if;
-    end process;
+    --process(clk)
+    --begin
+      --  if rising_edge(clk) then
+        --    -- Should look at registers all the time, even at reset
+          --  goal_x <= goal_pos(14 downto 9);
+            --goal_y <= goal_pos(4 downto 0);
+            --curr_x <= curr_pos(14 downto 9);
+            --curr_y <= curr_pos(4 downto 0);
+        --end if;
+    --end process;
 
 
     -- y position -> beat value for toggle clk_beat
@@ -122,7 +121,7 @@ begin
       "00001110000101011100"   when "00010",--57692   when 2,
       "00001100011010011111"   when "00001",--50847   when 1,
       --"00001011000110001111"   when "00000",--45455   when 0,
-      "00000000000000000001"   when others;--1       when others;
+      "11111111111111111111"   when others;--Maximum      when others;
 
     -- x-position -> freq value for toggle clk_freq
     -- Follows freq <= round(100000000/ (300 + 25*x)
@@ -170,7 +169,7 @@ begin
       "00110010000"  when "100101",--400  when 37,
       "00110001000"  when "100110",--392  when 38,
       --"00110000001"  when "100111",--385  when 39,
-      "00000000001"    when others;--1    when others;
+      "11111111111"    when others;--Maximum    when others;
 
         
     -- Clock divisor
@@ -192,8 +191,28 @@ begin
     end process;
 
     -- Toggle sound clocks to get 50% duty cycle
-    clk_beat <= not clk_beat when (clk_div_beat < unsigned(beat)) else clk_beat;
-    clk_freq <= not clk_freq when (clk_div_freq < unsigned(freq)) else clk_freq;
+    process(clk) begin
+        if rising_edge(clk) then
+            if rst = '1' then
+                clk_beat <= '0';
+            elsif clk_div_beat = unsigned(beat) then
+                clk_beat <= not clk_beat;
+            end if;
+        end if;
+    end process;
+    
+    process(clk) begin
+        if rising_edge(clk) then
+            if rst = '1' then
+                clk_freq <= '0';
+            elsif clk_div_freq = unsigned(freq) then
+                clk_freq <= not clk_freq;
+            end if;
+        end if;
+    end process;
+    
+    --clk_beat <= not clk_beat when (clk_div_beat = unsigned(beat)) else clk_beat;
+    --clk_freq <= not clk_freq when (clk_div_freq = unsigned(freq)) else clk_freq;
 
 
     -- Beat flip flop
@@ -222,9 +241,11 @@ begin
         
     --q_beat_plus <= sound_enable and not q_beat;
     q_beat_plus <= not q_beat;
-    q_freq_plus <= q_beat and not q_freq;
+    q_freq_plus <= q_beat and (not q_freq);
     
     test_diod <= q_beat;
     test2_diod <= clk_beat;
+    
+    sound_data <= q_freq;
   
 end behavioral;

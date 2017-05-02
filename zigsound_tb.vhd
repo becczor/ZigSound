@@ -49,7 +49,7 @@ BEGIN
         PS2KeyboardData => PS2KeyboardData
     );
     
-    rst <= '1', '0' after 1.7 us;
+    rst <= '1', '0' after 0.5 us;
 		
     -- Clock process definitions
     clk_gen : process
