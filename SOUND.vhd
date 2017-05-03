@@ -28,62 +28,62 @@ end SOUND;
 -- architecture
 architecture behavioral of SOUND is
     
-    alias goal_x : signed(5 downto 0) is goal_pos(14 downto 9);
-    alias goal_y : signed(4 downto 0) is goal_pos(4 downto 0);
+    --alias goal_x : signed(5 downto 0) is goal_pos(14 downto 9);
+    --alias goal_y : signed(4 downto 0) is goal_pos(4 downto 0);
     
-    alias curr_x : signed(5 downto 0) is curr_pos(14 downto 9);
-    alias curr_y : signed(4 downto 0) is curr_pos(4 downto 0);
+    --alias curr_x : signed(5 downto 0) is curr_pos(14 downto 9);
+    --alias curr_y : signed(4 downto 0) is curr_pos(4 downto 0);
 
-    signal x            : signed(5 downto 0);         -- x-position for playing
-    signal y            : signed(4 downto 0);         -- y-position for playing
+    --signal x            : signed(5 downto 0);         -- x-position for playing
+    --signal y            : signed(4 downto 0);         -- y-position for playing
 
-    signal beat         : signed(19 downto 0);        -- Divided value for desired frequency for beat at position
-    signal freq         : signed(10 downto 0);        -- Divided value for desired frequency for freq at position
+    --signal beat         : signed(19 downto 0);        -- Divided value for desired frequency for beat at position
+    --signal freq         : signed(16 downto 0);        -- Divided value for desired frequency for freq at position
 
-    signal clk_div_beat : unsigned(19 downto 0);        -- Dividing clock for beat
-    signal clk_div_freq : unsigned(10 downto 0);        -- Dividing clock for freq
+    --signal clk_div_beat : unsigned(19 downto 0);        -- Dividing clock for beat
+    --signal clk_div_freq : unsigned(16 downto 0);        -- Dividing clock for freq
 
-    signal clk_beat     : std_logic := '0';                            -- Clock signal for beat
-    signal clk_freq     : std_logic := '0';                            -- Clock signal for freq
+    --signal clk_beat     : std_logic := '0';                            -- Clock signal for beat
+    --signal clk_freq     : std_logic := '0';                            -- Clock signal for freq
 
-    -- Flip flops
-    signal q_beat       : std_logic := '0';                       -- Beat flip flop
-    signal q_beat_plus  : std_logic := '0';    
+    ---- Flip flops
+    --signal q_beat       : std_logic := '0';                       -- Beat flip flop
+    --signal q_beat_plus  : std_logic := '0';    
     
-    signal q_freq       : std_logic := '0';                       -- Freq flip flop
-    signal q_freq_plus  : std_logic := '0';
+    --signal q_freq       : std_logic := '0';                       -- Freq flip flop
+    --signal q_freq_plus  : std_logic := '0';
 
-    signal test         : signed(10 downto 0) := to_signed(350);
+    signal test         : signed(16 downto 0) := to_signed(113636, 17);
     signal clk_test     : std_logic := '0';
-    signal clk_div_test : unsigned(10 downto 0);
+    signal clk_div_test : unsigned(16 downto 0);
     signal q_test       : std_logic := '0';
     signal q_test_plus  : std_logic := '0';
 begin
 
     -- Set signals for playing sound
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if rst='1' then
-                x <= "000000";
-                y <= "00000";
-            elsif channel = '1' then
-                x <= goal_x;
-                y <= goal_y;
-            else
-                x <= curr_x;
-                y <= curr_y;
-            end if;
-        end if;
-    end process;
+    --process(clk)
+    --begin
+    --    if rising_edge(clk) then
+    --        if rst='1' then
+    --            x <= "000000";
+    --            y <= "00000";
+    --        elsif channel = '1' then
+    --            x <= goal_x;
+    --            y <= goal_y;
+    --        else
+    --            x <= curr_x;
+    --            y <= curr_y;
+    --        end if;
+    --    end if;
+    --end process;
 
 
     -- y position -> beat value for toggle clk_beat
     -- follows beat = round(100000000 / (0.555764 * exp(0.0980482 * y)))
     -- See list of Hz-values in frequencies.txt
     -- Position is 0 at top of screen
-    with y select
-      beat <=
+    --with y select
+      --beat <=
       --"11110100001001000000" when "11101",--1000000 when 29,
       --to_signed(789474, 20) when
       --"11000000101111100010"  when "11100",--789474  when 28,
@@ -115,7 +115,7 @@ begin
       --"00001110000101011100"   when "00010",--57692   when 2,
       --"00001100011010011111"   when "00001",--50847   when 1,
       ----"00001011000110001111"   when "00000",--45455   when 0,
-      to_signed(1000000, 20)   when others;--Maximum      when others;
+      --to_signed(1000000, 20)   when others;--Maximum      when others;
 
     -- x-position -> freq value for toggle clk_freq
     -- Follows freq <= round(100000000/ (300 + 25*x)
@@ -123,65 +123,137 @@ begin
     -- Position is 0 at left of screen
     with x select
         freq <=
-        to_signed(1075, 11) when to_signed(0, 6),
-        to_signed(1020, 11) when to_signed(1, 6),
-        to_signed(971, 11) when to_signed(2, 6),
-        to_signed(926, 11) when to_signed(3, 6),
-        to_signed(885, 11) when to_signed(4, 6),
-        to_signed(847, 11) when to_signed(5, 6),
-        to_signed(813, 11) when to_signed(6, 6),
-        to_signed(781, 11) when to_signed(7, 6),
-        to_signed(752, 11) when to_signed(8, 6),
-        to_signed(725, 11) when to_signed(9, 6),
-        to_signed(699, 11) when to_signed(10, 6),
-        to_signed(676, 11) when to_signed(11, 6),
-        to_signed(654, 11) when to_signed(12, 6),
-        to_signed(633, 11) when to_signed(13, 6),
-        to_signed(613, 11) when to_signed(14, 6),
-        to_signed(595, 11) when to_signed(15, 6),
-        to_signed(578, 11) when to_signed(16, 6),
-        to_signed(562, 11) when to_signed(17, 6),
-        to_signed(546, 11) when to_signed(18, 6),
-        to_signed(532, 11) when to_signed(19, 6),
-        to_signed(518, 11) when to_signed(20, 6),
-        to_signed(505, 11) when to_signed(21, 6),
-        to_signed(493, 11) when to_signed(22, 6),
-        to_signed(481, 11) when to_signed(23, 6),
-        to_signed(469, 11) when to_signed(24, 6),
-        to_signed(459, 11) when to_signed(25, 6),
-        to_signed(448, 11) when to_signed(26, 6),
-        to_signed(439, 11) when to_signed(27, 6),
-        to_signed(429, 11) when to_signed(28, 6),
-        to_signed(420, 11) when to_signed(29, 6),
-        to_signed(412, 11) when to_signed(30, 6),
-        to_signed(403, 11) when to_signed(31, 6),
-        to_signed(395, 11) when to_signed(32, 6),
-        to_signed(388, 11) when to_signed(33, 6),
-        to_signed(380, 11) when to_signed(34, 6),
-        to_signed(373, 11) when to_signed(35, 6),
-        to_signed(366, 11) when to_signed(36, 6),
-        to_signed(360, 11) when to_signed(37, 6),
-        to_signed(353, 11) when to_signed(38, 6),
-        to_signed(347, 11) when to_signed(39, 6),
+        to_signed(107527, 17) when to_signed(, 6),
+        to_signed(102041, 17) when to_signed(, 6),
+        to_signed(97087, 17) when to_signed(, 6),
+        to_signed(92593, 17) when to_signed(, 6),
+        to_signed(88496, 17) when to_signed(, 6),
+        to_signed(84746, 17) when to_signed(, 6),
+        to_signed(81301, 17) when to_signed(, 6),
+        to_signed(78125, 17) when to_signed(, 6),
+        to_signed(75188, 17) when to_signed(, 6),
+        to_signed(72464, 17) when to_signed(, 6),
+        to_signed(69930, 17) when to_signed(, 6),
+        to_signed(67568, 17) when to_signed(, 6),
+        to_signed(65359, 17) when to_signed(, 6),
+        to_signed(63291, 17) when to_signed(, 6),
+        to_signed(61350, 17) when to_signed(, 6),
+        to_signed(59524, 17) when to_signed(, 6),
+        to_signed(57803, 17) when to_signed(, 6),
+        to_signed(56180, 17) when to_signed(, 6),
+        to_signed(54645, 17) when to_signed(, 6),
+        to_signed(53191, 17) when to_signed(, 6),
+        to_signed(51813, 17) when to_signed(, 6),
+        to_signed(50505, 17) when to_signed(, 6),
+        to_signed(49261, 17) when to_signed(, 6),
+        to_signed(48077, 17) when to_signed(, 6),
+        to_signed(46948, 17) when to_signed(, 6),
+        to_signed(45872, 17) when to_signed(, 6),
+        to_signed(44843, 17) when to_signed(, 6),
+        to_signed(43860, 17) when to_signed(, 6),
+        to_signed(42918, 17) when to_signed(, 6),
+        to_signed(42017, 17) when to_signed(, 6),
+        to_signed(41152, 17) when to_signed(, 6),
+        to_signed(40323, 17) when to_signed(, 6),
+        to_signed(39526, 17) when to_signed(, 6),
+        to_signed(38760, 17) when to_signed(, 6),
+        to_signed(38023, 17) when to_signed(, 6),
+        to_signed(37313, 17) when to_signed(, 6),
+        to_signed(36630, 17) when to_signed(, 6),
+        to_signed(35971, 17) when to_signed(, 6),
+        to_signed(35336, 17) when to_signed(, 6),
+        to_signed(34722, 17) when to_signed(, 6),
         to_signed(1, 11) when others;
       
         
     -- Clock divisor
     -- Divide system clock (100 MHz) by beat and freq
+    --process(clk) begin
+    --    if rising_edge(clk) then
+    --        if rst='1' then
+    --            clk_div_beat <= (others => '0');
+    --            clk_div_freq <= (others => '0');
+    --        elsif clk_div_beat = unsigned(beat) then
+    --            clk_div_beat <= (others => '0');
+    --            clk_div_freq <= clk_div_freq + 1;
+    --        elsif clk_div_freq = unsigned(beat) then
+    --            clk_div_freq <= (others => '0');
+    --            clk_div_beat <= clk_div_beat + 1;
+    --        else
+    --            clk_div_beat <= clk_div_beat + 1;
+    --            clk_div_freq <= clk_div_freq + 1;
+    --        end if;
+    --    end if;
+    --end process;
+
+    -- Toggle sound clocks to get 50% duty cycle
+    --process(clk) begin
+    --    if rising_edge(clk) then
+    --        if rst = '1' then
+    --            clk_beat <= '0';
+    --        elsif clk_div_beat = unsigned(beat) then
+    --            clk_beat <= not clk_beat;
+    --        end if;
+    --    end if;
+    --end process;
+    
+    --process(clk) begin
+    --    if rising_edge(clk) then
+    --        if rst = '1' then
+    --            clk_freq <= '0';
+    --        elsif clk_div_freq = unsigned(freq) then
+    --            clk_freq <= not clk_freq;
+    --        end if;
+    --    end if;
+    --end process;
+
+
+    ---- Beat flip flop
+    --process(clk) begin
+    --    if rising_edge(clk) then
+    --        if rst = '1' then
+    --            q_beat <= '0';
+    --        elsif clk_beat = '1' then
+    --            q_beat <= q_beat_plus;
+    --        end if;
+    --    end if;
+    --end process;
+                
+
+
+    ---- Freq flip flop
+    --process(clk) begin
+    --    if rising_edge(clk) then
+    --        if rst='1' then
+    --            q_freq <= '0';
+    --        elsif clk_freq = '1' then
+    --            q_freq <= q_freq_plus;
+    --        end if;
+    --    end if;
+    --end process;
+        
+    ----q_beat_plus <= sound_enable and not q_beat;
+    --q_beat_plus <= not q_beat;
+    --q_freq_plus <= q_beat and (not q_freq);
+    ----q_freq_plus <= not q_freq;
+    
+    --test_diod <= q_beat;
+    --test2_diod <= clk_beat;
+    
+    ----sound_data <= q_freq;
+
+    -- ********** TESTING **************
+    
+    -- Clock divisor
+    -- Divide system clock (100 MHz) by test
     process(clk) begin
         if rising_edge(clk) then
             if rst='1' then
-                clk_div_beat <= (others => '0');
-                clk_div_freq <= (others => '0');
-            elsif clk_div_beat = unsigned(beat) then
-                clk_div_beat <= (others => '0');
-                clk_div_freq <= clk_div_freq + 1;
-            elsif clk_div_freq = unsigned(beat) then
-                clk_div_freq <= (others => '0');
-                clk_div_beat <= clk_div_beat + 1;
+                clk_div_test <= (others => '0');
+            elsif clk_div_test = unsigned(test) then
+                clk_div_test <= (others => '0');
             else
-                clk_div_beat <= clk_div_beat + 1;
-                clk_div_freq <= clk_div_freq + 1;
+                clk_div_test <= clk_div_test + 1;
             end if;
         end if;
     end process;
@@ -190,68 +262,28 @@ begin
     process(clk) begin
         if rising_edge(clk) then
             if rst = '1' then
-                clk_beat <= '0';
-            elsif clk_div_beat = unsigned(beat) then
-                clk_beat <= not clk_beat;
+                clk_test <= '0';
+            elsif clk_div_test = unsigned(test) then
+                clk_test <= not clk_test;
             end if;
         end if;
     end process;
     
-    process(clk) begin
-        if rising_edge(clk) then
-            if rst = '1' then
-                clk_freq <= '0';
-            elsif clk_div_freq = unsigned(freq) then
-                clk_freq <= not clk_freq;
-            end if;
-        end if;
-    end process;
-
-
-    -- Beat flip flop
-    process(clk) begin
-        if rising_edge(clk) then
-            if rst = '1' then
-                q_beat <= '0';
-            elsif clk_beat = '1' then
-                q_beat <= q_beat_plus;
-            end if;
-        end if;
-    end process;
-                
-
-
-    -- Freq flip flop
-    process(clk) begin
-        if rising_edge(clk) then
-            if rst='1' then
-                q_freq <= '0';
-            elsif clk_freq = '1' then
-                q_freq <= q_freq_plus;
-            end if;
-        end if;
-    end process;
-        
-    --q_beat_plus <= sound_enable and not q_beat;
-    q_beat_plus <= not q_beat;
-    q_freq_plus <= q_beat and (not q_freq);
-    --q_freq_plus <= not q_freq;
-    
-    test_diod <= q_beat;
-    test2_diod <= clk_beat;
-    
-    --sound_data <= q_freq;
-
-    -- ********** TESTING **************
     -- flip flop
-    process(clk) begin
-        if rising_edge(clk) then
+    process(clk_test) begin
+        if rising_edge(clk_test) then
             if rst='1' then
                 q_test <= '0';
-            elsif clk_test = '1' then
+            else
                 q_test <= q_test_plus;
             end if;
         end if;
     end process;
+
+    q_test_plus <= not q_test;
+    
+    sound_data <= q_test;
+    test_diod <= q_test;
+    test2_diod <= clk_test;
   
 end behavioral;
