@@ -53,6 +53,11 @@ architecture behavioral of SOUND is
     signal q_freq       : std_logic := '0';                       -- Freq flip flop
     signal q_freq_plus  : std_logic := '0';
 
+    signal test         : signed(10 downto 0) := to_signed(350);
+    signal clk_test     : std_logic := '0';
+    signal clk_div_test : unsigned(10 downto 0);
+    signal q_test       : std_logic := '0';
+    signal q_test_plus  : std_logic := '0';
 begin
 
     -- Set signals for playing sound
@@ -72,18 +77,6 @@ begin
         end if;
     end process;
 
-    -- Transfer position data to internal signals
-    --process(clk)
-    --begin
-      --  if rising_edge(clk) then
-        --    -- Should look at registers all the time, even at reset
-          --  goal_x <= goal_pos(14 downto 9);
-            --goal_y <= goal_pos(4 downto 0);
-            --curr_x <= curr_pos(14 downto 9);
-            --curr_y <= curr_pos(4 downto 0);
-        --end if;
-    --end process;
-
 
     -- y position -> beat value for toggle clk_beat
     -- follows beat = round(100000000 / (0.555764 * exp(0.0980482 * y)))
@@ -93,13 +86,13 @@ begin
       beat <=
       --"11110100001001000000" when "11101",--1000000 when 29,
       --to_signed(789474, 20) when
-      "11000000101111100010"  when "11100",--789474  when 28,
-      "10011111001110001110"  when "11011",--652174  when 27,
-      "10000111101000100100"  when "11010",--555556  when 26,
-      "01110110001000011111" when "11001",--483871  when 25,
-      "01101000101000011011"  when "11000",--428571  when 24,
-      "01011101111001100111"  when "10111",--384615  when 23,
-      "01010101001010100101"  when "10110",--348837  when 22,
+      --"11000000101111100010"  when "11100",--789474  when 28,
+      --"10011111001110001110"  when "11011",--652174  when 27,
+      --"10000111101000100100"  when "11010",--555556  when 26,
+      --"01110110001000011111" when "11001",--483871  when 25,
+      --"01101000101000011011"  when "11000",--428571  when 24,
+      --"01011101111001100111"  when "10111",--384615  when 23,
+      --"01010101001010100101"  when "10110",--348837  when 22,
       --"01001101111010101101"  when "10101",--319149  when 21,
       --"01000111110011100110"  when "10100",--294118  when 20,
       --"01000010100101010111"  when "10011",--272727  when 19,
@@ -114,15 +107,15 @@ begin
       --"00011111110110000011"  when "01010",--130435  when 10,
       --"00011101000100001000"  when "01001",--119048  when 9,
       --"00011010101000100011"  when "01000",--109091  when 8,
-      "00011000011010100000"  when "00111",--100000  when 7,
-      "00010110001100011101"   when "00110",--90909   when 6,
-      "00010011110010111001"   when "00101",--81081   when 5,
-      "00010001110111010011"   when "00100",--73171   when 4,
-      "00001111111011000001"   when "00011",--65217   when 3,
-      "00001110000101011100"   when "00010",--57692   when 2,
-      "00001100011010011111"   when "00001",--50847   when 1,
+      --"00011000011010100000"  when "00111",--100000  when 7,
+      --"00010110001100011101"   when "00110",--90909   when 6,
+      --"00010011110010111001"   when "00101",--81081   when 5,
+      --"00010001110111010011"   when "00100",--73171   when 4,
+      --"00001111111011000001"   when "00011",--65217   when 3,
+      --"00001110000101011100"   when "00010",--57692   when 2,
+      --"00001100011010011111"   when "00001",--50847   when 1,
       ----"00001011000110001111"   when "00000",--45455   when 0,
-      "11111111111111111111"   when others;--Maximum      when others;
+      to_signed(1000000, 20)   when others;--Maximum      when others;
 
     -- x-position -> freq value for toggle clk_freq
     -- Follows freq <= round(100000000/ (300 + 25*x)
@@ -141,80 +134,37 @@ begin
         to_signed(752, 11) when to_signed(8, 6),
         to_signed(725, 11) when to_signed(9, 6),
         to_signed(699, 11) when to_signed(10, 6),
-        to_signed(676, 11) when to_signed(, 6),
-        to_signed(654, 11) when to_signed(, 6),
-        to_signed(633, 11) when to_signed(, 6),
-        to_signed(613, 11) when to_signed(, 6),
-        to_signed(595, 11) when to_signed(, 6),
-        to_signed(578, 11) when to_signed(, 6),
-        to_signed(562, 11) when to_signed(, 6),
-        to_signed(546, 11) when to_signed(, 6),
-        to_signed(532, 11) when to_signed(, 6),
-        to_signed(518, 11) when to_signed(, 6),
-        to_signed(505, 11) when to_signed(, 6),
-        to_signed(493, 11) when to_signed(, 6),
-        to_signed(481, 11) when to_signed(, 6),
-        to_signed(469, 11) when to_signed(, 6),
-        to_signed(459, 11) when to_signed(, 6),
-        to_signed(448, 11) when to_signed(, 6),
-        to_signed(439, 11) when to_signed(, 6),
-        to_signed(429, 11) when to_signed(, 6),
-        to_signed(420, 11) when to_signed(, 6),
-        to_signed(412, 11) when to_signed(, 6),
-        to_signed(403, 11) when to_signed(, 6),
-        to_signed(395, 11) when to_signed(, 6),
-        to_signed(388, 11) when to_signed(, 6),
-        to_signed(380, 11) when to_signed(, 6),
-        to_signed(373, 11) when to_signed(, 6),
-        to_signed(366, 11) when to_signed(, 6),
-        to_signed(360, 11) when to_signed(, 6),
-        to_signed(353, 11) when to_signed(, 6),
-        to_signed(347, 11) when to_signed(, 6),
+        to_signed(676, 11) when to_signed(11, 6),
+        to_signed(654, 11) when to_signed(12, 6),
+        to_signed(633, 11) when to_signed(13, 6),
+        to_signed(613, 11) when to_signed(14, 6),
+        to_signed(595, 11) when to_signed(15, 6),
+        to_signed(578, 11) when to_signed(16, 6),
+        to_signed(562, 11) when to_signed(17, 6),
+        to_signed(546, 11) when to_signed(18, 6),
+        to_signed(532, 11) when to_signed(19, 6),
+        to_signed(518, 11) when to_signed(20, 6),
+        to_signed(505, 11) when to_signed(21, 6),
+        to_signed(493, 11) when to_signed(22, 6),
+        to_signed(481, 11) when to_signed(23, 6),
+        to_signed(469, 11) when to_signed(24, 6),
+        to_signed(459, 11) when to_signed(25, 6),
+        to_signed(448, 11) when to_signed(26, 6),
+        to_signed(439, 11) when to_signed(27, 6),
+        to_signed(429, 11) when to_signed(28, 6),
+        to_signed(420, 11) when to_signed(29, 6),
+        to_signed(412, 11) when to_signed(30, 6),
+        to_signed(403, 11) when to_signed(31, 6),
+        to_signed(395, 11) when to_signed(32, 6),
+        to_signed(388, 11) when to_signed(33, 6),
+        to_signed(380, 11) when to_signed(34, 6),
+        to_signed(373, 11) when to_signed(35, 6),
+        to_signed(366, 11) when to_signed(36, 6),
+        to_signed(360, 11) when to_signed(37, 6),
+        to_signed(353, 11) when to_signed(38, 6),
+        to_signed(347, 11) when to_signed(39, 6),
+        to_signed(1, 11) when others;
       
-      
-      
-      --"11000000010" when "000000",--1538 when 0,
-      "10110010101" when "000001",--1429 when 1,
-      "10100110101" when "000010",--1333 when 2,
-      "10011100010" when "000011",--1250 when 3,
-      "10010011000" when "000100",--1176 when 4,
-      "10001010111" when "000101",--1111 when 5,
-      "10000011101" when "000110",--1053 when 6,
-      "01111101000" when "000111",--1000 when 7,
-      "01110111000"  when "001000",--952  when 8,
-      "01110001101"  when "001001",--909  when 9,
-      "01101100110"  when "001010",--870  when 10,
-      "01101000001"  when "001011",--833  when 11,
-      "01100100000"  when "001100",--800  when 12,
-      "01100000001" when "001101",--769  when 13,
-      "01011100101"  when "001110",--741  when 14,
-      "01011001010"  when "001111",--714  when 15,
-      "01010110010"  when "010000",--690  when 16,
-      "01010011011"  when "010001",--667  when 17,
-      "01010000101"  when "010010",--645  when 18,
-      "01001110001" when "010011",--625  when 19,
-      "01001011110"  when "010100",--606  when 20,
-      "01001001100"  when "010101",--588  when 21,
-      "01000111011"  when "010110",--571  when 22,
-      "01000101100" when "010111",--556  when 23,
-      "01000011101"  when "011000",--541  when 24,
-      "01000001110"  when "011001",--526  when 25,
-      "01000000001"  when "011010",--513  when 26,
-      "00111110100"  when "011011",--500  when 27,
-      "00111101000"  when "011100",--488  when 28
-      "00111011100"  when "011101",--476  when 29,
-      "00111010001"  when "011110",--465  when 30,
-      "00111000111" when "011111",--455  when 31,
-      "00110111100" when "100000",--444  when 32,
-      "00110110011"  when "100001",--435  when 33,
-      "00110101010"  when "100010",--426  when 34,
-      "00110100001"  when "100011",--417  when 35,
-      "00110011000"  when "100100",--408  when 36,
-      "00110010000"  when "100101",--400  when 37,
-      "00110001000"  when "100110",--392  when 38,
-      --"00110000001"  when "100111",--385  when 39,
-      "11111111111"    when others;--Maximum    when others;
-
         
     -- Clock divisor
     -- Divide system clock (100 MHz) by beat and freq
@@ -225,8 +175,10 @@ begin
                 clk_div_freq <= (others => '0');
             elsif clk_div_beat = unsigned(beat) then
                 clk_div_beat <= (others => '0');
+                clk_div_freq <= clk_div_freq + 1;
             elsif clk_div_freq = unsigned(beat) then
                 clk_div_freq <= (others => '0');
+                clk_div_beat <= clk_div_beat + 1;
             else
                 clk_div_beat <= clk_div_beat + 1;
                 clk_div_freq <= clk_div_freq + 1;
@@ -254,9 +206,6 @@ begin
             end if;
         end if;
     end process;
-    
-    --clk_beat <= not clk_beat when (clk_div_beat = unsigned(beat)) else clk_beat;
-    --clk_freq <= not clk_freq when (clk_div_freq = unsigned(freq)) else clk_freq;
 
 
     -- Beat flip flop
@@ -286,10 +235,23 @@ begin
     --q_beat_plus <= sound_enable and not q_beat;
     q_beat_plus <= not q_beat;
     q_freq_plus <= q_beat and (not q_freq);
+    --q_freq_plus <= not q_freq;
     
     test_diod <= q_beat;
     test2_diod <= clk_beat;
     
-    sound_data <= q_freq;
+    --sound_data <= q_freq;
+
+    -- ********** TESTING **************
+    -- flip flop
+    process(clk) begin
+        if rising_edge(clk) then
+            if rst='1' then
+                q_test <= '0';
+            elsif clk_test = '1' then
+                q_test <= q_test_plus;
+            end if;
+        end if;
+    end process;
   
 end behavioral;
