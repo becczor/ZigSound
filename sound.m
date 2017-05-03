@@ -23,13 +23,13 @@ bpm = [ 30, 38, 46, 54, 62, 70, 78, 86, 94, 102, 110, 120, 130, 140, 152, 166, 1
 Hz_beat = bpm ./60.00;
 
 % Multiply with 0.5 for 50% duty cycle
-div_beat = round((power(10,6)*0.5) ./ Hz_beat);
+div_beat = round((power(10,8)*0.5) ./ Hz_beat);
 
 
 x = 1:40;
 Hz_freq = 440+25.*x;
 % Multiply with 0.5 for 50% duty cycle
-div_freq = round((power(10,6)*0.5) ./ Hz_freq);
+div_freq = round((power(10,8)*0.5) ./ Hz_freq);
 
 
 
