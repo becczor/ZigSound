@@ -53,12 +53,6 @@ architecture behavioral of SOUND is
     signal q_freq       : std_logic := '0';                       -- Freq flip flop
     signal q_freq_plus  : std_logic := '0';
 
-    -- ******* TESTING *******
-    --signal test         : signed(16 downto 0) := to_signed(113636, 17);
-    --signal clk_test     : std_logic := '0';
-    --signal clk_div_test : unsigned(16 downto 0);
-    --signal q_test       : std_logic := '0';
-    --signal q_test_plus  : std_logic := '0';
 begin
 
     -- Set signals for playing sound
@@ -163,7 +157,7 @@ begin
         to_signed(35971, 17) when to_signed(37, 6),
         to_signed(35336, 17) when to_signed(38, 6),
         to_signed(34722, 17) when to_signed(39, 6),
-        to_signed(1, 17) when others;
+        to_signed(54645, 17) when others;
       
         
     -- Clock divisor
@@ -176,7 +170,7 @@ begin
             elsif clk_div_beat = unsigned(beat) then
                 clk_div_beat <= (others => '0');
                 clk_div_freq <= clk_div_freq + 1;
-            elsif clk_div_freq = unsigned(beat) then
+            elsif clk_div_freq = unsigned(freq) then
                 clk_div_freq <= (others => '0');
                 clk_div_beat <= clk_div_beat + 1;
             else
@@ -237,49 +231,5 @@ begin
     test2_diod <= clk_beat;
     
     sound_data <= q_freq;
-
-    -- ********** TESTING **************
-    
-    -- Clock divisor
-    -- Divide system clock (100 MHz) by test
-    --process(clk) begin
-    --    if rising_edge(clk) then
-    --        if rst='1' then
-    --            clk_div_test <= (others => '0');
-    --        elsif clk_div_test = unsigned(test) then
-    --            clk_div_test <= (others => '0');
-    --        else
-    --            clk_div_test <= clk_div_test + 1;
-    --        end if;
-    --    end if;
-    --end process;
-
-    -- Toggle sound clocks to get 50% duty cycle
-    --process(clk) begin
-    --    if rising_edge(clk) then
-    --        if rst = '1' then
-    --            clk_test <= '0';
-    --        elsif clk_div_test = unsigned(test) then
-    --            clk_test <= not clk_test;
-    --        end if;
-    --    end if;
-    --end process;
-    
-    -- flip flop
-    --process(clk_test) begin
-    --    if rising_edge(clk_test) then
-    --        if rst='1' then
-    --            q_test <= '0';
-    --        else
-    --            q_test <= q_test_plus;
-    --        end if;
-    --    end if;
-    --end process;
-
-    --q_test_plus <= not q_test;
-    
-    --sound_data <= q_test;
-    --test_diod <= q_test;
-    --test2_diod <= clk_test;
   
 end behavioral;
