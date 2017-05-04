@@ -163,7 +163,7 @@ begin
         to_signed(35971, 17) when to_signed(37, 6),
         to_signed(35336, 17) when to_signed(38, 6),
         to_signed(34722, 17) when to_signed(39, 6),
-        to_signed(1, 11) when others;
+        to_signed(1, 17) when others;
       
         
     -- Clock divisor
