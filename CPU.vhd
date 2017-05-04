@@ -18,11 +18,12 @@ entity CPU is
 		move_resp       : in std_logic;
 		curr_pos_out    : out signed(17 downto 0);
 		next_pos_out    : out signed(17 downto 0);
+        goal_pos_out    : out signed(17 downto 0);
 		sel_track_out   : out unsigned(1 downto 0);
-		sel_sound_out   : out std_logic;
+		sel_sound_out   : out std_logic
 		--TEST
         --test_diod       : out std_logic;
-        switch          : in std_logic
+        --switch          : in std_logic
         );
 end CPU;
 
@@ -65,6 +66,7 @@ architecture Behavioral of CPU is
     signal MOVE_REQ     : std_logic := '0';  -- Move request (move_req_out)
     signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
     signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
+    signal GOAL_POS     : signed(17 downto 0) := "000010100000001111";  -- Goal position (goal_pos_out)
     signal SEL_TRACK    : unsigned(1 downto 0) := "01";  -- Track select (sel_track_out) 
     -- To SOUND
     signal SEL_SOUND    : std_logic := '0'; -- Sound select (sel_sound_out)
@@ -93,7 +95,6 @@ architecture Behavioral of CPU is
     --signal GR1          : signed(17 downto 0) := "000000000000000011";
     --signal GR2          : signed(17 downto 0) := "000000000000000001";
     --signal GR3          : signed(17 downto 0) := (others => '0');
-    --signal GOAL_POS     : signed(17 downto 0) := (others => '0');
     
     --********************
     --* Register aliases *
@@ -102,6 +103,8 @@ architecture Behavioral of CPU is
     alias CURR_YPOS     : signed(4 downto 0) is CURR_POS(4 downto 0);
     alias NEXT_XPOS     : signed(5 downto 0) is NEXT_POS(14 downto 9);
     alias NEXT_YPOS     : signed(4 downto 0) is NEXT_POS(4 downto 0);
+    alias GOAL_XPOS     : signed(5 downto 0) is GOAL_POS(14 downto 9);
+    alias GOAL_YPOS     : signed(4 downto 0) is GOAL_POS(4 downto 0);
     alias key_code      : unsigned(2 downto 0) is PS2cmd(2 downto 0);
 
     -- TEST                             
@@ -622,6 +625,7 @@ begin
     --uAddr <= uPC; 
     curr_pos_out <= CURR_POS;
     next_pos_out <= NEXT_POS;
+    goal_pos_out <= GOAL_POS;
     sel_track_out <= SEL_TRACK;
     sel_sound_out <= SEL_SOUND;
     move_req_out <= MOVE_REQ;
