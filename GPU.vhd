@@ -101,7 +101,7 @@ begin
     -- Takes x- and y-pos from curr_pos if we're in CLEAR, else from next_pos.
     xpos <= unsigned(CURR_XPOS) when (WRstate = IDLE) else unsigned(NEXT_XPOS);
     ypos <= unsigned(CURR_YPOS) when (WRstate = IDLE) else unsigned(NEXT_YPOS);
-    tile <= x"00" when (WRstate = IDLE) else x"1F";
+    tile <= x"00" when (WRstate = IDLE) else x"01";
   
     end behavioral;
 
