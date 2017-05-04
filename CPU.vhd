@@ -66,7 +66,7 @@ architecture Behavioral of CPU is
     signal MOVE_REQ     : std_logic := '0';  -- Move request (move_req_out)
     signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
     signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
-    signal SEL_TRACK    : signed(1 downto 0) := "01";  -- Track select (sel_track_out) 
+    signal SEL_TRACK    : signed(1 downto 0) := "00";  -- Track select (sel_track_out) 
     -- To SOUND
     signal SEL_SOUND    : std_logic := '0'; -- Sound select (sel_sound_out)
     --signal rst_track_signal    : std_logic := '0';
@@ -319,7 +319,7 @@ begin
     begin
         if rising_edge(clk) then
             if (rst = '1') then
-                SEL_TRACK <= "01";
+                SEL_TRACK <= "00";
             elsif (FB = "001" and GRX = "001") then
                 rst_track_out <= '1';
                 SEL_TRACK <= DATA_BUS(1 downto 0);
