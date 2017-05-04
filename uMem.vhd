@@ -41,12 +41,18 @@ constant u_mem_c : u_mem_t := (
 		b"0100_110_000_1_0_00_0000_0000000",	--0984000	AR := GR3 + AR
 		b"0000_100_111_0_0_00_0001_0000000",	--0138080	ASR := AR, µPC := K1 (OP-fältet)
 
+
 		--LOAD
 		--GRx := PM(A)	0A	
 		b"0000_010_110_0_0_00_0011_0000000",	--00B0180	GRx := PM(A), µPC = 0
+
+
+        -- UNUSABLE WITH NO WAY TO WRITE TO PM FROM CPU.
 		--STORE
 		--PM(A) := GRx	0B	
 		b"0000_110_010_0_0_00_0011_0000000",	--0190180	PM(A) := GRx, µPC = 0
+
+
 		--ADD
 		--GRx := GRx + PM(A)	0C	
 		b"0001_110_000_0_0_00_0000_0000000",	--0380000	AR := GRx via buss

@@ -23,8 +23,8 @@ entity zigsound is
         --Test
         debug_PS2CLK            : out std_logic;
         debug_PS2Data           : out std_logic;
-        test_diod   		    : out std_logic;
-        switch                  : in std_logic
+        --test_diod   		    : out std_logic;
+        --switch                  : in std_logic
         );
         
 end zigsound;
@@ -53,7 +53,7 @@ architecture Behavioral of zigsound is
 	        sel_sound_out   : out std_logic;
 	        rst_track_out   : out std_logic;
 	        --test_diod   	: out std_logic;
-	        switch          : in std_logic
+	        --switch          : in std_logic
 	        );
   	end component;
 
@@ -134,7 +134,7 @@ architecture Behavioral of zigsound is
         PS2KeyboardData     : in std_logic;  -- USB keyboard PS2 data
         PS2cmd				: out unsigned(17 downto 0);
         --TEST
-	    test_diod		    : out std_logic  
+	    --test_diod		    : out std_logic  
 		);
 	end component;
 	
@@ -204,7 +204,7 @@ begin
                 sel_sound_out => sel_sound_con,
                 rst_track_out => rst_track_con,
                 --test_diod => test_diod,
-                switch => switch 
+                --switch => switch 
                 );
 
     -- uMem Component Connection
@@ -274,7 +274,7 @@ begin
 	            PS2KeyboardCLK => PS2KeyboardCLK,
 	            PS2KeyboardData => PS2KeyboardData,
 	            PS2cmd => PS2cmd_con,
-	            test_diod => test_diod
+	            --test_diod => test_diod
 	            );
 
 end Behavioral;

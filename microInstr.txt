@@ -1,4 +1,4 @@
-******* ALU: *******
+﻿******* ALU: *******
   0000 - Hämtfas, LOAD, STORE, ADD, SUB, AND, LSR, BRA, BNE, BGT, BGE, HALT
   0001 - Hämtfas, ADD, SUB, AND, LSR, BRA, CMP
   0010-----
@@ -70,7 +70,7 @@
   1010-----
   1011 - BGT, BGE
   1100 - LSR
-  1101-----
+  1101 - BCT (branch on continue)
   1110 - BGT, BGE
   1111 - HALT
 
