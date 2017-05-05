@@ -20,7 +20,6 @@ entity CPU is
         next_pos_out    : out signed(17 downto 0);
         sel_track_out   : out unsigned(1 downto 0);
         sel_sound_out   : out std_logic;
-        rst_track_out   : out std_logic;
         --TEST--
         --test_diod     : out std_logic;
         --switch        : in std_logic
@@ -67,6 +66,8 @@ architecture Behavioral of CPU is
     signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
     signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
     signal SEL_TRACK    : signed(1 downto 0) := "00";  -- Track select (sel_track_out) 
+    -- Temp for saving next track before we can apply it to SEL_TRACK.
+    signal next_track   : signed(1 downto 0) := "00"; 
     -- To SOUND
     signal SEL_SOUND    : std_logic := '0'; -- Sound select (sel_sound_out)
     --**************************
@@ -106,6 +107,13 @@ architecture Behavioral of CPU is
     alias NEXT_XPOS     : signed(5 downto 0) is NEXT_POS(14 downto 9);
     alias NEXT_YPOS     : signed(4 downto 0) is NEXT_POS(4 downto 0);
     alias key_code      : unsigned(2 downto 0) is PS2cmd(2 downto 0);
+
+    --************
+    --* Counters *
+    --************
+    signal x_cnt        : signed(5 downto 0) := (others => '0');
+    signal y_cnt        : signed(4 downto 0) := (others => '0');
+    signal dly_cnt      : unsigned(1 downto 0) := (others => '0');
 
      --TEST                             
     --signal test_led_counter             : unsigned(25 downto 0);
@@ -288,11 +296,19 @@ begin
         if rising_edge(clk) then
             if (rst = '1') then
                 SEL_TRACK <= "00";
-            elsif (FB = "110" and GRX = "101") then
-                rst_track_out <= '1';
-                SEL_TRACK <= DATA_BUS(1 downto 0);
+                dly_cnt <= to_unsigned(0,2);
+            -- In process of changing track, locking keyboard.
+            elsif (dly_cnt = 0 and FB = "110" and GRX = "101") then
+                next_track <= DATA_BUS(1 downto 0); 
+                dly_cnt <= to_unsigned(1,2);
+            elsif (dly_cnt = 1) then
+                dly_cnt <= to_unsigned(2,2);
+            -- Unlocking keyboard and changing track.
+            elsif (dly_cnt = 2) then
+                dly_cnt <= to_unsigned(0,2);
+                SEL_TRACK <= next_track;
             else
-                rst_track_out <= '0';    
+                null;
             end if;
         end if;
     end process;    
@@ -570,7 +586,7 @@ begin
     process(clk)
     begin
         if rising_edge(clk) then
-            if (rst = '1' or rst_track = '1') then
+            if (rst = '1') then
                 CURR_POS <= "000000001000000001";
                 NEXT_POS <= "000000001000000001";
                 MOVE_REQ <= '0';
@@ -579,29 +595,39 @@ begin
                 if (move_resp = '1') then
                     CURR_POS <= NEXT_POS;
                 end if;
-                case key_code is
-                    when "001" =>  -- UP (W)
-                        NEXT_XPOS <= CURR_XPOS;
-                        NEXT_YPOS <= CURR_YPOS - 1;
-                        MOVE_REQ <= '1';
-                    when "010" =>  -- LEFT (A)
-                        NEXT_YPOS <= CURR_YPOS;
-                        NEXT_XPOS <= CURR_XPOS - 1;
-                        MOVE_REQ <= '1';
-                    when "011" =>  -- DOWN (S)
-                        NEXT_XPOS <= CURR_XPOS;
-                        NEXT_YPOS <= CURR_YPOS + 1;
-                        MOVE_REQ <= '1';
-                    when "100" =>  -- RIGHT (D)
-                        NEXT_YPOS <= CURR_YPOS;
-                        NEXT_XPOS <= CURR_XPOS + 1;
-                        MOVE_REQ <= '1';
-                    when "101" => -- SOUND TOGGLE (SPACE)
-                        SEL_SOUND <= not SEL_SOUND;
-                        MOVE_REQ <= '0';
-                    when others =>
-                        MOVE_REQ <= '0';
-                end case;
+                -- We're changing track, send move_req back to start.
+                if (dly_cnt = 0 and FB = "110" and GRX = "101") then  
+                    NEXT_POS <= "000000001000000001";
+                    MOVE_REQ <= '1';
+                -- Not in locked mode, check for key pressed.
+                elsif (dly_cnt = 0) then
+                    case key_code is
+                        when "001" =>  -- UP (W)
+                            NEXT_XPOS <= CURR_XPOS;
+                            NEXT_YPOS <= CURR_YPOS - 1;
+                            MOVE_REQ <= '1';
+                        when "010" =>  -- LEFT (A)
+                            NEXT_YPOS <= CURR_YPOS;
+                            NEXT_XPOS <= CURR_XPOS - 1;
+                            MOVE_REQ <= '1';
+                        when "011" =>  -- DOWN (S)
+                            NEXT_XPOS <= CURR_XPOS;
+                            NEXT_YPOS <= CURR_YPOS + 1;
+                            MOVE_REQ <= '1';
+                        when "100" =>  -- RIGHT (D)
+                            NEXT_YPOS <= CURR_YPOS;
+                            NEXT_XPOS <= CURR_XPOS + 1;
+                            MOVE_REQ <= '1';
+                        when "101" => -- SOUND TOGGLE (SPACE)
+                            SEL_SOUND <= not SEL_SOUND;
+                            MOVE_REQ <= '0';
+                        when others =>
+                            MOVE_REQ <= '0';
+                    end case;
+                -- In locked mode, don't check for key pressed.
+                else    
+                    MOVE_REQ <= '0';
+                end if;
             end if;
         end if;
     end process;

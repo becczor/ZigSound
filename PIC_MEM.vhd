@@ -18,7 +18,6 @@ entity PIC_MEM is
         rst		            : in std_logic;
         -- CPU
         sel_track       	: in unsigned(1 downto 0);
-        rst_track           : in std_logic;
         -- GPU
         we		        	: in std_logic;
         data_nextpos    	: out unsigned(7 downto 0);
@@ -35,9 +34,6 @@ end PIC_MEM;
 -- Architecture
 architecture Behavioral of PIC_MEM is
 
-
-    signal addr_last		: unsigned(10 downto 0) := to_unsigned(41,11); -- Last character address
-    signal curr_track		: unsigned(1 downto 0) := "00"; -- Last character address
 
     -- Track memory type
     type ram_t is array (0 to 3599) of unsigned(7 downto 0);
@@ -413,12 +409,6 @@ architecture Behavioral of PIC_MEM is
         x"18",x"18",x"18",x"18",x"18",x"18",x"18",x"18",x"18",x"18"  -- Row 29
         );
         
-    -- TRACK 2 initialization
-    --signal track_2 : ram_t := (0 => x"1F", others => (others => '0')); 
-    
-    -- TRACK 3 initialization
-    --signal track_3 : ram_t := (0 => x"1F", others => (others => '0')); 
-
 
 begin
 
@@ -427,52 +417,18 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        if ((rst = '1') or (rst_track = '1')) then
-            track(to_integer(curr_track)*1200 + to_integer(addr_last)) <= x"00";
-            track(to_integer(curr_track)*1200+41) <= x"1F"; 
-            addr_last <= to_unsigned(41,11);
-            curr_track <= sel_track;
-        elsif (we = '1') then
-            track(to_integer(sel_track)*1200 + to_integer(addr_change)) <= data_change;
-            addr_last <= addr_change;
+        if (we = '1') then
+            track(to_integer(sel_track*to_unsigned(1200,11) + addr_change)) <= data_change;
         else
             null;
         end if;
-        data_nextpos <= track(to_integer(sel_track)*1200 + to_integer(addr_nextpos));
-        data_vga <= track(to_integer(sel_track)*1200 + to_integer(addr_vga));
     end if;
     end process;
-
-    -- Sets data_nextpos to data at addr_nextpos and data_vga to data at addr_vga.
     
     
-    -- Is not correct! Just changed to see if LUT utilazation decreses 
-    --process(clk)
-    --begin
-    --if rising_edge(clk) then
-    --    data_nextpos <= track(to_integer(sel_track)*1200 + to_integer(addr_nextpos));
-    --    data_vga <= track(to_integer(sel_track)*1200 + to_integer(addr_vga));
-    --else
-    --    null;
-    --end if;
-    --end process; 
+    data_nextpos <= track(to_integer(sel_track*to_unsigned(1200,11) + addr_nextpos));
+    data_vga <= track(to_integer(sel_track*to_unsigned(1200,11) + addr_vga));
 
-
-    
-    --with sel_track select
-    --    data_nextpos <= 
-    --    track_1(to_integer(addr_nextpos)) when "01",
-    --    track_2(to_integer(addr_nextpos)) when "10",
-    --    track_3(to_integer(addr_nextpos)) when "11",
-    --    (others => '0') when others;
-    --with sel_track select
-    --    data_vga <= 
-    --    track_1(to_integer(addr_vga)) when "01",
-    --    track_2(to_integer(addr_vga)) when "10",
-    --    track_3(to_integer(addr_vga)) when "11",
-    --    (others => '0') when others;
-        
-        
 
 
 end Behavioral;

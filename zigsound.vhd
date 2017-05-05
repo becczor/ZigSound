@@ -51,7 +51,6 @@ architecture Behavioral of zigsound is
 	        next_pos_out    : out signed(17 downto 0);
 	        sel_track_out   : out unsigned(1 downto 0);
 	        sel_sound_out   : out std_logic;
-	        rst_track_out   : out std_logic;
 	        --test_diod   	: out std_logic;
 	        --switch          : in std_logic
 	        );
@@ -97,7 +96,6 @@ architecture Behavioral of zigsound is
         rst	                : in std_logic;
         -- CPU
         sel_track       	: in unsigned(1 downto 0);
-        rst_track           : in std_logic;
         -- GPU
         we		            : in std_logic;
         data_nextpos    	: out unsigned(7 downto 0);
@@ -151,7 +149,6 @@ architecture Behavioral of zigsound is
 	signal next_pos_con     : signed(17 downto 0);
 	signal sel_track_con    : unsigned(1 downto 0);
 	signal sel_sound_con    : std_logic;
-	signal rst_track_con    : std_logic;
     
     -- uMem signals
     signal uData_con        : unsigned(24 downto 0);
@@ -201,8 +198,7 @@ begin
                 curr_pos_out => curr_pos_con,
                 next_pos_out => next_pos_con,
                 sel_track_out => sel_track_con,
-                sel_sound_out => sel_sound_con,
-                rst_track_out => rst_track_con,
+                sel_sound_out => sel_sound_con
                 --test_diod => test_diod,
                 --switch => switch 
                 );
@@ -247,8 +243,7 @@ begin
 	            addr_change => addr_change_con,
 	            data_vga => data_vga_con,
 	            addr_vga => addr_vga_con,
-	            sel_track => sel_track_con,
-	            rst_track => rst_track_con
+	            sel_track => sel_track_con
 	            );
 	
 	-- VGA_MOTOR Component Connection
