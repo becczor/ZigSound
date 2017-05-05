@@ -396,7 +396,7 @@ begin
                         uPC <= uPC + 1;
                     end if;  
                 when "1101" =>  -- Used in BCT (branch on continue).
-                    if (flag_G = '0') then
+                    if (flag_G = '1') then
                         uPC <= MICROADDR;
                     else 
                         uPC <= uPC + 1;

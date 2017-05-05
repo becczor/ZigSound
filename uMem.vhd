@@ -88,8 +88,8 @@ constant u_mem_c : u_mem_t := (
 		b"0101_010_000_0_0_00_0011_0000000",	--0A80180	AR := GRx - PM(A) via buss
 		--BNE
 		--PC := PC + 1 + ADR 
-		--om z = 1, annars PC++	20	
-		b"0000_000_000_0_0_00_1000_0000000",	--0000400	 µPC := 0 om Z = 1
+		--om Z = 0, annars PC++	20	
+		b"0000_000_000_0_0_00_1000_0000000",	--0000400	µPC := 0 om Z = 1
 		b"0000_000_000_0_0_00_0101_0011011",	--000029B	Hopp till BRA
 		--BGT
 		--PC := PC + 1 + ADR 
@@ -112,6 +112,11 @@ constant u_mem_c : u_mem_t := (
 		--HALT
 		--Avbryt exekvering	2E	
 		b"0000_000_000_0_0_00_1111_0000000"	    --0000780	Halt
+        --BCT  
+        --PC := PC + 1 + ADR
+        --om G = 0, annars PC++ 2F
+		b"0000_000_000_0_0_00_1101_0000000",	--0000400	µPC := 0 om G = 1
+		b"0000_000_000_0_0_00_0101_0011011",	--000029B	Hopp till BRA
         );
 
 signal u_mem : u_mem_t := u_mem_c;
