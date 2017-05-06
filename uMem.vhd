@@ -18,7 +18,7 @@ architecture Behavioral of uMem is
 --************************
 --* u_mem : Micro Memory *
 --************************
-type u_mem_t is array (0 to 46) of unsigned(24 downto 0);
+type u_mem_t is array (0 to 49) of unsigned(24 downto 0);
 -- Maximum array length is 256, change when adding/deleting from uMem.
 constant u_mem_c : u_mem_t := (
         -- ALU_TB_FB_S_P_LC_SEQ_MICROADDR
@@ -42,58 +42,58 @@ constant u_mem_c : u_mem_t := (
 		b"0000_100_111_0_0_00_0001_0000000",	--0138080	ASR := AR, µPC := K1 (OP-fältet)
 
 
-		--LOAD
-		--GRx := PM(A)	0A	
+		--LOAD 0A
+		--GRx := PM(A)
 		b"0000_010_110_0_0_00_0011_0000000",	--00B0180	GRx := PM(A), µPC = 0
 
 
+		--STORE 0B
+		--PM(A) := GRx	
         -- UNUSABLE WITH NO WAY TO WRITE TO PM FROM CPU.
-		--STORE
-		--PM(A) := GRx	0B	
 		b"0000_110_010_0_0_00_0011_0000000",	--0190180	PM(A) := GRx, µPC = 0
 
 
-		--ADD
-		--GRx := GRx + PM(A)	0C	
+		--ADD 0C
+		--GRx := GRx + PM(A)
 		b"0001_110_000_0_0_00_0000_0000000",	--0380000	AR := GRx via buss
 		b"0100_010_000_0_0_00_0000_0000000",	--0880000	AR := GRx + PM(A) via buss
 		b"0000_100_110_0_0_00_0011_0000000",	--0130180	GRx := AR, µPC = 0
-		--SUB
-		--GRx := GRx - PM(A)	0F	
+		--SUB 0F
+		--GRx := GRx - PM(A)
 		b"0001_110_000_0_0_00_0000_0000000",	--0380000	AR := GRx via buss
 		b"0101_010_000_0_0_00_0000_0000000",	--0A80000	AR := GRx - PM(A) via buss
 		b"0000_100_110_0_0_00_0011_0000000",	--0130180	GRx := AR, µPC = 0
-		--AND
-		--GRx := GRx & PM(A)	12	
+		--AND 12
+		--GRx := GRx & PM(A)
 		b"0001_110_000_0_0_00_0000_0000000",	--0380000	AR := GRx via buss
 		b"0110_010_000_0_0_00_0000_0000000",	--0C80000	AR := GRx & PM(A) via buss
 		b"0000_100_110_0_0_00_0011_0000000",	--0130180	GRx := AR, µPC = 0
-		--LSR
-		--GRx skiftas logiskt höger Y steg 	15	
+		--LSR 15
+		--GRx skiftas logiskt höger Y steg	
 		b"0000_001_000_0_0_10_0000_0000000",	--0041000	LC := IR via buss
 		b"0001_110_000_0_0_00_0000_0000000",	--0380000	AR := GRx via buss
 		b"0000_000_000_0_0_00_1100_0011010",	--000061A	Hopp till (*) om L = 1 (LC = 0, d.v.s. klara) (#)
 		b"1101_000_000_0_0_01_0000_0000000",	--1A00800	Skifta AR logiskt åt höger 1 steg, LC--
 		b"0000_000_000_0_0_00_0101_0010111",	--0000297	Hopp till (#)
 		b"0000_100_110_0_0_00_0011_0000000",	--0130180	GRx := AR, µPC = 0 (*)
-		--BRA
-		--PC := PC + 1 + ADR	1B	
+		--BRA 1B
+		--PC := PC + 1 + ADR
 		b"0001_011_000_0_0_00_0000_0000000",	--02C0000	AR := PC via buss
 		b"0100_001_000_0_0_00_0000_0000000",	--0840000	AR := PC + IR
 		b"0000_100_011_0_0_00_0011_0000000",	--0118180	PC := AR
-		--CMP
+		--CMP 1E
 		--Sätter flaggor genom
-		--AR := GRx - PM(A)	1E	
+		--AR := GRx - PM(A)	
 		b"0001_110_000_0_0_00_0000_0000000",	--0380000	AR := GRx via buss
 		b"0101_010_000_0_0_00_0011_0000000",	--0A80180	AR := GRx - PM(A) via buss
-		--BNE
+		--BNE 20
 		--PC := PC + 1 + ADR 
-		--om Z = 0, annars PC++	20	
+		--om Z = 0, annars PC++
 		b"0000_000_000_0_0_00_1000_0000000",	--0000400	µPC := 0 om Z = 1
 		b"0000_000_000_0_0_00_0101_0011011",	--000029B	Hopp till BRA
-		--BGT
+		--BGT 22
 		--PC := PC + 1 + ADR 
-		--om >, annars PC++	22	
+		--om >, annars PC++	
 		b"0000_000_000_0_0_00_0100_0100100",	--0000224	Hopp till (*) om Z = 0
 		b"0000_000_000_0_0_00_0011_0000000",	--0000180	µPC := 0
 		b"0000_000_000_0_0_00_1001_0100111",	--00004A7	Hopp till (#) om N = 1        (*)
@@ -101,22 +101,26 @@ constant u_mem_c : u_mem_t := (
 		b"0000_000_000_0_0_00_0011_0000000",	--0000180	µPC := 0
 		b"0000_000_000_0_0_00_1011_0011011",	--000059B	Hopp till BRA om O = 1        (#)
 		b"0000_000_000_0_0_00_0011_0000000",	--0000180	µPC := 0
-		--BGE
+		--BGE 29
 		--PC := PC + 1 + ADR 
-		--om ≥, annars PC++	29	
+		--om ≥, annars PC++
 		b"0000_000_000_0_0_00_1001_0101100",	--00004AC	Hopp till (#) om N = 1
 		b"0000_000_000_0_0_00_1110_0011011",	--000071B	Hopp till BRA om O = 0
 		b"0000_000_000_0_0_00_0011_0000000",	--0000180	µPC := 0
 		b"0000_000_000_0_0_00_1011_0011011",	--000059B	Hopp till BRA om O = 1        (#)
 		b"0000_000_000_0_0_00_0011_0000000",	--0000180	µPC := 0
-		--HALT
-		--Avbryt exekvering	2E	
-		b"0000_000_000_0_0_00_1111_0000000"	    --0000780	Halt
-        --BCT  
+		--HALT 2E
+		--Avbryt exekvering
+		b"0000_000_000_0_0_00_1111_0000000",    --0000780	Halt
+        --BCT 2F
         --PC := PC + 1 + ADR
-        --om G = 0, annars PC++ 2F
-		b"0000_000_000_0_0_00_1101_0000000",	--0000400	µPC := 0 om G = 1
+        --om G = 0, annars PC++
+		b"0000_000_000_0_0_00_1101_0000000",	--0000680	µPC := 0 om G = 1
 		b"0000_000_000_0_0_00_0101_0011011",	--000029B	Hopp till BRA
+        --SETRND 31
+        --GOAL_POS := RND_GOAL_POS if GRX = "100"    
+        --SEL_TRACK := RND_SEL_TRACK if GRX = "101" 
+        b"0000_110_110_0_0_00_0000_0000000" 	--01B0000	REG := RND_REG
         );
 
 signal u_mem : u_mem_t := u_mem_c;

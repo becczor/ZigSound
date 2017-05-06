@@ -19,7 +19,7 @@ entity CPU is
         curr_pos_out    : out signed(17 downto 0);
         next_pos_out    : out signed(17 downto 0);
         sel_track_out   : out unsigned(1 downto 0);
-        sel_sound_out   : out std_logic;
+        sel_sound_out   : out std_logic
         --TEST--
         --test_diod     : out std_logic;
         --switch        : in std_logic
@@ -65,7 +65,8 @@ architecture Behavioral of CPU is
     signal MOVE_REQ     : std_logic := '0';  -- Move request (move_req_out)
     signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
     signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
-    signal SEL_TRACK    : signed(1 downto 0) := "00";  -- Track select (sel_track_out) 
+    signal SEL_TRACK    : signed(1 downto 0) := "00";  -- Track select (sel_track_out)
+    signal RND_SEL_TRACK : signed(1 downto 0) := "00"; 
     -- Temp for saving next track before we can apply it to SEL_TRACK.
     signal next_track   : signed(1 downto 0) := "00"; 
     -- To SOUND
@@ -97,7 +98,6 @@ architecture Behavioral of CPU is
     signal GR3          : signed(17 downto 0) := (others => '0');
     signal GOAL_POS     : signed(17 downto 0) := (others => '0');
     signal RND_GOAL_POS : signed(17 downto 0) := (others => '0');
-    signal RND_SEL_TRACK : signed(1 downto 0) := "00";
     
     --********************
     --* Register aliases *
@@ -125,39 +125,40 @@ architecture Behavioral of CPU is
 	--****************************************************************************
 	type uAddr_instr_t is array (0 to 31) of unsigned(7 downto 0);
 	constant uAddr_instr_c : uAddr_instr_t := 
-	-- LÄGG IN STARTADRESSER FÖR INSTRUKTIONER HÄR GUYS!!
-        ("00000000",
-         "00000000",
-         "00000000", 
-         "00000000", 
-         "00000000", 
-         "00000000", 
-         "00000000",
-         "00000000",
-         "00000000",
-         "00000000",
-         "00000000",
-         "00000000",
-         "00000000", 
-         "00000000", 
-         "00000000", 
-         "00000000", 
-         "00000000",
-         "00000000",
-         "00000000",
-         "00000000",
-         "00000000",
-         "00000000",
-         "00000000", 
-         "00000000", 
-         "00000000", 
-         "00000000", 
-         "00000000",
-         "00000000",
-         "00000000",
-         "00000000",
-         "00000000",
-         "00000000");
+	-- OP consists of 5 bits, so the maximum amount of instructions is 32.
+        (x"0A", -- LOAD     "00000" 0
+         x"0B", -- STORE    "00001" 1
+         x"0C", -- ADD      "00010" 2
+         x"0F", -- SUB      "00011" 3
+         x"12", -- AND      "00100" 4
+         x"15", -- LSR      "00101" 5
+         x"1B", -- BRA      "00110" 6
+         x"1E", -- CMP      "00111" 7
+         x"20", -- BNE      "01000" 8
+         x"22", -- BGT      "01001" 9
+         x"29", -- BGE      "01010" 10
+         x"2E", -- HALT     "01011" 11
+         x"2F", -- BCT      "01100" 12
+         x"31", -- SETRND   "01101" 13
+         x"00", -- NULL     "01110" 14
+         x"00", -- NULL     "01111" 15
+         x"00", -- NULL     "10000" 16
+         x"00", -- NULL     "10001" 17
+         x"00", -- NULL     "10010" 18
+         x"00", -- NULL     "10011" 19
+         x"00", -- NULL     "10100" 20
+         x"00", -- NULL     "10101" 21
+         x"00", -- NULL     "10110" 22
+         x"00", -- NULL     "10111" 23
+         x"00", -- NULL     "11000" 24
+         x"00", -- NULL     "11001" 25
+         x"00", -- NULL     "11010" 26
+         x"00", -- NULL     "11011" 27
+         x"00", -- NULL     "11100" 28
+         x"00", -- NULL     "11101" 29
+         x"00", -- NULL     "11110" 30
+         x"00"  -- NULL     "11111" 31
+        );
     signal uAddr_instr : uAddr_instr_t := uAddr_instr_c;
 
 begin 
@@ -179,7 +180,7 @@ begin
     end process;
 
     RND_SEL_TRACK <= x_cnt(1 downto 0) when (not x_cnt(1 downto 0) = "11") else "00";
-    RND_GOAL_POS <= ("000" & x_cnt & "0000" & y_cnt) when ((not to_integer(x_cnt) = 1) and (not to_integer(y_cnt) = 1));
+    RND_GOAL_POS <= ("000" & x_cnt & "0000" & y_cnt) when ((not (to_integer(x_cnt) = 1)) and (not (to_integer(y_cnt) = 1)));
 
     
 	--*****************************
@@ -313,20 +314,6 @@ begin
         end if;
     end process;    
 
-
-    ----****************************************
-    ----* RST_TRACK : Track-selection Register *
-    ----****************************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                RST_TRACK <= '0';
-            else (FB = "110" and GRX = "110") then
-                RST_TRACK <= DATA_BUS(0);
-            end if;
-        end if;
-    end process;    
 
     --*****************************************
     --* ASR : Program Memory Address Register *
@@ -572,11 +559,11 @@ begin
     GR0                             when (TB = "110" and GRX = "000") else 
     GR1                             when (TB = "110" and GRX = "001") else 
     GR2                             when (TB = "110" and GRX = "010") else 
-    GR3                             when (TB = "110" and GRX = "011") else 
-    GOAL_POS                        when (TB = "110" and GRX = "100") else 
-    to_signed(0,16) & SEL_TRACK     when (TB = "110" and GRX = "101") else
-    RND_GOAL_POS                    when (TB = "110" and GRX = "110") else
-    to_signed(0,16) & RND_SEL_TRACK when (TB = "110" and GRX = "111") else
+    GR3                             when (TB = "110" and GRX = "011") else
+    RND_GOAL_POS                    when (TB = "110" and GRX = "100") else
+    to_signed(0,16) & RND_SEL_TRACK when (TB = "110" and GRX = "101") else 
+    GOAL_POS                        when (TB = "110" and GRX = "110") else 
+    to_signed(0,16) & SEL_TRACK     when (TB = "110" and GRX = "111") else
     to_signed(0,10) & ASR           when (TB = "111") else
     DATA_BUS;
     
