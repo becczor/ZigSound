@@ -115,8 +115,8 @@ architecture Behavioral of CPU is
     --************
     --* Counters *
     --************
-    signal x_cnt        : signed(5 downto 0) := (others => '0');
-    signal y_cnt        : signed(4 downto 0) := (others => '0');
+    signal free_pos_lmt : signed(10 downto 0) := (others => '0');
+    signal free_pos_cnt : signed(10 downto 0) := (others => '0');
     signal dly_cnt      : unsigned(1 downto 0) := (others => '0');
 
      --TEST                             
@@ -168,41 +168,58 @@ architecture Behavioral of CPU is
     --**************************
     --* p_mem : Program Memory *
     --**************************
-    type free_pos_mem_t is array (0 to 3) of signed(17 downto 0);
-    -- Maximum array length is 256, change when adding/deleting from pMem.
-    constant free_pos_mem_c : free_pos_mem_t := (
-        -- NNN_XXXXXX_NNNN_YYYYY
-        "000" & to_signed(0) & "0000" & to_signed(1),
-        "000" & to_signed(0) & "0000" & to_signed(0),
-        "000" & to_signed(0) & "0000" & to_signed(0),
-        "000" & to_signed(0) & "0000" & to_signed(0),
-        "000" & to_signed(0) & "0000" & to_signed(0),
-        "000" & to_signed(0) & "0000" & to_signed(0),
-        "000" & to_signed(0) & "0000" & to_signed(0),
-        "000" & to_signed(0) & "0000" & to_signed(0),
+    type track_1_free_pos_mem_t is array (0 to 3) of signed(17 downto 0);
+    type track_2_free_pos_mem_t is array (0 to 3) of signed(17 downto 0);
+    type track_3_free_pos_mem_t is array (0 to 3) of signed(17 downto 0);
+    constant track_1_free_pos_mem_c : free_pos_mem_t := (
+        "000_XXXXXX_0000_YYYYY", "000_XXXXXX_0000_YYYYY", -- Row 1
+        "000_XXXXXX_0000_YYYYY", "000_XXXXXX_0000_YYYYY" -- Row 2
+        
 	);
-    signal p_mem : p_mem_t := p_mem_c;
+	constant track_2_free_pos_mem_c : free_pos_mem_t := (
+        "000_XXXXXX_0000_YYYYY", "000_XXXXXX_0000_YYYYY", -- Row 1
+        "000_XXXXXX_0000_YYYYY", "000_XXXXXX_0000_YYYYY" -- Row 2
+        
+	);
+	constant track_3_free_pos_mem_c : free_pos_mem_t := (
+        "000_XXXXXX_0000_YYYYY", "000_XXXXXX_0000_YYYYY", -- Row 1
+        "000_XXXXXX_0000_YYYYY", "000_XXXXXX_0000_YYYYY" -- Row 2
+        
+	);
+    signal track_1_free_pos_mem : track_1_free_pos_mem_t := track_1_free_pos_mem_c;
+    signal track_2_free_pos_mem : track_2_free_pos_mem_t := track_2_free_pos_mem_c;
+    signal track_3_free_pos_mem : track_3_free_pos_mem_t := track_3_free_pos_mem_c;
 
 begin 
     
     --****************************
     --* Random number generation *
-    --****************************  
+    --****************************
+    free_pos_lmt <= 
+    to_unsigned()                   when (SEL_TRACK = "00") else
+    to_unsigned()                   when (SEL_TRACK = "01") else
+    to_unsigned()                   when (SEL_TRACK = "10") else
+    free_pos_lmt;
+    
     process(clk)
     begin
         if rising_edge(clk) then
             if (rst = '1') then
-                x_cnt <= "010110";
-                y_cnt <= "10011";
+                free_pos_cnt <= (others => '0');
+            else if (free_pos_cnt >= free_pos_lmt) then
+                free_pos_cnt <= (others => '0');
             else
-                x_cnt <= x_cnt + 1;
-                y_cnt <= y_cnt + 1;
+                free_pos_cnt <= free_pos_cnt + 1;
             end if;
         end if;
     end process;
 
-    RND_SEL_TRACK <= x_cnt(1 downto 0) when (not x_cnt(1 downto 0) = "11") else "00";
-    RND_GOAL_POS <= ("000" & x_cnt & "0000" & y_cnt) when ((not (to_integer(x_cnt) = 1)) and (not (to_integer(y_cnt) = 1)));
+    RND_SEL_TRACK <= free_pos_cnt(1 downto 0) when (not x_cnt(1 downto 0) = "11") else "00";
+    RND_GOAL_POS <= 
+    track_1_free_pos_mem(free_pos_cnt)      when (SEL_TRACK = "00") else
+    track_2_free_pos_mem(free_pos_cnt)      when (SEL_TRACK = "01") else
+    track_3_free_pos_mem(free_pos_cnt)      when (SEL_TRACK = "10") else
+    track_1_free_pos_mem(free_pos_cnt);
 
     
 	--*****************************
