@@ -14,15 +14,16 @@ entity CPU is
         pAddr           : out signed(7 downto 0);
         pData           : in signed(17 downto 0);
         PS2cmd          : in unsigned(17 downto 0);
-        move_req_out    : out std_logic;
-        move_resp       : in std_logic;
-        curr_pos_out    : out signed(17 downto 0);
-        next_pos_out    : out signed(17 downto 0);
-        sel_track_out   : out unsigned(1 downto 0);
-        sel_sound_out   : out std_logic
-        --TEST--
-        --test_diod     : out std_logic;
-        --switch        : in std_logic
+		move_req_out    : out std_logic;
+		move_resp       : in std_logic;
+		curr_pos_out    : out signed(17 downto 0);
+		next_pos_out    : out signed(17 downto 0);
+        goal_pos_out    : out signed(17 downto 0);
+		sel_track_out   : out unsigned(1 downto 0);
+		sel_sound_out   : out std_logic
+		--TEST
+        --test_diod       : out std_logic;
+        --switch          : in std_logic
         );
 end CPU;
 
@@ -66,11 +67,12 @@ architecture Behavioral of CPU is
     signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
     signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
     signal SEL_TRACK    : signed(1 downto 0) := "00";  -- Track select (sel_track_out)
-    signal RND_SEL_TRACK : signed(1 downto 0) := "00"; 
+    signal RND_SEL_TRACK : signed(1 downto 0) := "00"; -- Randomly generated track selector.
     -- Temp for saving next track before we can apply it to SEL_TRACK.
     signal next_track   : signed(1 downto 0) := "00"; 
     -- To SOUND
     signal SEL_SOUND    : std_logic := '0'; -- Sound select (sel_sound_out)
+    
     --**************************
 	--* Program Memory Signals *
 	--**************************
@@ -92,11 +94,11 @@ architecture Behavioral of CPU is
     --* Register Signals *
     --********************
     signal AR           : signed(17 downto 0) := (others => '0');
-    signal GR0          : signed(17 downto 0) := "000000000000000011"; -- VARFÖR?    
-    signal GR1          : signed(17 downto 0) := "000000000000000011"; -- VARFÖR?
-    signal GR2          : signed(17 downto 0) := "000000000000000001"; -- VARFÖR?
+    signal GR0          : signed(17 downto 0) := (others => '0');
+    signal GR1          : signed(17 downto 0) := (others => '0');
+    signal GR2          : signed(17 downto 0) := (others => '0');
     signal GR3          : signed(17 downto 0) := (others => '0');
-    signal GOAL_POS     : signed(17 downto 0) := (others => '0');
+    signal GOAL_POS     : signed(17 downto 0) := "000010100000001111";  -- Goal position (goal_pos_out)
     signal RND_GOAL_POS : signed(17 downto 0) := (others => '0');
     
     --********************
@@ -106,6 +108,8 @@ architecture Behavioral of CPU is
     alias CURR_YPOS     : signed(4 downto 0) is CURR_POS(4 downto 0);
     alias NEXT_XPOS     : signed(5 downto 0) is NEXT_POS(14 downto 9);
     alias NEXT_YPOS     : signed(4 downto 0) is NEXT_POS(4 downto 0);
+    alias GOAL_XPOS     : signed(5 downto 0) is GOAL_POS(14 downto 9);
+    alias GOAL_YPOS     : signed(4 downto 0) is GOAL_POS(4 downto 0);
     alias key_code      : unsigned(2 downto 0) is PS2cmd(2 downto 0);
 
     --************
@@ -160,12 +164,30 @@ architecture Behavioral of CPU is
          x"00"  -- NULL     "11111" 31
         );
     signal uAddr_instr : uAddr_instr_t := uAddr_instr_c;
+    
+    --**************************
+    --* p_mem : Program Memory *
+    --**************************
+    type free_pos_mem_t is array (0 to 3) of signed(17 downto 0);
+    -- Maximum array length is 256, change when adding/deleting from pMem.
+    constant free_pos_mem_c : free_pos_mem_t := (
+        -- NNN_XXXXXX_NNNN_YYYYY
+        "000" & to_signed(0) & "0000" & to_signed(1),
+        "000" & to_signed(0) & "0000" & to_signed(0),
+        "000" & to_signed(0) & "0000" & to_signed(0),
+        "000" & to_signed(0) & "0000" & to_signed(0),
+        "000" & to_signed(0) & "0000" & to_signed(0),
+        "000" & to_signed(0) & "0000" & to_signed(0),
+        "000" & to_signed(0) & "0000" & to_signed(0),
+        "000" & to_signed(0) & "0000" & to_signed(0),
+	);
+    signal p_mem : p_mem_t := p_mem_c;
 
 begin 
     
     --****************************
     --* Random number generation *
-    --****************************
+    --****************************  
     process(clk)
     begin
         if rising_edge(clk) then
@@ -419,6 +441,10 @@ begin
     end if;
     end process;
     
+    --******************************
+    --* Goal position reached flag *
+    --******************************
+    flag_G <= '1' when (CURR_POS = GOAL_POS) else '0';  
     
     --*******************************
     --* ALU : Arithmetic Logic Unit *
@@ -433,7 +459,6 @@ begin
             flag_C <= '0';
             flag_O <= '0';
             flag_L <= '0';
-            flag_G <= '0';  
         else
             case ALU is
                 when "0000" =>  -- NO FUNCTION (No flags) 
@@ -627,6 +652,7 @@ begin
     uAddr <= uPC; 
     curr_pos_out <= CURR_POS;
     next_pos_out <= NEXT_POS;
+    goal_pos_out <= GOAL_POS;
     sel_track_out <= unsigned(SEL_TRACK);
     sel_sound_out <= SEL_SOUND;
     move_req_out <= MOVE_REQ;
@@ -659,8 +685,7 @@ begin
     --end process;
     
     --test_signal <= switch;
-    
-    
+
 end Behavioral;
 
 

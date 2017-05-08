@@ -6,11 +6,11 @@ then
     exit 1
 fi
 
-if sed 's/--.*//' < "$1" | egrep -n 'rising_edge *\(.*\)' | egrep -v 'rising_edge *\( *clk *\)'
-then
-    echo "ERROR in $1: Du försöker klocka på något som antagligen inte är en riktigt klocka. Du bör enbart använda rising_edge(clk) i din syntetiserbara kod."
-    exit 1
-fi
+#if sed 's/--.*//' < "$1" | egrep -n 'rising_edge *\(.*\)' | egrep -v 'rising_edge *\( *clk *\)'
+#then
+#    echo "ERROR in $1: Du försöker klocka på något som antagligen inte är en riktigt klocka. Du bör enbart använda rising_edge(clk) i din syntetiserbara kod."
+#    exit 1
+#fi
 
 if sed 's/--.*//' < "$1" | egrep -n 'falling_edge'
 then
