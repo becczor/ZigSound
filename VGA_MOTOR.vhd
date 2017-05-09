@@ -287,22 +287,25 @@ architecture Behavioral of VGA_MOTOR is
         x"90",x"DA",x"DA",x"BE",x"DA",x"94",x"DA",x"94",x"94",x"DA",x"90",x"94",x"90",x"DA",x"DA",x"DA",
         x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"DA",x"BE",x"BE",x"90",x"DA",x"DA",x"BE",x"BE",x"90",
         
-        x"BE",x"BE",x"94",x"BE",x"94",x"DA",x"90",x"BE",x"BE",x"DA",x"90",x"DA",x"DA",x"DA",x"90",x"90",    -- x"08" TOGGLE CURRPOS
-        x"90",x"E0",x"E0",x"E0",x"90",x"DA",x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"BE",x"BE",x"DA",x"94",
-        x"94",x"BE",x"E0",x"E0",x"BE",x"94",x"94",x"DA",x"90",x"BE",x"90",x"94",x"BE",x"DA",x"BE",x"94",
-        x"94",x"94",x"E0",x"E0",x"BE",x"BE",x"90",x"DA",x"94",x"BE",x"90",x"90",x"BE",x"94",x"DA",x"DA",    
-        x"DA",x"DA",x"E0",x"E0",x"DA",x"DA",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"DA",x"94",x"DA",x"90",
-        x"94",x"DA",x"E0",x"E0",x"94",x"DA",x"90",x"DA",x"94",x"DA",x"DA",x"94",x"DA",x"DA",x"94",x"DA",
-        x"DA",x"90",x"90",x"DA",x"90",x"DA",x"90",x"BE",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"94",x"DA",    
-        x"BE",x"94",x"90",x"DA",x"94",x"90",x"BE",x"BE",x"DA",x"90",x"90",x"94",x"BE",x"BE",x"DA",x"94",
-        x"BE",x"DA",x"DA",x"90",x"94",x"90",x"94",x"DA",x"BE",x"94",x"94",x"94",x"94",x"DA",x"DA",x"94",
-        x"DA",x"DA",x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"90",x"DA",x"DA",x"94",x"94",x"90",x"DA",    
-        x"90",x"94",x"DA",x"94",x"DA",x"BE",x"BE",x"94",x"90",x"90",x"94",x"DA",x"94",x"DA",x"90",x"DA",
-        x"DA",x"90",x"DA",x"90",x"90",x"94",x"FF",x"DA",x"90",x"94",x"94",x"BE",x"DA",x"DA",x"94",x"94",
-        x"DA",x"94",x"90",x"94",x"90",x"94",x"FF",x"DA",x"DA",x"DA",x"94",x"BE",x"DA",x"90",x"DA",x"DA",
-        x"DA",x"90",x"90",x"94",x"94",x"90",x"DA",x"94",x"DA",x"DA",x"BE",x"90",x"90",x"94",x"DA",x"94",
-        x"90",x"DA",x"DA",x"BE",x"DA",x"94",x"DA",x"94",x"94",x"DA",x"90",x"94",x"90",x"DA",x"DA",x"DA",
-        x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"DA",x"BE",x"BE",x"90",x"DA",x"DA",x"BE",x"BE",x"90",
+            
+        
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF", -- x"08" TOGGLE CURRPOS
+    x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",
+    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
+    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
+    x"FF",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"FF",
+    x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",
+    x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",
+    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
+    x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",
+    x"FF",x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+
         
         x"BE",x"BE",x"94",x"BE",x"94",x"DA",x"90",x"BE",x"BE",x"DA",x"90",x"DA",x"DA",x"DA",x"90",x"90",    -- x"09" TOGGLE GOALPOS
         x"90",x"DA",x"DA",x"94",x"90",x"DA",x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"BE",x"BE",x"DA",x"94",
