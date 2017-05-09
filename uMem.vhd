@@ -8,7 +8,7 @@ use IEEE.NUMERIC_STD.all;
 entity uMem is
   port (
     clk   : in std_logic;
-    uAddr : in unsigned(7 downto 0);
+    uAddr : in unsigned(6 downto 0);
     uData : out unsigned(24 downto 0));
 
 end uMem;
@@ -19,13 +19,13 @@ architecture Behavioral of uMem is
 --* u_mem : Micro Memory *
 --************************
 type u_mem_t is array (0 to 49) of unsigned(24 downto 0);
--- Maximum array length is 256, change when adding/deleting from uMem.
+-- Maximum array length is 127, change when adding/deleting from uMem.
 constant u_mem_c : u_mem_t := (
         -- ALU_TB_FB_S_P_LC_SEQ_MICROADDR
         -- 4444_333_333_1_1_22_4444_7777777
 		--Hämtfas
 		b"0000_011_111_0_0_00_0000_0000000",	--00F8000	ASR := PC
-		b"0000_010_001_0_1_00_0000_0000000",	--008A000	IR:= PM, PC++
+		b"0000_010_001_0_1_00_0000_0000000",	--008A000	IR := PM, PC++
 		--Hopp till korrekt beräkning av EA
 		b"0000_000_000_0_0_00_0010_0000000",	--0000100	µPC := K2 (M-fältet)
 		--Beräkningar av EA (Adresseringslägen)
@@ -120,7 +120,7 @@ constant u_mem_c : u_mem_t := (
         --SETRND 31
         --GOAL_POS := RND_GOAL_POS if GRX = "100"    
         --SEL_TRACK := RND_SEL_TRACK if GRX = "101" 
-        b"0000_110_110_0_0_00_0000_0000000" 	--01B0000	REG := RND_REG
+        b"0000_110_110_0_0_00_0011_0000000" 	--01B0000	REG := RND_REG
         );
 
 signal u_mem : u_mem_t := u_mem_c;
@@ -130,14 +130,14 @@ begin
     --********************
     --* uData Assignment *
     --********************
-    process(clk)
-    begin
-        if rising_edge(clk) then
+    --process(clk)
+    --begin
+    --    if rising_edge(clk) then
             uData <= u_mem(to_integer(uAddr));
-        else
-            null;
-        end if;
-    end process;
+    --    else
+    --        null;
+    --    end if;
+    --end process;
     
 end Behavioral;
 

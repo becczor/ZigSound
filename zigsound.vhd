@@ -42,7 +42,7 @@ architecture Behavioral of zigsound is
     	port(
             clk             : in std_logic;
 	        rst             : in std_logic;
-	        uAddr           : out unsigned(7 downto 0);
+	        uAddr           : out unsigned(6 downto 0);
 	        uData           : in unsigned(24 downto 0);
 	        pAddr           : out signed(7 downto 0);
 	        pData           : in signed(17 downto 0);
@@ -63,14 +63,17 @@ architecture Behavioral of zigsound is
     component uMem
         port(
          clk            : in std_logic;   
-         uAddr          : in unsigned(7 downto 0);
-         uData          : out unsigned(24 downto 0));
+         uAddr          : in unsigned(6 downto 0);
+         uData          : out unsigned(24 downto 0)
+         );
     end component;
 
     --pMem : Program Memory Component
 	component pMem
         port(pAddr          : in signed(7 downto 0);
-	         pData          : out signed(17 downto 0));
+	         pData          : out signed(17 downto 0);
+	         clk            : in std_logic
+	         );
 	end component;
 	
     -- GPU : Graphics control component 
@@ -159,7 +162,7 @@ architecture Behavioral of zigsound is
     
     -- CPU signals
     signal pAddr_con        : signed(7 downto 0);
-    signal uAddr_con        : unsigned(7 downto 0);
+    signal uAddr_con        : unsigned(6 downto 0);
     signal move_req_con     : std_logic;
     signal curr_pos_con     : signed(17 downto 0);
 	signal next_pos_con     : signed(17 downto 0);
@@ -239,7 +242,8 @@ begin
     U2 : pMem port map(
                 
                 pAddr => pAddr_con,
-                pData => pData_con
+                pData => pData_con,
+                clk => clk
                 );
                 
     -- GPU Component Connection

@@ -9,7 +9,7 @@ entity CPU is
     port(
         clk             : in std_logic;
         rst             : in std_logic;
-        uAddr           : out unsigned(7 downto 0);
+        uAddr           : out unsigned(6 downto 0);
         uData           : in unsigned(24 downto 0);
         pAddr           : out signed(7 downto 0);
         pData           : in signed(17 downto 0);
@@ -45,23 +45,27 @@ architecture Behavioral of CPU is
     alias P             : std_logic is uM(13);                          -- P-bit
     alias LC            : unsigned(1 downto 0) is uM(12 downto 11);     -- LC
     alias SEQ           : unsigned(3 downto 0) is uM(10 downto 7);      -- SEQ
-    alias MICROADDR     : unsigned(7 downto 0) is uM(7 downto 0);       -- Micro address
+    alias MICROADDR     : unsigned(6 downto 0) is uM(6 downto 0);       -- Micro address
     
     --**************************************
     --* Program Memory Instruction Aliases *
     --**************************************
-    alias OP            : signed(4 downto 0) is PM(17 downto 13);     -- Operation    
-    alias GRX           : signed(2 downto 0) is PM(12 downto 10);     -- Register    
-    alias M             : signed(1 downto 0) is PM(9 downto 8);       -- Addressing mode        
-    alias ADDR          : signed(7 downto 0) is PM(7 downto 0);       -- Address field    
+    --alias OP            : signed(4 downto 0) is PM(17 downto 13);     -- Operation    
+    --alias GRX           : signed(2 downto 0) is PM(12 downto 10);     -- Register    
+    --alias M             : signed(1 downto 0) is PM(9 downto 8);       -- Addressing mode        
+    --alias ADDR          : signed(7 downto 0) is PM(7 downto 0);       -- Address field
+    signal OP            : signed(4 downto 0);     -- Operation    
+    signal GRX           : signed(2 downto 0);     -- Register    
+    signal M             : signed(1 downto 0);       -- Addressing mode        
+    signal ADDR          : signed(7 downto 0);       -- Address field    
 
     --****************************
     --* Outgoing signals signals *
     --****************************
     -- To pMem
-    signal ASR          : signed(7 downto 0);  -- (pAddr)
+    signal ASR          : signed(7 downto 0) := (others => '0');  -- (pAddr)
     -- To uMem
-    signal uPC          : unsigned(7 downto 0); -- Micro Program Counter (uAddr)
+    signal uPC          : unsigned(6 downto 0) := (others => '0'); -- Micro Program Counter (uAddr)
     -- To GPU
     signal MOVE_REQ     : std_logic := '0';  -- Move request (move_req_out)
     signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
@@ -76,9 +80,9 @@ architecture Behavioral of CPU is
     --**************************
 	--* Program Memory Signals *
 	--**************************
-	signal PC           : signed(7 downto 0); -- Program Counter
-	signal IR           : signed(17 downto 0); -- Instruction Register 
-	signal DATA_BUS     : signed(17 downto 0); -- Data Bus
+	signal PC           : signed(7 downto 0) := (others => '0'); -- Program Counter
+	signal IR           : signed(17 downto 0) := (others => '0'); -- Instruction Register 
+	signal DATA_BUS     : signed(17 downto 0) := (others => '0'); -- Data Bus
 	
     --****************
     --* Flag Signals *
@@ -127,41 +131,41 @@ architecture Behavioral of CPU is
     --****************************************************************************
 	--* uAddr_instr : Array of uAddresses where each instruction begins in uMem. *
 	--****************************************************************************
-	type uAddr_instr_t is array (0 to 31) of unsigned(7 downto 0);
+	type uAddr_instr_t is array (0 to 31) of unsigned(6 downto 0);
 	constant uAddr_instr_c : uAddr_instr_t := 
 	-- OP consists of 5 bits, so the maximum amount of instructions is 32.
-        (x"0A", -- LOAD     "00000" 0
-         x"0B", -- STORE    "00001" 1
-         x"0C", -- ADD      "00010" 2
-         x"0F", -- SUB      "00011" 3
-         x"12", -- AND      "00100" 4
-         x"15", -- LSR      "00101" 5
-         x"1B", -- BRA      "00110" 6
-         x"1E", -- CMP      "00111" 7
-         x"20", -- BNE      "01000" 8
-         x"22", -- BGT      "01001" 9
-         x"29", -- BGE      "01010" 10
-         x"2E", -- HALT     "01011" 11
-         x"2F", -- BCT      "01100" 12
-         x"31", -- SETRND   "01101" 13
-         x"00", -- NULL     "01110" 14
-         x"00", -- NULL     "01111" 15
-         x"00", -- NULL     "10000" 16
-         x"00", -- NULL     "10001" 17
-         x"00", -- NULL     "10010" 18
-         x"00", -- NULL     "10011" 19
-         x"00", -- NULL     "10100" 20
-         x"00", -- NULL     "10101" 21
-         x"00", -- NULL     "10110" 22
-         x"00", -- NULL     "10111" 23
-         x"00", -- NULL     "11000" 24
-         x"00", -- NULL     "11001" 25
-         x"00", -- NULL     "11010" 26
-         x"00", -- NULL     "11011" 27
-         x"00", -- NULL     "11100" 28
-         x"00", -- NULL     "11101" 29
-         x"00", -- NULL     "11110" 30
-         x"00"  -- NULL     "11111" 31
+        ("0001010",--x"0A", -- LOAD     "00000" 0
+         "0001011",--x"0B", -- STORE    "00001" 1
+         "0001100",--x"0C", -- ADD      "00010" 2
+         "0001111",--x"0F", -- SUB      "00011" 3
+         "0010010",--x"12", -- AND      "00100" 4
+         "0010101",--x"15", -- LSR      "00101" 5
+         "0011011",--x"1B", -- BRA      "00110" 6
+         "0011110",--x"1E", -- CMP      "00111" 7
+         "0100000",--x"20", -- BNE      "01000" 8
+         "0100010",--x"22", -- BGT      "01001" 9
+         "0101001",--x"29", -- BGE      "01010" 10
+         "0101110",--x"2E", -- HALT     "01011" 11
+         "0101111",--x"2F", -- BCT      "01100" 12
+         "0110001",--x"31", -- SETRND   "01101" 13
+         "0000000",--x"00", -- NULL     "01110" 14
+         "0000000",--x"00", -- NULL     "01111" 15
+         "0000000",--x"00", -- NULL     "10000" 16
+         "0000000",--x"00", -- NULL     "10001" 17
+         "0000000",--x"00", -- NULL     "10010" 18
+         "0000000",--x"00", -- NULL     "10011" 19
+         "0000000",--x"00", -- NULL     "10100" 20
+         "0000000",--x"00", -- NULL     "10101" 21
+         "0000000",--x"00", -- NULL     "10110" 22
+         "0000000",--x"00", -- NULL     "10111" 23
+         "0000000",--x"00", -- NULL     "11000" 24
+         "0000000",--x"00", -- NULL     "11001" 25
+         "0000000",--x"00", -- NULL     "11010" 26
+         "0000000",--x"00", -- NULL     "11011" 27
+         "0000000",--x"00", -- NULL     "11100" 28
+         "0000000",--x"00", -- NULL     "11101" 29
+         "0000000",--x"00", -- NULL     "11110" 30
+         "0000000"--x"00"  -- NULL     "11111" 31
         );
     signal uAddr_instr : uAddr_instr_t := uAddr_instr_c;
     
@@ -299,7 +303,7 @@ begin
         end if;
     end process;
 
-    RND_SEL_TRACK <= free_pos_cnt(1 downto 0) when (not free_pos_cnt(1 downto 0) = "11") else "00";
+    RND_SEL_TRACK <= free_pos_cnt(1 downto 0) when (not (free_pos_cnt(1 downto 0) = "11")) else "00";
     RND_GOAL_POS <= 
     track_1_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "00") else
     track_2_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "01") else
@@ -317,9 +321,16 @@ begin
                 IR <= (others => '0');
             elsif (FB = "001") then
                 IR <= DATA_BUS;
+            else
+                null;
             end if;
         end if;
     end process;
+    
+    OP <= IR(17 downto 13); -- Operation    
+    GRX <= IR(12 downto 10);     -- Register    
+    M <= IR(9 downto 8);       -- Addressing mode        
+    ADDR <= IR(7 downto 0);       -- Address field
 
     -- FB = "010" UNUSED (CAN'T WRITE TO PM)
     
@@ -335,6 +346,8 @@ begin
                 PC <= DATA_BUS(7 downto 0);
             elsif (P = '1') then
                 PC <= PC + 1;
+            else
+                null;
             end if;
         end if;
     end process;
@@ -350,8 +363,16 @@ begin
         if rising_edge(clk) then
             if (rst = '1') then
                 GR0 <= (others => '0');
+            elsif (S = '1') then
+                if (M = "00") then
+                    GR0 <= DATA_BUS;
+                else 
+                    null;
+                end if;
             elsif (FB = "110" and GRX = "000") then
                 GR0 <= DATA_BUS;
+            else
+                null;
             end if;
         end if;
     end process;
@@ -364,8 +385,16 @@ begin
         if rising_edge(clk) then
             if (rst = '1') then
                 GR1 <= (others => '0');
+            elsif (S = '1') then
+                if (M = "01") then
+                    GR1 <= DATA_BUS;
+                else 
+                    null;
+                end if;
             elsif (FB = "110" and GRX = "001") then
                 GR1 <= DATA_BUS;
+            else
+                null;
             end if;
         end if;
     end process;
@@ -378,8 +407,16 @@ begin
         if rising_edge(clk) then
             if (rst = '1') then
                 GR2 <= (others => '0');
+            elsif (S = '1') then
+                if (M = "10") then
+                    GR2 <= DATA_BUS;
+                else 
+                    null;
+                end if;
             elsif (FB = "110" and GRX = "010") then
                 GR2 <= DATA_BUS;
+            else
+                null;
             end if;
         end if;
     end process;
@@ -392,8 +429,16 @@ begin
         if rising_edge(clk) then
             if (rst = '1') then
                 GR3 <= (others => '0');
+            elsif (S = '1') then
+                if (M = "11") then
+                    GR3 <= DATA_BUS;
+                else 
+                    null;
+                end if;
             elsif (FB = "110" and GRX = "011") then
                 GR3 <= DATA_BUS;
+            else
+                null;
             end if;
         end if;
     end process;
@@ -408,6 +453,8 @@ begin
                 GOAL_POS <= (others => '0');
             elsif (FB = "110" and GRX = "100") then
                 GOAL_POS <= DATA_BUS;
+            else
+                null;
             end if;
         end if;
     end process;
@@ -423,13 +470,13 @@ begin
                 SEL_TRACK <= "00";
                 dly_cnt <= to_unsigned(0,2);
             -- In process of changing track, locking keyboard.
-            elsif (dly_cnt = 0 and FB = "110" and GRX = "101") then
+            elsif (dly_cnt = "00" and FB = "110" and GRX = "101") then
                 next_track <= DATA_BUS(1 downto 0); 
                 dly_cnt <= to_unsigned(1,2);
-            elsif (dly_cnt = 1) then
+            elsif (dly_cnt = "01") then
                 dly_cnt <= to_unsigned(2,2);
             -- Unlocking keyboard and changing track.
-            elsif (dly_cnt = 2) then
+            elsif (dly_cnt = "10") then
                 dly_cnt <= to_unsigned(0,2);
                 SEL_TRACK <= next_track;
             else
@@ -471,13 +518,13 @@ begin
                 when "0010" =>
                     case M is
                         when "00" =>
-                            uPC <= "00000011"; -- "Direct adressering" uAddr
+                            uPC <= "0000011"; -- "Direct adressering" uAddr
                         when "01" => 
-                            uPC <= "00000100"; -- "Immediate operand" uAddr
+                            uPC <= "0000100"; -- "Immediate operand" uAddr
                         when "10" => 
-                            uPC <= "00000101"; -- "Indirect adressering" uAddr
+                            uPC <= "0000101"; -- "Indirect adressering" uAddr
                         when "11" => 
-                            uPC <= "00000111"; -- "Indexed adressering" uAddr
+                            uPC <= "0000111"; -- "Indexed adressering" uAddr
                         when others => 
                             uPC <= (others => '0');
                     end case;
@@ -584,6 +631,8 @@ begin
                         flag_N <= '0';
                         if (to_integer(AR + DATA_BUS) = 0) then
                             flag_Z <= '1';
+                        else
+                            flag_Z <= '0';
                         end if; 
                     end if;
                     -- SHOULD SET OVERFLOW AND CARRY AS WELL
@@ -597,6 +646,8 @@ begin
                         flag_N <= '0';
                         if (to_integer(AR - DATA_BUS) = 0) then
                             flag_Z <= '1';
+                        else
+                            flag_Z <= '0';
                         end if;
                     end if;
                     -- SHOULD SET OVERFLOW AND CARRY AS WELL
@@ -610,6 +661,8 @@ begin
                         flag_N <= '0';
                         if (to_integer(AR and DATA_BUS) = 0) then
                             flag_Z <= '1';
+                        else
+                            flag_Z <= '0';
                         end if;    
                     end if;
                         
@@ -678,20 +731,20 @@ begin
     --* Data Bus Assignment *
     --***********************
     DATA_BUS <= 
-    IR                              when (TB = "001") else
-    PM                              when (TB = "010") else
-    to_signed(0,10) & PC            when (TB = "011") else
-    AR                              when (TB = "100") else
-    --NULL                          when (TB = "101") else
-    GR0                             when (TB = "110" and GRX = "000") else 
-    GR1                             when (TB = "110" and GRX = "001") else 
-    GR2                             when (TB = "110" and GRX = "010") else 
-    GR3                             when (TB = "110" and GRX = "011") else
-    RND_GOAL_POS                    when (TB = "110" and GRX = "100") else
-    to_signed(0,16) & RND_SEL_TRACK when (TB = "110" and GRX = "101") else 
-    GOAL_POS                        when (TB = "110" and GRX = "110") else 
-    to_signed(0,16) & SEL_TRACK     when (TB = "110" and GRX = "111") else
-    to_signed(0,10) & ASR           when (TB = "111") else
+    to_signed(0,10) & IR(7 downto 0)    when (TB = "001") else  -- ADR
+    PM                                  when (TB = "010") else
+    to_signed(0,10) & PC                when (TB = "011") else
+    AR                                  when (TB = "100") else
+    --NULL                              when (TB = "101") else
+    GR0                                 when (TB = "110" and GRX = "000") else 
+    GR1                                 when (TB = "110" and GRX = "001") else 
+    GR2                                 when (TB = "110" and GRX = "010") else 
+    GR3                                 when (TB = "110" and GRX = "011") else
+    RND_GOAL_POS                        when (TB = "110" and GRX = "100") else
+    to_signed(0,16) & RND_SEL_TRACK     when (TB = "110" and GRX = "101") else 
+    GOAL_POS                            when (TB = "110" and GRX = "110") else 
+    to_signed(0,16) & SEL_TRACK         when (TB = "110" and GRX = "111") else
+    to_signed(0,10) & ASR               when (TB = "111") else
     DATA_BUS;
     
     --*************************
