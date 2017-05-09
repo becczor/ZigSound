@@ -15,6 +15,7 @@ entity CPU is
         --pData           : in signed(17 downto 0);
         PS2cmd          : in unsigned(17 downto 0);
 		move_req_out    : out std_logic;
+		tog_sound_icon_out : out std_logic;
 		move_resp       : in std_logic;
 		curr_pos_out    : out signed(17 downto 0);
 		next_pos_out    : out signed(17 downto 0);
@@ -64,6 +65,7 @@ architecture Behavioral of CPU is
     --signal uPC          : unsigned(7 downto 0); -- Micro Program Counter (uAddr)
     -- To GPU
     signal MOVE_REQ     : std_logic := '0';  -- Move request (move_req_out)
+    signal TOG_SOUND_ICON  : std_logic := '0';  -- Signal for toggleing sound icon
     signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
     signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
     signal GOAL_POS     : signed(17 downto 0) := "000010100000001111";  -- Goal position (goal_pos_out)
@@ -579,6 +581,7 @@ begin
                 CURR_POS <= "000000001000000001";
                 NEXT_POS <= "000000001000000001";
                 MOVE_REQ <= '0';
+                TOG_SOUND_ICON <= '0';
                 SEL_SOUND <= '0';
                 SEL_TRACK <= "01";
             else
@@ -590,11 +593,13 @@ begin
                         --test_signal <= '1';
                         NEXT_XPOS <= CURR_XPOS;
                         NEXT_YPOS <= CURR_YPOS - 1;
+                        TOG_SOUND_ICON <= '0';
                         MOVE_REQ <= '1';
                     when "010" =>  -- LEFT (A)
                         --test_signal <= '1';
                         NEXT_YPOS <= CURR_YPOS;
                         NEXT_XPOS <= CURR_XPOS - 1;
+                        TOG_SOUND_ICON <= '0';
                         MOVE_REQ <= '1';
                     when "011" =>  -- DOWN (S)
                         --test_signal <= '1';
@@ -605,13 +610,16 @@ begin
                         --test_signal <= '1';
                         NEXT_YPOS <= CURR_YPOS;
                         NEXT_XPOS <= CURR_XPOS + 1;
+                        TOG_SOUND_ICON <= '0';
                         MOVE_REQ <= '1';
                     when "101" => -- SOUND TOGGLE (SPACE)
                         --test_signal <= '1';
                         SEL_SOUND <= not SEL_SOUND;
+                        TOG_SOUND_ICON <= '1';
                         MOVE_REQ <= '0';
                     when others =>
                         --test_signal <= '0';
+                        TOG_SOUND_ICON <= '0';
                         MOVE_REQ <= '0';
                 end case;
             end if;
@@ -629,6 +637,7 @@ begin
     sel_track_out <= SEL_TRACK;
     sel_sound_out <= SEL_SOUND;
     move_req_out <= MOVE_REQ;
+    tog_sound_icon_out <= TOG_SOUND_ICON;
     
     
 end Behavioral;

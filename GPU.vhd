@@ -17,8 +17,12 @@ entity GPU is
         clk                 : in std_logic;			-- system clock (100 MHz)
         rst	        		: in std_logic;			-- reset signal
         
+        -- FROM SOUND
+        sound_channel       : in std_logic;
+        
         -- TO/FROM CPU
         move_req            : in std_logic;         -- move request
+        tog_sound_icon      : in std_logic;
         move_resp			: out std_logic := '0';		-- response to move request
         curr_pos            : in signed(17 downto 0); -- current position
         next_pos            : in signed(17 downto 0); -- next position
@@ -39,6 +43,7 @@ architecture behavioral of GPU is
     signal ypos             : unsigned(4 downto 0);  -- curr y position
     signal xpos             : unsigned(5 downto 0);  -- curr x position
     signal tile		        : unsigned(7 downto 0);	-- tile index
+    signal sound_icon       : unsigned(7 downto 0);	-- sound icon index
 
     type wr_type is (IDLE, DRAW);  -- declare state types for write cycle
     signal WRstate : wr_type;  -- write cycle state
@@ -79,6 +84,10 @@ begin
                         move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
                         we_picmem <= '1';   -- PIC_MEM can now use address and data to clear curr_pos.
                         WRstate <= DRAW;    -- Set state to DRAW so we get addr and data from next_pos.
+                    elsif (tog_sound_icon = '1') then
+                        addr_change <= to_unsigned(1199,11);
+                        data_change <= sound_icon;
+                        we_picmem <= '1';
                     else   
                         we_picmem <= '0';
                     end if;
@@ -102,6 +111,8 @@ begin
     xpos <= unsigned(CURR_XPOS) when (WRstate = IDLE) else unsigned(NEXT_XPOS);
     ypos <= unsigned(CURR_YPOS) when (WRstate = IDLE) else unsigned(NEXT_YPOS);
     tile <= x"00" when (WRstate = IDLE) else x"01";
+    sound_icon <= x"08" when (sound_channel = '0') else x"09";
+    
   
     end behavioral;
 

@@ -49,6 +49,7 @@ architecture Behavioral of zigsound is
 		    --pData           : in signed(17 downto 0);
 		    PS2cmd          : in unsigned(17 downto 0);
             move_req_out    : out std_logic;
+            tog_sound_icon_out : out std_logic;  -- signal for chaning the sound icon
 		    move_resp       : in std_logic;
 		    curr_pos_out    : out signed(17 downto 0);
 		    next_pos_out    : out signed(17 downto 0);
@@ -77,8 +78,11 @@ architecture Behavioral of zigsound is
 		port(
         clk                 : in std_logic;  -- system clock (100 MHz)
         rst	        		: in std_logic;  -- reset signal
+        -- From SOUND
+        sound_channel       : in std_logic;
         -- TO/FROM CPU
         move_req            : in std_logic;  -- move request
+        tog_sound_icon      : in std_logic;   -- signal for changing the sound icon
         curr_pos            : in signed(17 downto 0);  -- current position
         next_pos            : in signed(17 downto 0);  -- next position
         move_resp			: out std_logic;  -- response to move request
@@ -160,6 +164,7 @@ architecture Behavioral of zigsound is
     --signal pAddr_con        : signed(7 downto 0);
     --signal uAddr_con        : unsigned(7 downto 0);
     signal move_req_con     : std_logic;
+    signal tog_sound_icon_con     : std_logic;
     signal curr_pos_con     : signed(17 downto 0);
 	signal next_pos_con     : signed(17 downto 0);
     signal goal_pos_con     : signed(17 downto 0);
@@ -217,6 +222,7 @@ begin
                 --pData => pData_con,
                 PS2cmd => PS2cmd_con,
                 move_req_out => move_req_con,
+                tog_sound_icon_out => tog_sound_icon_con,
                 move_resp => move_resp_con,
                 curr_pos_out => curr_pos_con,
                 next_pos_out => next_pos_con,
@@ -242,8 +248,10 @@ begin
     -- GPU Component Connection
 	U3 : GPU port map(
 	            clk => clk, 
-	            rst => rst, 
+	            rst => rst,
+	            sound_channel => sel_sound_con, 
 	            move_req => move_req_con,
+	            tog_sound_icon => tog_sound_icon_con,
 	            move_resp => move_resp_con,
 	            curr_pos => curr_pos_con,
 	            next_pos => next_pos_con,
