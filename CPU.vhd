@@ -15,6 +15,7 @@ entity CPU is
         pData           : in signed(17 downto 0);
         PS2cmd          : in unsigned(17 downto 0);
 		move_req_out    : out std_logic;
+		tog_sound_icon_out : out std_logic;
 		move_resp       : in std_logic;
 		curr_pos_out    : out signed(17 downto 0);
 		next_pos_out    : out signed(17 downto 0);
@@ -68,6 +69,7 @@ architecture Behavioral of CPU is
     signal uPC          : unsigned(6 downto 0) := (others => '0'); -- Micro Program Counter (uAddr)
     -- To GPU
     signal MOVE_REQ     : std_logic := '0';  -- Move request (move_req_out)
+    signal TOG_SOUND_ICON  : std_logic := '0';  -- Signal for toggleing sound icon
     signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
     signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
     signal SEL_TRACK    : signed(1 downto 0) := "00";  -- Track select (sel_track_out)
@@ -757,11 +759,13 @@ begin
                 CURR_POS <= "000000001000000001";
                 NEXT_POS <= "000000001000000001";
                 MOVE_REQ <= '0';
+                TOG_SOUND_ICON <= '0';
                 SEL_SOUND <= '0';
             else
                 if (move_resp = '1') then
                     CURR_POS <= NEXT_POS;
                 end if;
+                TOG_SOUND_ICON <= '0';
                 -- We're changing track, send move_req back to start.
                 if (dly_cnt = 0 and FB = "110" and GRX = "101") then  
                     NEXT_POS <= "000000001000000001";
@@ -787,6 +791,7 @@ begin
                             MOVE_REQ <= '1';
                         when "101" => -- SOUND TOGGLE (SPACE)
                             SEL_SOUND <= not SEL_SOUND;
+                            TOG_SOUND_ICON <= '1';
                             MOVE_REQ <= '0';
                         when others =>
                             MOVE_REQ <= '0';
@@ -811,6 +816,7 @@ begin
     sel_track_out <= unsigned(SEL_TRACK);
     sel_sound_out <= SEL_SOUND;
     move_req_out <= MOVE_REQ;
+    tog_sound_icon_out <= TOG_SOUND_ICON;
     
 
     --*************
