@@ -17,8 +17,12 @@ entity GPU is
         clk                 : in std_logic;			-- system clock (100 MHz)
         rst	        		: in std_logic;			-- reset signal
         
+        -- FROM SOUND
+        sound_channel       : in std_logic;
+        
         -- TO/FROM CPU
         move_req            : in std_logic;         -- move request
+        tog_sound_icon      : in std_logic;
         move_resp			: out std_logic := '0';		-- response to move request
         curr_pos            : in signed(17 downto 0); -- current position
         next_pos            : in signed(17 downto 0); -- next position
@@ -39,6 +43,8 @@ architecture behavioral of GPU is
     signal ypos             : unsigned(4 downto 0);  -- curr y position
     signal xpos             : unsigned(5 downto 0);  -- curr x position
     signal tile		        : unsigned(7 downto 0);	-- tile index
+    signal addr_change_calc		: unsigned(10 downto 0);
+    signal sound_icon       : unsigned(7 downto 0);	-- sound icon index
 
     type wr_type is (IDLE, DRAW);  -- declare state types for write cycle
     signal WRstate : wr_type;  -- write cycle state
@@ -74,16 +80,20 @@ begin
             case WRstate is
                 when IDLE =>
                     if (move_req = '1' and data_nextpos = x"00") then  -- We should move.
-                        addr_change <= xpos + (to_unsigned(40, 6) * ypos); -- Translates curr x- and y-pos into PIC_MEM-address.
+                        addr_change <= addr_change_calc; -- Translates curr x- and y-pos into PIC_MEM-address.
                         data_change <= tile;    -- Sets data to BG-tile.
                         move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
                         we_picmem <= '1';   -- PIC_MEM can now use address and data to clear curr_pos.
                         WRstate <= DRAW;    -- Set state to DRAW so we get addr and data from next_pos.
+                    elsif (tog_sound_icon = '1') then
+                        addr_change <= to_unsigned(1199,11);
+                        data_change <= sound_icon;
+                        we_picmem <= '1';
                     else   
                         we_picmem <= '0';
                     end if;
                 when DRAW =>
-                    addr_change <= xpos + (to_unsigned(40, 6) * ypos); -- Translates x- and y-pos into PIC_MEM-address.
+                    addr_change <= addr_change_calc; -- Translates x- and y-pos into PIC_MEM-address.
                     data_change <= tile;  -- Sets data to character tile.
                     move_resp <= '0'; 
                     WRstate <= IDLE;
@@ -97,11 +107,16 @@ begin
     --*********************
     --* Signal assignment *
     --*********************
-	addr_nextpos <= unsigned(NEXT_XPOS) + (to_unsigned(40, 6) * unsigned(NEXT_YPOS));
+    
+    addr_change_calc <= xpos + (to_unsigned(40, 6) * ypos);
+    
+    addr_nextpos <= unsigned(NEXT_XPOS) + (to_unsigned(40, 6) * unsigned(NEXT_YPOS));
     -- Takes x- and y-pos from curr_pos if we're in CLEAR, else from next_pos.
     xpos <= unsigned(CURR_XPOS) when (WRstate = IDLE) else unsigned(NEXT_XPOS);
     ypos <= unsigned(CURR_YPOS) when (WRstate = IDLE) else unsigned(NEXT_YPOS);
     tile <= x"00" when (WRstate = IDLE) else x"01";
+    sound_icon <= x"05" when (sound_channel = '0') else x"06";
+    
   
     end behavioral;
 
