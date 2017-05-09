@@ -25,9 +25,12 @@ constant p_mem_c : p_mem_t := (
     -- 55555_333_22_88888888
     b"01101_101_00_00000000",  -- 1. SETRND SEL_TRACK
     b"01101_100_00_00000000",  -- 2. SETRND GOAL_POS
-    b"01100_000_01_11111110",  -- 3. BCT (BRA to 1 if G = 1) -2
-    b"00110_000_01_11111011"   -- 4. BRA to 3 -5
+    b"01100_000_00_11111111",  -- 3. BCT : Stay here while G = 0 (-1)
+    -- 4. WON : Stay here while LC (ADR) > 0, also set won := '1' while here
+    b"01110_000_00_01111111",  -- 4. See above
+    b"00110_000_00_11111100"   -- 6. BRA back to 1 (-4)
 	);
+    -- Testade ändra M från 01 till 00 och ändra -2/-5 till -1/-4 på BCT/BRA
 
   signal p_mem : p_mem_t := p_mem_c;
 

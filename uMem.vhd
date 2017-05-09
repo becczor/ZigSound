@@ -121,6 +121,12 @@ constant u_mem_c : u_mem_t := (
         --GOAL_POS := RND_GOAL_POS if GRX = "100"    
         --SEL_TRACK := RND_SEL_TRACK if GRX = "101" 
         b"0000_110_110_0_0_00_0011_0000000" 	--01B0000	REG := RND_REG
+		--WON 32
+		--Wait while message is shown upon finding goal pos.
+		b"0000_001_000_0_0_10_0000_0000000",	--HEX	LC := IR (ADR) via buss
+		b"0000_000_000_0_0_00_1100_UADDR(*)",	--HEX	Hopp till (*) om L = 1 (LC = 0, d.v.s. klara) (#)
+		b"0000_000_000_0_0_01_0101_UADDR(#)",	--HEX	LC_cnt--, Hopp till (#)
+        b"0000_000_000_0_0_00_0011_0000000",    --HEX  µPC = 0 (*)
         );
 
 signal u_mem : u_mem_t := u_mem_c;

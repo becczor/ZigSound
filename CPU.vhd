@@ -21,7 +21,8 @@ entity CPU is
 		next_pos_out    : out signed(17 downto 0);
         goal_pos_out    : out signed(17 downto 0);
 		sel_track_out   : out unsigned(1 downto 0);
-		sel_sound_out   : out std_logic
+		sel_sound_out   : out std_logic;
+        goal_reached_out : out std_logic
 		--TEST
         --test_diod       : out std_logic;
         --switch          : in std_logic
@@ -93,7 +94,7 @@ architecture Behavioral of CPU is
 	signal flag_N       : std_logic := '0';
 	signal flag_C       : std_logic := '0';  -- NOT ALWAYS BEING DETECTED ATM
 	signal flag_O       : std_logic := '0';  -- NOT BEING DETECTED ATM
-	signal flag_L       : std_logic := '0';  -- NOT BEING DETECTED ATM
+	signal flag_L       : std_logic := '0';  -- 1 if LC_cnt = 0 (done)
     signal flag_G       : std_logic := '0';  -- Goal reached
 	
     --********************
@@ -104,7 +105,7 @@ architecture Behavioral of CPU is
     signal GR1          : signed(17 downto 0) := (others => '0');
     signal GR2          : signed(17 downto 0) := (others => '0');
     signal GR3          : signed(17 downto 0) := (others => '0');
-    signal GOAL_POS     : signed(17 downto 0) := "000010100000001111";  -- Goal position (goal_pos_out)
+    signal GOAL_POS     : signed(17 downto 0) := (others => '0');  -- Goal position (goal_pos_out)
     signal RND_GOAL_POS : signed(17 downto 0) := (others => '0');
     
     --********************
@@ -124,6 +125,7 @@ architecture Behavioral of CPU is
     signal free_pos_lmt : signed(10 downto 0) := (others => '0');
     signal free_pos_cnt : signed(10 downto 0) := (others => '0');
     signal dly_cnt      : unsigned(1 downto 0) := (others => '0');
+    signal LC_cnt       : signed(16 downto 0) := (others => '0');
 
      --TEST                             
     --signal test_led_counter             : unsigned(25 downto 0);
@@ -609,7 +611,6 @@ begin
             flag_N <= '0';
             flag_C <= '0';
             flag_O <= '0';
-            flag_L <= '0';
         else
             case ALU is
                 when "0000" =>  -- NO FUNCTION (No flags) 
@@ -619,10 +620,10 @@ begin
                     AR <= DATA_BUS;
                     
                 --when "0010" =>  -- ONES' COMPLEMENT, (No flags) ***UNUSED***
-                --when "0011" =>  -- SET TO ZERO (Z/N)            ***UNUSED***
-                --    AR <= (others => '0'); 
-                --    flag_N <= '0';
-                --    flag_Z <= '1';
+                when "0011" =>  -- SET TO ZERO (Z/N)            ***UNUSED***
+                    AR <= (others => '0'); 
+                    flag_N <= '0';
+                    flag_Z <= '1';
                     
                 when "0100" => -- AR := AR + DATA_BUS (Z/N/O/C)
                     AR <= AR + DATA_BUS;
@@ -681,8 +682,8 @@ begin
                  --       flag_Z <= '0';
                  --   end if;
                     
-                --when "1000" => -- AR := AR + BUSS (No flags)        ***UNUSED***
-                --    AR <= AR + DATA_BUS;
+                when "1000" => -- AR := 1
+                    AR <= to_signed(1,18);
                     
                 --when "1001" => -- AR LSL, zero is shifted in, bit shifted out to C. (Z/N(C) ***UNUSED***
                 --    AR <= AR(16 downto 0) & '0';
@@ -725,6 +726,35 @@ begin
                     null;
      
             end case;
+        end if;
+    end if;
+    end process;
+
+    --*********************
+    --* LC : Loop Counter *
+    --*********************
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if rst = '1' then
+            LC_cnt <= (others => '0');
+            flag_L <= '0';
+        else
+            if (LC = "01") then
+                LC_cnt <= LC_cnt - 1;
+            elsif (LC = "10") then
+                LC_cnt <= to_signed(0,9) & DATA_BUS(7 downto 0);
+            elsif (LC = "11") then
+                LC_cnt <= to_signed(0,10) & MICROADR;
+            else
+                null;
+            end if;
+            -- Set flag_L to '1' if we're done looping.
+            if (LC_cnt = 0) then
+                flag_L <= '1';            
+            else
+                flag_L <= '0';
+            end if;
         end if;
     end if;
     end process;
@@ -817,6 +847,7 @@ begin
     sel_sound_out <= SEL_SOUND;
     move_req_out <= MOVE_REQ;
     tog_sound_icon_out <= TOG_SOUND_ICON;
+    goal_reached_out <= flag_G;
     
 
     --*************
