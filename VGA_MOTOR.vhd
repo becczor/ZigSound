@@ -33,13 +33,39 @@ architecture Behavioral of VGA_MOTOR is
     signal Ypixel	        : unsigned(9 downto 0);		-- Vertical pixel counter
     signal ClkDiv	        : unsigned(1 downto 0);		-- Clock divisor, to generate 25 MHz signal
     signal Clk25			: std_logic;			    -- One pulse width 25 MHz signal
-    signal tilePixel        : std_logic_vector(7 downto 0);	-- Tile pixel data
+    signal pixel           : std_logic_vector(7 downto 0);	-- Tile pixel data
     signal tileAddr         : unsigned(12 downto 0);	-- Tile address
     signal blank            : std_logic;                -- blanking signal
+    signal spriteAddr       : unsigned(7 downto 0);     -- The sprite addr
+    signal isSprite         : std_logic;                -- '1' if VGA should show sprite '0' if tile
+    signal sprite_x_offset  : unsigned(9 downto 0);     -- xPixel - start of sprite x-position
+    signal sprite_y_offset  : unsigned(9 downto 0);     -- yPixel - start of y-position
 	
     -- Tile memory type
     type ram_t is array (0 to 2559) of std_logic_vector(7 downto 0);
+    
+    -- Sprite memory type
+    type ram_s is array (0 to 255) of std_logic_vector(7 downto 0);
+    
+    -- Sprite memory
+    signal spriteMem : ram_s := 
+    (
+            -- Y                                               -- A                                               -- Y                                                    --   !
+          x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",  x"FF",x"FF",x"00",x"00",x"00",x"FF",x"FF",x"FF",    x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",    
+		  x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",  x"FF",x"00",x"00",x"FF",x"00",x"00",x"FF",x"FF",    x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
+		  x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",  x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",    x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
+		  x"FF",x"FF",x"1C",x"1C",x"1C",x"1C",x"FF",x"FF",  x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",    x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
+		  x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",  x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"FF",    x"FF",x"FF",x"1C",x"1C",x"1C",x"1C",x"FF",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
+		  x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",  x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",    x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+		  x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",  x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",    x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",    x"FF",x"FF",x"FF",x"E0",x"E0",x"FF",x"FF",x"FF",
+          x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF"
+          
+          
+          );
 
+
+
+    
     -- Tile memory
     signal tileMem : ram_t := 
         (
@@ -425,24 +451,32 @@ begin
 
     blank <= '1' when ((Xpixel > 639 and Xpixel <= 799) or (Ypixel > 479 and Ypixel <= 520)) else '0';
 
+    isSprite <= '1' when ((Xpixel > 300 and Xpixel <= 428) and (Ypixel > 200 and Ypixel <= 232)) else '0';  -- ÄNDRA EFTER SOTRLEK
+
     -- Tile memory
     process(clk)
     begin
     if rising_edge(clk) then
         if (rst = '1') then
-            tilePixel <= (others => '0');
+            pixel <= (others => '0');
+        elsif (isSprite = '1') then
+            pixel <= spriteMem(to_integer(spriteAddr));
         elsif (blank = '0') then
-            tilePixel <= tileMem(to_integer(tileAddr));
+            pixel <= tileMem(to_integer(tileAddr));
         else
-            tilePixel <= (others => '0');
+            pixel <= (others => '0');
         end if;
     end if;
     end process;
 
 
+    sprite_x_offset <= Xpixel - to_unsigned(300,10);
+    sprite_y_offset <= Ypixel - to_unsigned(200,10);
 
     -- Tile memory address composite
     tileAddr <= unsigned(data(4 downto 0)) & Ypixel(3 downto 0) & Xpixel(3 downto 0);
+    spriteAddr <= sprite_y_offset(4 downto 2) & sprite_x_offset(6 downto 2); --Ändras när vi ändrar spriteMem
+    --spritePixel <= spriteMem(to_integer(spriteAddr));
 
     -- Picture memory address composite
     --addr <= to_unsigned(20, 7) * Ypixel(8 downto 5) + Xpixel(9 downto 5);
@@ -450,14 +484,14 @@ begin
 
 
     -- VGA generation
-    vgaRed(2) <= tilePixel(7);
-    vgaRed(1) <= tilePixel(6);
-    vgaRed(0) <= tilePixel(5);
-    vgaGreen(2) <= tilePixel(4);
-    vgaGreen(1) <= tilePixel(3);
-    vgaGreen(0) <= tilePixel(2);
-    vgaBlue(2) <= tilePixel(1);
-    vgaBlue(1) <= tilePixel(0);
+    vgaRed(2) <= pixel(7);
+    vgaRed(1) <= pixel(6);
+    vgaRed(0) <= pixel(5);
+    vgaGreen(2) <= pixel(4);
+    vgaGreen(1) <= pixel(3);
+    vgaGreen(0) <= pixel(2);
+    vgaBlue(2) <= pixel(1);
+    vgaBlue(1) <= pixel(0);
 
 
 end Behavioral;
