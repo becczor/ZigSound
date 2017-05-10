@@ -18,7 +18,7 @@ architecture Behavioral of uMem is
 --************************
 --* u_mem : Micro Memory *
 --************************
-type u_mem_t is array (0 to 49) of unsigned(24 downto 0);
+type u_mem_t is array (0 to 56) of unsigned(24 downto 0);
 -- Maximum array length is 127, change when adding/deleting from uMem.
 constant u_mem_c : u_mem_t := (
         -- ALU_TB_FB_S_P_LC_SEQ_MICROADDR
@@ -120,13 +120,16 @@ constant u_mem_c : u_mem_t := (
         --SETRND 31
         --GOAL_POS := RND_GOAL_POS if GRX = "100"    
         --SEL_TRACK := RND_SEL_TRACK if GRX = "101" 
-        b"0000_110_110_0_0_00_0011_0000000" 	--01B0000	REG := RND_REG
+        b"0000_110_110_0_0_00_0011_0000000", 	--01B0000	REG := RND_REG
 		--WON 32
 		--Wait while message is shown upon finding goal pos.
-		b"0000_001_000_0_0_10_0000_0000000",	--HEX	LC := IR (ADR) via buss
-		b"0000_000_000_0_0_00_1100_UADDR(*)",	--HEX	Hopp till (*) om L = 1 (LC = 0, d.v.s. klara) (#)
-		b"0000_000_000_0_0_01_0101_UADDR(#)",	--HEX	LC_cnt--, Hopp till (#)
-        b"0000_000_000_0_0_00_0011_0000000",    --HEX  µPC = 0 (*)
+		b"0000_010_000_0_0_10_0000_0000000",	--HEX	LC := PM(4) via buss
+        b"1000_000_000_0_0_00_0000_0000000",    --HEX   AR := '1'
+        b"0000_100_100_0_0_00_0000_0000000",    --HEX   WON := '1' via buss (AR)
+		b"0000_000_000_0_0_00_1100_0110111",	--HEX	Hopp till (*) om L = 1 (LC = 0, d.v.s. klara) (#)
+        b"0000_000_000_0_0_01_0101_0110101",	--HEX	LC_cnt--, Hopp till (#)
+        b"0011_000_000_0_0_00_0000_0000000",    --HEX   AR := '0' (*)
+        b"0000_100_100_0_0_00_0011_0000000"     --HEX   WON := '0' via buss (AR), µPC := 0
         );
 
 signal u_mem : u_mem_t := u_mem_c;

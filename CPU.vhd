@@ -7,25 +7,25 @@ use IEEE.NUMERIC_STD.all;
 --*****************
 entity CPU is
     port(
-        clk             : in std_logic;
-        rst             : in std_logic;
-        uAddr           : out unsigned(6 downto 0);
-        uData           : in unsigned(24 downto 0);
-        pAddr           : out signed(7 downto 0);
-        pData           : in signed(17 downto 0);
-        PS2cmd          : in unsigned(17 downto 0);
-		move_req_out    : out std_logic;
-		tog_sound_icon_out : out std_logic;
-		move_resp       : in std_logic;
-		curr_pos_out    : out signed(17 downto 0);
-		next_pos_out    : out signed(17 downto 0);
-        goal_pos_out    : out signed(17 downto 0);
-		sel_track_out   : out unsigned(1 downto 0);
-		sel_sound_out   : out std_logic;
-        goal_reached_out : out std_logic
+        clk                 : in std_logic;
+        rst                 : in std_logic;
+        uAddr               : out unsigned(6 downto 0);
+        uData               : in unsigned(24 downto 0);
+        pAddr               : out signed(7 downto 0);
+        pData               : in signed(17 downto 0);
+        PS2cmd              : in unsigned(17 downto 0);
+		move_req_out        : out std_logic;
+		tog_sound_icon_out  : out std_logic;
+		move_resp           : in std_logic;
+		curr_pos_out        : out signed(17 downto 0);
+		next_pos_out        : out signed(17 downto 0);
+        goal_pos_out        : out signed(17 downto 0);
+		sel_track_out       : out unsigned(1 downto 0);
+		sel_sound_out       : out std_logic;
+        goal_reached_out    : out std_logic
 		--TEST
-        --test_diod       : out std_logic;
-        --switch          : in std_logic
+        --test_diod           : out std_logic;
+        --switch              : in std_logic
         );
 end CPU;
 
@@ -34,98 +34,88 @@ architecture Behavioral of CPU is
     --****************
     --* Port aliases *
     --****************
-    alias uM            : unsigned(24 downto 0) is uData(24 downto 0);
-    alias PM            : signed(17 downto 0) is pData(17 downto 0);
+    alias uM                : unsigned(24 downto 0) is uData(24 downto 0);
+    alias PM                : signed(17 downto 0) is pData(17 downto 0);
     
     --*****************************
     --* Micro Instruction Aliases *
     --*****************************
-    alias ALU           : unsigned(3 downto 0) is uM(24 downto 21);     -- ALU    
-    alias TB            : unsigned(2 downto 0) is uM(20 downto 18);     -- To bus
-    alias FB            : unsigned(2 downto 0) is uM(17 downto 15);     -- From bus
-    alias S             : std_logic is uM(14);                          -- S-bit
-    alias P             : std_logic is uM(13);                          -- P-bit
-    alias LC            : unsigned(1 downto 0) is uM(12 downto 11);     -- LC
-    alias SEQ           : unsigned(3 downto 0) is uM(10 downto 7);      -- SEQ
-    alias MICROADDR     : unsigned(6 downto 0) is uM(6 downto 0);       -- Micro address
+    alias ALU               : unsigned(3 downto 0) is uM(24 downto 21);  -- ALU    
+    alias TB                : unsigned(2 downto 0) is uM(20 downto 18);  -- To bus
+    alias FB                : unsigned(2 downto 0) is uM(17 downto 15);  -- From bus
+    alias S                 : std_logic is uM(14);                       -- S-bit
+    alias P                 : std_logic is uM(13);                       -- P-bit
+    alias LC                : unsigned(1 downto 0) is uM(12 downto 11);  -- LC
+    alias SEQ               : unsigned(3 downto 0) is uM(10 downto 7);   -- SEQ
+    alias MICROADDR         : unsigned(6 downto 0) is uM(6 downto 0);    -- Micro address
     
     --**************************************
-    --* Program Memory Instruction Aliases *
+    --* Program Memory Instruction Signals *
     --**************************************
-    --alias OP            : signed(4 downto 0) is PM(17 downto 13);     -- Operation    
-    --alias GRX           : signed(2 downto 0) is PM(12 downto 10);     -- Register    
-    --alias M             : signed(1 downto 0) is PM(9 downto 8);       -- Addressing mode        
-    --alias ADDR          : signed(7 downto 0) is PM(7 downto 0);       -- Address field
-    signal OP            : signed(4 downto 0);     -- Operation    
-    signal GRX           : signed(2 downto 0);     -- Register    
-    signal M             : signed(1 downto 0);       -- Addressing mode        
-    signal ADDR          : signed(7 downto 0);       -- Address field    
-
-    --****************************
-    --* Outgoing signals signals *
-    --****************************
-    -- To pMem
-    signal ASR          : signed(7 downto 0) := (others => '0');  -- (pAddr)
-    -- To uMem
-    signal uPC          : unsigned(6 downto 0) := (others => '0'); -- Micro Program Counter (uAddr)
-    -- To GPU
-    signal MOVE_REQ     : std_logic := '0';  -- Move request (move_req_out)
-    signal TOG_SOUND_ICON  : std_logic := '0';  -- Signal for toggleing sound icon
-    signal CURR_POS     : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
-    signal NEXT_POS     : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
-    signal SEL_TRACK    : signed(1 downto 0) := "00";  -- Track select (sel_track_out)
-    signal RND_SEL_TRACK : signed(1 downto 0) := "00"; -- Randomly generated track selector.
-    -- Temp for saving next track before we can apply it to SEL_TRACK.
-    signal next_track   : signed(1 downto 0) := "00"; 
-    -- To SOUND
-    signal SEL_SOUND    : std_logic := '0'; -- Sound select (sel_sound_out)
-    
-    --**************************
-	--* Program Memory Signals *
-	--**************************
-	signal PC           : signed(7 downto 0) := (others => '0'); -- Program Counter
-	signal IR           : signed(17 downto 0) := (others => '0'); -- Instruction Register 
-	signal DATA_BUS     : signed(17 downto 0) := (others => '0'); -- Data Bus
+    signal OP               : signed(4 downto 0);  -- Operation    
+    signal GRX              : signed(2 downto 0);  -- Register    
+    signal M                : signed(1 downto 0);  -- Addressing mode        
+    signal ADDR             : signed(7 downto 0);  -- Address field    
 	
     --****************
     --* Flag Signals *
     --****************
-	signal flag_Z       : std_logic := '0';
-	signal flag_N       : std_logic := '0';
-	signal flag_C       : std_logic := '0';  -- NOT ALWAYS BEING DETECTED ATM
-	signal flag_O       : std_logic := '0';  -- NOT BEING DETECTED ATM
-	signal flag_L       : std_logic := '0';  -- 1 if LC_cnt = 0 (done)
-    signal flag_G       : std_logic := '0';  -- Goal reached
-	
-    --********************
-    --* Register Signals *
-    --********************
-    signal AR           : signed(17 downto 0) := (others => '0');
-    signal GR0          : signed(17 downto 0) := (others => '0');
-    signal GR1          : signed(17 downto 0) := (others => '0');
-    signal GR2          : signed(17 downto 0) := (others => '0');
-    signal GR3          : signed(17 downto 0) := (others => '0');
-    signal GOAL_POS     : signed(17 downto 0) := (others => '0');  -- Goal position (goal_pos_out)
-    signal RND_GOAL_POS : signed(17 downto 0) := (others => '0');
+	signal flag_Z           : std_logic := '0';  -- Zero
+	signal flag_N           : std_logic := '0';  -- Negative
+	signal flag_C           : std_logic := '0';  -- NOT ALWAYS BEING DETECTED ATM
+	signal flag_O           : std_logic := '0';  -- NOT BEING DETECTED ATM
+	signal flag_L           : std_logic := '0';  -- 1 if LC_cnt = 0 (done)
+    signal flag_G           : std_logic := '0';  -- Goal reached
+
+    --****************************
+    --* Outgoing signals signals *
+    --****************************
+    -- To GPU
+    signal MOVE_REQ         : std_logic := '0';  -- Move request (move_req_out)
+    signal TOG_SOUND_ICON   : std_logic := '0';  -- Signal for toggleing sound icon
+    signal CURR_POS         : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
+    signal NEXT_POS         : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
+    signal SEL_TRACK        : signed(1 downto 0) := "00";  -- Track select (sel_track_out)
+    signal RND_SEL_TRACK    : signed(1 downto 0) := "00"; -- Randomly generated track selector.
+    signal next_track       : signed(1 downto 0) := "00"; -- Temp for saving next track before we can apply it to SEL_TRACK.
+    -- To SOUND
+    signal SEL_SOUND        : std_logic := '0'; -- Sound select (sel_sound_out)
+    signal GOAL_POS         : signed(17 downto 0) := (others => '0');  -- Goal position (goal_pos_out)
+    signal RND_GOAL_POS     : signed(17 downto 0) := (others => '0');
+    signal WON              : std_logic := '0'; -- LSB signals that goal_pos was found
+
+    --***************
+    --* CPU Signals *
+    --***************
+    signal PC               : signed(7 downto 0) := (others => '0'); -- Program Counter
+    signal uPC              : unsigned(6 downto 0) := (others => '0'); -- Micro Program Counter (uAddr)
+	signal IR               : signed(17 downto 0) := (others => '0'); -- Instruction Register 
+	signal DATA_BUS         : signed(17 downto 0) := (others => '0'); -- Data Bus
+    signal ASR              : signed(7 downto 0) := (others => '0');  -- (pAddr)
+    signal AR               : signed(17 downto 0) := (others => '0');
+    signal GR0              : signed(17 downto 0) := (others => '0');
+    signal GR1              : signed(17 downto 0) := (others => '0');
+    signal GR2              : signed(17 downto 0) := (others => '0');
+    signal GR3              : signed(17 downto 0) := (others => '0');
     
-    --********************
-    --* Register aliases *
-    --********************
-    alias CURR_XPOS     : signed(5 downto 0) is CURR_POS(14 downto 9);
-    alias CURR_YPOS     : signed(4 downto 0) is CURR_POS(4 downto 0);
-    alias NEXT_XPOS     : signed(5 downto 0) is NEXT_POS(14 downto 9);
-    alias NEXT_YPOS     : signed(4 downto 0) is NEXT_POS(4 downto 0);
-    alias GOAL_XPOS     : signed(5 downto 0) is GOAL_POS(14 downto 9);
-    alias GOAL_YPOS     : signed(4 downto 0) is GOAL_POS(4 downto 0);
-    alias key_code      : unsigned(2 downto 0) is PS2cmd(2 downto 0);
+    --******************
+    --* Signal aliases *
+    --******************
+    alias CURR_XPOS         : signed(5 downto 0) is CURR_POS(14 downto 9);
+    alias CURR_YPOS         : signed(4 downto 0) is CURR_POS(4 downto 0);
+    alias NEXT_XPOS         : signed(5 downto 0) is NEXT_POS(14 downto 9);
+    alias NEXT_YPOS         : signed(4 downto 0) is NEXT_POS(4 downto 0);
+    alias GOAL_XPOS         : signed(5 downto 0) is GOAL_POS(14 downto 9);
+    alias GOAL_YPOS         : signed(4 downto 0) is GOAL_POS(4 downto 0);
+    alias key_code          : unsigned(2 downto 0) is PS2cmd(2 downto 0);
 
     --************
     --* Counters *
     --************
-    signal free_pos_lmt : signed(10 downto 0) := (others => '0');
-    signal free_pos_cnt : signed(10 downto 0) := (others => '0');
-    signal dly_cnt      : unsigned(1 downto 0) := (others => '0');
-    signal LC_cnt       : signed(16 downto 0) := (others => '0');
+    signal free_pos_lmt     : signed(10 downto 0) := (others => '0');
+    signal free_pos_cnt     : signed(10 downto 0) := (others => '0');
+    signal dly_cnt          : unsigned(1 downto 0) := (others => '0');
+    signal LC_cnt           : signed(16 downto 0) := (others => '0');
 
      --TEST                             
     --signal test_led_counter             : unsigned(25 downto 0);
@@ -152,7 +142,7 @@ architecture Behavioral of CPU is
          "0101110",--x"2E", -- HALT     "01011" 11
          "0101111",--x"2F", -- BCT      "01100" 12
          "0110001",--x"31", -- SETRND   "01101" 13
-         "0000000",--x"00", -- NULL     "01110" 14
+         "0110010",--x"32", -- WON      "01110" 14
          "0000000",--x"00", -- NULL     "01111" 15
          "0000000",--x"00", -- NULL     "10000" 16
          "0000000",--x"00", -- NULL     "10001" 17
@@ -289,9 +279,9 @@ begin
     --* Random number generation *
     --****************************
     free_pos_lmt <= 
-    to_signed(987,11)                 when (SEL_TRACK = "00") else
-    to_signed(1063,11)                when (SEL_TRACK = "01") else
-    to_signed(986,11)                 when (SEL_TRACK = "10") else
+    to_signed(987,11)   when (SEL_TRACK = "00") else
+    to_signed(1063,11)  when (SEL_TRACK = "01") else
+    to_signed(986,11)   when (SEL_TRACK = "10") else
     (others => '0');
     
     process(clk)
@@ -308,6 +298,7 @@ begin
     end process;
 
     RND_SEL_TRACK <= free_pos_cnt(1 downto 0) when (not (free_pos_cnt(1 downto 0) = "11")) else "00";
+    --RND_GOAL_POS <= "000000001000000001";    
     RND_GOAL_POS <= 
     track_1_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "00") else
     track_2_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "01") else
@@ -331,10 +322,10 @@ begin
         end if;
     end process;
     
-    OP <= IR(17 downto 13); -- Operation    
-    GRX <= IR(12 downto 10);     -- Register    
-    M <= IR(9 downto 8);       -- Addressing mode        
-    ADDR <= IR(7 downto 0);       -- Address field
+    OP <= IR(17 downto 13);   -- Operation    
+    GRX <= IR(12 downto 10);  -- Register    
+    M <= IR(9 downto 8);      -- Addressing mode        
+    ADDR <= IR(7 downto 0);   -- Address field
 
     -- FB = "010" UNUSED (CAN'T WRITE TO PM)
     
@@ -356,7 +347,22 @@ begin
         end if;
     end process;
 
-    -- FB = "100" UNUSED (UNDEFINED)
+    --*********************************************
+    --* WON : Signal for when goal pos was found. *
+    --*********************************************
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if (rst = '1') then
+                WON <= '0';
+            elsif (FB = "100") then
+                WON <= DATA_BUS(0);
+            else
+                null;
+            end if;
+        end if;
+    end process; 
+
     -- FB = "101" UNUSED (HR)
     
     --****************************
@@ -585,9 +591,9 @@ begin
                     else 
                         uPC <= uPC + 1;
                     end if;  
-               when "1111" =>
-                    uPC <= (others => '0'); -- SHOULD ALSO HALT EXECUTION   
-                when others =>
+               --when "1111" => ***UNUSED***
+               --     uPC <= (others => '0'); -- SHOULD ALSO HALT EXECUTION   
+               when others =>
                     null;
             end case; 
         end if;
@@ -682,8 +688,10 @@ begin
                  --       flag_Z <= '0';
                  --   end if;
                     
-                when "1000" => -- AR := 1
-                    AR <= to_signed(1,18);
+                when "1000" => -- AR := 1 (Z/N)
+                    AR <= to_signed(1,18);                     
+                    flag_N <= '0';
+                    flag_Z <= '0';
                     
                 --when "1001" => -- AR LSL, zero is shifted in, bit shifted out to C. (Z/N(C) ***UNUSED***
                 --    AR <= AR(16 downto 0) & '0';
@@ -740,12 +748,12 @@ begin
             LC_cnt <= (others => '0');
             flag_L <= '0';
         else
-            if (LC = "01") then
+            if (LC = "01" and LC_cnt > 0) then
                 LC_cnt <= LC_cnt - 1;
             elsif (LC = "10") then
                 LC_cnt <= to_signed(0,9) & DATA_BUS(7 downto 0);
             elsif (LC = "11") then
-                LC_cnt <= to_signed(0,10) & MICROADR;
+                LC_cnt <= to_signed(0,10) & signed(MICROADDR);
             else
                 null;
             end if;
@@ -767,7 +775,7 @@ begin
     PM                                  when (TB = "010") else
     to_signed(0,10) & PC                when (TB = "011") else
     AR                                  when (TB = "100") else
-    --NULL                              when (TB = "101") else
+    --NULL                                when (TB = "101") else
     GR0                                 when (TB = "110" and GRX = "000") else 
     GR1                                 when (TB = "110" and GRX = "001") else 
     GR2                                 when (TB = "110" and GRX = "010") else 
@@ -838,7 +846,7 @@ begin
     --*******************************
     --* Outgoing signals assignment *
     --*******************************
-    pAddr <= ASR;
+    pAddr <= ASR when (ASR >= to_signed(0,8) and ASR <= 5) else to_signed(0,8);
     uAddr <= uPC; 
     curr_pos_out <= CURR_POS;
     next_pos_out <= NEXT_POS;
@@ -847,7 +855,7 @@ begin
     sel_sound_out <= SEL_SOUND;
     move_req_out <= MOVE_REQ;
     tog_sound_icon_out <= TOG_SOUND_ICON;
-    goal_reached_out <= flag_G;
+    goal_reached_out <= WON;
     
 
     --*************
