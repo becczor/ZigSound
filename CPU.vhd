@@ -301,7 +301,8 @@ begin
     end process;
 
     RND_SEL_TRACK <= free_pos_cnt(1 downto 0) when (not (free_pos_cnt(1 downto 0) = "11")) else "00";
-    RND_GOAL_POS <= "000010100000001111";    
+    --RND_GOAL_POS <= "000010100000001111";
+    RND_GOAL_POS <= "000000001000000001";    
     --RND_GOAL_POS <= 
     --track_1_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "00") else
     --track_2_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "01") else

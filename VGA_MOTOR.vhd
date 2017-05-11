@@ -17,6 +17,7 @@ entity VGA_MOTOR is
     clk	    	    		: in std_logic;
     rst		        		: in std_logic;
     data		    		: in unsigned(7 downto 0);
+    goal_reached            : in std_logic;
     addr		    		: out unsigned(10 downto 0);
     vgaRed		        	: out std_logic_vector(2 downto 0);
     vgaGreen	        	: out std_logic_vector(2 downto 0);
@@ -526,7 +527,7 @@ begin
     if rising_edge(clk) then
         if (rst = '1') then
             pixel <= (others => '0');
-        elsif (isRbSprite = '1') then
+        elsif (isRbSprite = '1' and goal_reached = '1') then
             pixel <= spriteMemRb(to_integer(spriteAddrRb));
         elsif (blank = '0') then
             pixel <= tileMem(to_integer(tileAddr));
