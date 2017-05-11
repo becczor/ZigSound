@@ -40,123 +40,125 @@ architecture Behavioral of zigsound is
     -- CPU component
 	component CPU
     	port(
-            clk             : in std_logic;
-	        rst             : in std_logic;
-	        uAddr           : out unsigned(6 downto 0);
-	        uData           : in unsigned(24 downto 0);
-	        pAddr           : out signed(7 downto 0);
-	        pData           : in signed(17 downto 0);
-	        PS2cmd          : in unsigned(17 downto 0);
-            move_req_out    : out std_logic;
-            tog_sound_icon_out : out std_logic;  -- signal for chaning the sound icon
-		    move_resp       : in std_logic;
-		    curr_pos_out    : out signed(17 downto 0);
-		    next_pos_out    : out signed(17 downto 0);
-            goal_pos_out    : out signed(17 downto 0);
-		    sel_track_out   : out unsigned(1 downto 0);
-		    sel_sound_out   : out std_logic
-		    --test_diod   	: out std_logic;
-		    --switch          : in std_logic
+            clk                 : in std_logic;
+	        rst                 : in std_logic;
+	        uAddr               : out unsigned(6 downto 0);
+	        uData               : in unsigned(24 downto 0);
+	        pAddr               : out signed(7 downto 0);
+	        pData               : in signed(17 downto 0);
+	        PS2cmd              : in unsigned(17 downto 0);
+            move_req_out        : out std_logic;
+            tog_sound_icon_out  : out std_logic;  -- signal for chaning the sound icon
+		    move_resp           : in std_logic;
+		    curr_pos_out        : out signed(17 downto 0);
+		    next_pos_out        : out signed(17 downto 0);
+            goal_pos_out        : out signed(17 downto 0);
+		    sel_track_out       : out unsigned(1 downto 0);
+		    sel_sound_out       : out std_logic;
+            goal_reached_out    : out std_logic;
+            score_out           : out signed(17 downto 0)
+		    --test_diod   	      : out std_logic;
+		    --switch              : in std_logic
 		    );
   	end component;
 
     --uMem : Micro Memory Component
     component uMem
         port(
-         clk            : in std_logic;   
-         uAddr          : in unsigned(6 downto 0);
-         uData          : out unsigned(24 downto 0)
+         clk                    : in std_logic;   
+         uAddr                  : in unsigned(6 downto 0);
+         uData                  : out unsigned(24 downto 0)
          );
     end component;
 
     --pMem : Program Memory Component
 	component pMem
-        port(pAddr          : in signed(7 downto 0);
-	         pData          : out signed(17 downto 0);
-	         clk            : in std_logic
+        port(pAddr              : in signed(7 downto 0);
+	         pData              : out signed(17 downto 0);
+	         clk                : in std_logic
 	         );
 	end component;
 	
     -- GPU : Graphics control component 
 	component GPU
 		port(
-        clk                 : in std_logic;  -- system clock (100 MHz)
-        rst	        		: in std_logic;  -- reset signal
+        clk                     : in std_logic;  -- system clock (100 MHz)
+        rst	           		    : in std_logic;  -- reset signal
         -- From SOUND
-        sound_channel       : in std_logic;
+        sound_channel           : in std_logic;
         -- TO/FROM CPU
-        move_req            : in std_logic;  -- move request
-        tog_sound_icon      : in std_logic;   -- signal for changing the sound icon
-        curr_pos            : in signed(17 downto 0);  -- current position
-        next_pos            : in signed(17 downto 0);  -- next position
-        move_resp			: out std_logic;  -- response to move request
+        move_req                : in std_logic;  -- move request
+        tog_sound_icon          : in std_logic;   -- signal for changing the sound icon
+        curr_pos                : in signed(17 downto 0);  -- current position
+        next_pos                : in signed(17 downto 0);  -- next position
+        move_resp			    : out std_logic;  -- response to move request
         -- TO/FROM PIC_MEM
-        data_nextpos        : in unsigned(7 downto 0);  -- tile data at nextpos
-        addr_nextpos        : out unsigned(10 downto 0);  -- tile addr of nextpos
-        data_change			: out unsigned(7 downto 0);  -- tile data for change
-        addr_change			: out unsigned(10 downto 0);  -- tile address for change
-        we_picmem			: out std_logic  -- write enable for PIC_MEM
+        data_nextpos            : in unsigned(7 downto 0);  -- tile data at nextpos
+        addr_nextpos            : out unsigned(10 downto 0);  -- tile addr of nextpos
+        data_change			    : out unsigned(7 downto 0);  -- tile data for change
+        addr_change			    : out unsigned(10 downto 0);  -- tile address for change
+        we_picmem			    : out std_logic  -- write enable for PIC_MEM
 		);
 	end component;
 
 	-- PIC_MEM : Picture memory component
 	component PIC_MEM
 		port(
-        clk    	            : in std_logic;
-        rst	                : in std_logic;
+        clk    	                : in std_logic;
+        rst	                    : in std_logic;
         -- CPU
-        sel_track       	: in unsigned(1 downto 0);
+        sel_track       	    : in unsigned(1 downto 0);
         -- GPU
-        we		            : in std_logic;
-        data_nextpos    	: out unsigned(7 downto 0);
-        addr_nextpos    	: in unsigned(10 downto 0);
-        data_change	    	: in unsigned(7 downto 0);
-        addr_change	    	: in unsigned(10 downto 0);
+        we		                : in std_logic;
+        data_nextpos    	    : out unsigned(7 downto 0);
+        addr_nextpos    	    : in unsigned(10 downto 0);
+        data_change	    	    : in unsigned(7 downto 0);
+        addr_change	    	    : in unsigned(10 downto 0);
         -- VGA MOTOR
-        data_vga        	: out unsigned(7 downto 0);
-        addr_vga	    	: in unsigned(10 downto 0)
+        data_vga        	    : out unsigned(7 downto 0);
+        addr_vga	    	    : in unsigned(10 downto 0)
 		);
 	end component;
 
 	-- VGA_MOTOR : VGA motor component
 	component VGA_MOTOR
 		port(
-		clk			        : in std_logic;
-		rst	        	    : in std_logic; 
-		data	    		: in unsigned(7 downto 0);
-		addr	    		: out unsigned(10 downto 0);
-		vgaRed	       		: out std_logic_vector(2 downto 0);
-		vgaGreen	    	: out std_logic_vector(2 downto 0);
-		vgaBlue		    	: out std_logic_vector(2 downto 1);
-		Hsync		    	: out std_logic;
-		Vsync		    	: out std_logic
+		clk			            : in std_logic;
+		rst	        	        : in std_logic; 
+		data	    		    : in unsigned(7 downto 0);
+		addr	    		    : out unsigned(10 downto 0);
+		vgaRed	       		    : out std_logic_vector(2 downto 0);
+		vgaGreen	    	    : out std_logic_vector(2 downto 0);
+		vgaBlue		    	    : out std_logic_vector(2 downto 1);
+		Hsync		    	    : out std_logic;
+		Vsync		    	    : out std_logic
 		);
 	end component;
 	
 	-- KBD_ENC : Keyboard encoder
 	component KBD_ENC
 		port(
-		clk					: in std_logic;
-		rst	        		: in std_logic;
-		PS2KeyboardCLK      : in std_logic;  -- USB keyboard PS2 clock
-        PS2KeyboardData     : in std_logic;  -- USB keyboard PS2 data
-        PS2cmd				: out unsigned(17 downto 0)
+		clk					    : in std_logic;
+		rst	        		    : in std_logic;
+		PS2KeyboardCLK          : in std_logic;  -- USB keyboard PS2 clock
+        PS2KeyboardData         : in std_logic;  -- USB keyboard PS2 data
+        PS2cmd				    : out unsigned(17 downto 0)
         --TEST
-	    --test_diod		    : out std_logic  
+	    --test_diod		          : out std_logic  
 		);
 	end component;
 	
     -- Sound component
     component SOUND
         port (
-        clk                 : in std_logic;                      -- system clock (100 MHz)
-        rst                 : in std_logic;                      -- reset signal
-        goal_pos            : in signed(17 downto 0);  -- goal position
-        curr_pos            : in signed(17 downto 0);  -- current position
-        channel             : in std_logic;                      -- deciding which of the two sound that should be played, 0 = curr, 1 = goal.
-        sound_data          : out std_logic;
-        test_diod		    : out std_logic;
-        test2_diod          : out std_logic
+        clk                     : in std_logic;            -- system clock (100 MHz)
+        rst                     : in std_logic;            -- reset signal
+        goal_pos                : in signed(17 downto 0);  -- goal position
+        curr_pos                : in signed(17 downto 0);  -- current position
+        channel                 : in std_logic;            -- deciding which of the two sounds that should be played, 0 = curr, 1 = goal.
+        sound_data              : out std_logic;           --
+        test_diod		        : out std_logic;           --
+        test2_diod              : out std_logic            --
         );
     end component;
 
@@ -174,6 +176,8 @@ architecture Behavioral of zigsound is
     signal goal_pos_con         : signed(17 downto 0);
 	signal sel_track_con        : unsigned(1 downto 0);
 	signal sel_sound_con        : std_logic;
+    signal goal_reached_con     : std_logic;
+    signal score_con            : signed(17 downto 0);
     
     -- uMem signals
     signal uData_con            : unsigned(24 downto 0);
@@ -232,7 +236,9 @@ begin
                 next_pos_out => next_pos_con,
                 goal_pos_out => goal_pos_con,
                 sel_track_out => sel_track_con,
-                sel_sound_out => sel_sound_con
+                sel_sound_out => sel_sound_con,
+                goal_reached_out => goal_reached_con,
+                score_out => score_con
                 --test_diod => test_diod,
                 --switch => switch 
                 );
