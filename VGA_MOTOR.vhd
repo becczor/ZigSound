@@ -33,13 +33,18 @@ architecture Behavioral of VGA_MOTOR is
     signal Ypixel	        : unsigned(9 downto 0);		-- Vertical pixel counter
     signal ClkDiv	        : unsigned(1 downto 0);		-- Clock divisor, to generate 25 MHz signal
     signal Clk25			: std_logic;			    -- One pulse width 25 MHz signal
-    signal pixel           : std_logic_vector(7 downto 0);	-- Tile pixel data
+    signal pixel            : std_logic_vector(7 downto 0);	-- Tile pixel data
     signal tileAddr         : unsigned(12 downto 0);	-- Tile address
     signal blank            : std_logic;                -- blanking signal
     signal spriteAddr       : unsigned(7 downto 0);     -- The sprite addr
     signal isSprite         : std_logic;                -- '1' if VGA should show sprite '0' if tile
     signal sprite_x_offset  : unsigned(9 downto 0);     -- xPixel - start of sprite x-position
     signal sprite_y_offset  : unsigned(9 downto 0);     -- yPixel - start of y-position
+    
+    -- Test animation
+    
+    signal time_cnt         : unsigned(20 downto 0);
+    signal x_cnt            : unsigned(9 downto 0);       
 	
     -- Tile memory type
     type ram_t is array (0 to 2559) of std_logic_vector(7 downto 0);
@@ -53,11 +58,11 @@ architecture Behavioral of VGA_MOTOR is
             -- Y                                               -- A                                               -- Y                                                    --   !
           x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",  x"FF",x"FF",x"00",x"00",x"00",x"FF",x"FF",x"FF",    x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",    
 		  x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",  x"FF",x"00",x"00",x"FF",x"00",x"00",x"FF",x"FF",    x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
-		  x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",  x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",    x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
-		  x"FF",x"FF",x"1C",x"1C",x"1C",x"1C",x"FF",x"FF",  x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",    x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
-		  x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",  x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"FF",    x"FF",x"FF",x"1C",x"1C",x"1C",x"1C",x"FF",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
-		  x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",  x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",    x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-		  x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",  x"00",x"00",x"FF",x"FF",x"FF",x"00",x"00",x"FF",    x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",    x"FF",x"FF",x"FF",x"E0",x"E0",x"FF",x"FF",x"FF",
+		  x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",  x"00",x"00",x"FF",x"FE",x"FE",x"00",x"00",x"FF",    x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
+		  x"FF",x"FF",x"1C",x"1C",x"1C",x"1C",x"FF",x"FF",  x"00",x"00",x"FF",x"FE",x"FE",x"00",x"00",x"FF",    x"FF",x"1C",x"1C",x"FF",x"FF",x"1C",x"1C",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
+		  x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",  x"00",x"00",x"00",x"FE",x"FE",x"00",x"00",x"FF",    x"FF",x"FF",x"1C",x"1C",x"1C",x"1C",x"FF",x"FF",    x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
+		  x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",  x"00",x"00",x"FF",x"FE",x"FE",x"00",x"00",x"FF",    x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+		  x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",  x"00",x"00",x"FF",x"Fe",x"FF",x"00",x"00",x"FF",    x"FF",x"FF",x"FF",x"1C",x"1C",x"FF",x"FF",x"FF",    x"FF",x"FF",x"FF",x"E0",x"E0",x"FF",x"FF",x"FF",
           x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF"
           
           
@@ -368,6 +373,44 @@ begin
     -- 25 MHz clock (one system clock pulse width)
     Clk25 <= '1' when (ClkDiv = 3) else '0';
 
+
+
+    --- testing animation thing
+    --- slows the speed of time_cnt
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if rst = '1' then
+            time_cnt <= (others => '0');
+        else
+            time_cnt <= time_cnt + 1;
+        end if;
+    end if;
+    end process;
+    
+    
+    
+    --- testing animation thing
+    --- 
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if rst = '1' then
+            x_cnt <= "0100101100";
+        elsif x_cnt = "0110101100" then
+            null;
+        elsif time_cnt = "1111111111111111111" then     
+            x_cnt <= x_cnt + 1;
+        end if;
+    end if;
+    end process;
+
+    
+
+    -- 25 MHz clock (one system clock pulse width)
+    Clk25 <= '1' when (ClkDiv = 3) else '0';
+
+
 	
     -- Horizontal pixel counter
 
@@ -392,6 +435,7 @@ begin
     end if;
     end process;
 	
+
 
 
     -- Horizontal sync
@@ -451,7 +495,7 @@ begin
 
     blank <= '1' when ((Xpixel > 639 and Xpixel <= 799) or (Ypixel > 479 and Ypixel <= 520)) else '0';
 
-    isSprite <= '1' when ((Xpixel > 300 and Xpixel <= 428) and (Ypixel > 200 and Ypixel <= 232)) else '0';  -- ÄNDRA EFTER SOTRLEK
+    isSprite <= '1' when ((Xpixel > 300 and Xpixel < x_cnt) and (Ypixel > 200 and Ypixel < 232) and not (spriteMem(to_integer(spriteAddr)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
 
     -- Tile memory
     process(clk)
@@ -470,6 +514,9 @@ begin
     end process;
 
 
+
+    -- Sets the offset of x and y pixel coords for sprite-drawing. 
+    -- Sprite starts at 300 and 200 
     sprite_x_offset <= Xpixel - to_unsigned(300,10);
     sprite_y_offset <= Ypixel - to_unsigned(200,10);
 
