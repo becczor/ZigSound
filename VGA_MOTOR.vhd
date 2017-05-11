@@ -518,7 +518,7 @@ begin
 
     blank <= '1' when ((Xpixel > 639 and Xpixel <= 799) or (Ypixel > 479 and Ypixel <= 520)) else '0';
 
-    isRbSprite <= '1' when ((Xpixel > 64 and Xpixel < x_cnt) and (Ypixel > 200 and Ypixel < 456) and not (spriteMemRb(to_integer(spriteAddr)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
+    isRbSprite <= '1' when ((Xpixel > 64 and Xpixel < x_cnt) and (Ypixel > 200 and Ypixel < 456) and not (spriteMemRb(to_integer(spriteAddrRb)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
 
     -- Tile memory
     process(clk)
@@ -527,7 +527,7 @@ begin
         if (rst = '1') then
             pixel <= (others => '0');
         elsif (isRbSprite = '1') then
-            pixel <= spriteMemRb(to_integer(spriteAddr));
+            pixel <= spriteMemRb(to_integer(spriteAddrRb));
         elsif (blank = '0') then
             pixel <= tileMem(to_integer(tileAddr));
         else
