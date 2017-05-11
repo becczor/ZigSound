@@ -90,7 +90,7 @@ constant u_mem_c : u_mem_t := (
 		--PC := PC + 1 + ADR 
 		--om Z = 0, annars PC++
 		b"0000_000_000_0_0_00_1000_0000000",	--0000400	µPC := 0 om Z = 1
-		b"0000_000_000_0_0_00_0101_0011011",	--000029B	Hopp till BRA
+		b"0000_000_000_0_0_00_0101_0011011",	--000029B	Hopp till BRA om Z = 0
 		--BGT 22
 		--PC := PC + 1 + ADR 
 		--om >, annars PC++	
@@ -121,15 +121,24 @@ constant u_mem_c : u_mem_t := (
         --GOAL_POS := RND_GOAL_POS if GRX = "100"    
         --SEL_TRACK := RND_SEL_TRACK if GRX = "101" 
         b"0000_110_110_0_0_00_0011_0000000", 	--01B0000	REG := RND_REG
-		--WON 32
-		--Wait while message is shown upon finding goal pos.
-		b"0000_010_000_0_0_10_0000_0000000",	--HEX	LC := PM(4) via buss
-        b"1000_000_000_0_0_00_0000_0000000",    --HEX   AR := '1'
-        b"0000_100_100_0_0_00_0000_0000000",    --HEX   WON := '1' via buss (AR)
-		b"0000_000_000_0_0_00_1100_0110111",	--HEX	Hopp till (*) om L = 1 (LC = 0, d.v.s. klara) (#)
-        b"0000_000_000_0_0_01_0101_0110101",	--HEX	LC_cnt--, Hopp till (#)
-        b"0011_000_000_0_0_00_0000_0000000",    --HEX   AR := '0' (*)
-        b"0000_100_100_0_0_00_0011_0000000"     --HEX   WON := '0' via buss (AR), µPC := 0
+        --SHOWGOALMSG 32
+        --WON := '1'
+        b"1000_000_000_0_0_00_0000_0000000",    --HEX       AR := '1'
+        b"0000_100_100_0_0_00_0011_0000000",    --HEX       WON := '1' via buss (AR), µPC := 0
+        --HIDEGOALMSG 34
+        --WON := '0'
+        b"0011_000_000_0_0_00_0000_0000000",    --HEX       AR := '0'
+        b"0000_100_100_0_0_00_0011_0000000"     --HEX       WON := '0' via buss (AR), µPC := 0
+		--WAIT 36
+		--Wait for a while depending on PM(ASR)
+		b"0000_010_000_0_0_10_0000_0000000",	--HEX	    LC_cnt := PM via buss
+		b"0000_000_000_0_0_00_1100_0111001",	--HEX	    Hopp till (*) om L = 1 (LC_cnt = 0, d.v.s. klara) (#)
+        b"0000_000_000_0_0_01_0101_0110111",	--HEX	    LC_cnt--, Hopp till (#)
+        b"0000_000_000_0_0_00_0011_0000000",    --HEX       µPC := 0 (*)
+        --INCRSCORE 3A
+        -- SCORE <= SCORE + 1
+        b"1000_000_000_0_0_00_0000_0000000"     --HEX       AR := '1'
+        b"0100_101_000_0_0_00_0011_0000000"     --HEX       AR := AR + SCORE via buss, µPC := 0
         );
 
 signal u_mem : u_mem_t := u_mem_c;

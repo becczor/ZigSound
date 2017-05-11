@@ -55,7 +55,8 @@ architecture Behavioral of zigsound is
             goal_pos_out        : out signed(17 downto 0);
 		    sel_track_out       : out unsigned(1 downto 0);
 		    sel_sound_out       : out std_logic;
-            goal_reached_out    : out std_logic
+            goal_reached_out    : out std_logic;
+            score_out           : out signed(17 downto 0)
 		    --test_diod   	      : out std_logic;
 		    --switch              : in std_logic
 		    );
@@ -176,6 +177,7 @@ architecture Behavioral of zigsound is
 	signal sel_track_con        : unsigned(1 downto 0);
 	signal sel_sound_con        : std_logic;
     signal goal_reached_con     : std_logic;
+    signal score_con            : signed(17 downto 0);
     
     -- uMem signals
     signal uData_con            : unsigned(24 downto 0);
@@ -235,7 +237,8 @@ begin
                 goal_pos_out => goal_pos_con,
                 sel_track_out => sel_track_con,
                 sel_sound_out => sel_sound_con,
-                goal_reached_out => goal_reached_con
+                goal_reached_out => goal_reached_con,
+                score_out => score_con
                 --test_diod => test_diod,
                 --switch => switch 
                 );

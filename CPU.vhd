@@ -22,7 +22,8 @@ entity CPU is
         goal_pos_out        : out signed(17 downto 0);
 		sel_track_out       : out unsigned(1 downto 0);
 		sel_sound_out       : out std_logic;
-        goal_reached_out    : out std_logic
+        goal_reached_out    : out std_logic;
+        score_out           : out signed(17 downto 0)
 		--TEST
         --test_diod           : out std_logic;
         --switch              : in std_logic
@@ -82,6 +83,7 @@ architecture Behavioral of CPU is
     signal SEL_SOUND        : std_logic := '0'; -- Sound select (sel_sound_out)
     signal GOAL_POS         : signed(17 downto 0) := (others => '0');  -- Goal position (goal_pos_out)
     signal RND_GOAL_POS     : signed(17 downto 0) := (others => '0');
+    signal SCORE            : signed(17 downto 0) := (others => '0');
     signal WON              : std_logic := '0'; -- LSB signals that goal_pos was found
 
     --***************
@@ -128,38 +130,39 @@ architecture Behavioral of CPU is
 	type uAddr_instr_t is array (0 to 31) of unsigned(6 downto 0);
 	constant uAddr_instr_c : uAddr_instr_t := 
 	-- OP consists of 5 bits, so the maximum amount of instructions is 32.
-        ("0001010",--x"0A", -- LOAD     "00000" 0
-         "0001011",--x"0B", -- STORE    "00001" 1
-         "0001100",--x"0C", -- ADD      "00010" 2
-         "0001111",--x"0F", -- SUB      "00011" 3
-         "0010010",--x"12", -- AND      "00100" 4
-         "0010101",--x"15", -- LSR      "00101" 5
-         "0011011",--x"1B", -- BRA      "00110" 6
-         "0011110",--x"1E", -- CMP      "00111" 7
-         "0100000",--x"20", -- BNE      "01000" 8
-         "0100010",--x"22", -- BGT      "01001" 9
-         "0101001",--x"29", -- BGE      "01010" 10
-         "0101110",--x"2E", -- HALT     "01011" 11
-         "0101111",--x"2F", -- BCT      "01100" 12
-         "0110001",--x"31", -- SETRND   "01101" 13
-         "0110010",--x"32", -- WON      "01110" 14
-         "0000000",--x"00", -- NULL     "01111" 15
-         "0000000",--x"00", -- NULL     "10000" 16
-         "0000000",--x"00", -- NULL     "10001" 17
-         "0000000",--x"00", -- NULL     "10010" 18
-         "0000000",--x"00", -- NULL     "10011" 19
-         "0000000",--x"00", -- NULL     "10100" 20
-         "0000000",--x"00", -- NULL     "10101" 21
-         "0000000",--x"00", -- NULL     "10110" 22
-         "0000000",--x"00", -- NULL     "10111" 23
-         "0000000",--x"00", -- NULL     "11000" 24
-         "0000000",--x"00", -- NULL     "11001" 25
-         "0000000",--x"00", -- NULL     "11010" 26
-         "0000000",--x"00", -- NULL     "11011" 27
-         "0000000",--x"00", -- NULL     "11100" 28
-         "0000000",--x"00", -- NULL     "11101" 29
-         "0000000",--x"00", -- NULL     "11110" 30
-         "0000000"--x"00"  -- NULL     "11111" 31
+    ------ µStartAddr ------- µInstr --------- OP ---
+        ("0001010",--x"0A", -- LOAD         "00000" 0
+         "0001011",--x"0B", -- STORE        "00001" 1
+         "0001100",--x"0C", -- ADD          "00010" 2
+         "0001111",--x"0F", -- SUB          "00011" 3
+         "0010010",--x"12", -- AND          "00100" 4
+         "0010101",--x"15", -- LSR          "00101" 5
+         "0011011",--x"1B", -- BRA          "00110" 6
+         "0011110",--x"1E", -- CMP          "00111" 7
+         "0100000",--x"20", -- BNE          "01000" 8
+         "0100010",--x"22", -- BGT          "01001" 9
+         "0101001",--x"29", -- BGE          "01010" 10
+         "0101110",--x"2E", -- HALT         "01011" 11
+         "0101111",--x"2F", -- BCT          "01100" 12
+         "0110001",--x"31", -- SETRND       "01101" 13
+         "0110010",--x"32", -- SHOWGOALMSG  "01110" 14
+         "0110100",--x"34", -- HIDEGOALMSG  "01111" 15
+         "0110110",--x"36", -- WAIT         "10000" 16
+         "0111010",--x"3A", -- INCRSCORE    "10001" 17
+         "0000000",--x"00", -- NULL         "10010" 18
+         "0000000",--x"00", -- NULL         "10011" 19
+         "0000000",--x"00", -- NULL         "10100" 20
+         "0000000",--x"00", -- NULL         "10101" 21
+         "0000000",--x"00", -- NULL         "10110" 22
+         "0000000",--x"00", -- NULL         "10111" 23
+         "0000000",--x"00", -- NULL         "11000" 24
+         "0000000",--x"00", -- NULL         "11001" 25
+         "0000000",--x"00", -- NULL         "11010" 26
+         "0000000",--x"00", -- NULL         "11011" 27
+         "0000000",--x"00", -- NULL         "11100" 28
+         "0000000",--x"00", -- NULL         "11101" 29
+         "0000000",--x"00", -- NULL         "11110" 30
+         "0000000" --x"00"  -- NULL         "11111" 31
         );
     signal uAddr_instr : uAddr_instr_t := uAddr_instr_c;
     
@@ -363,7 +366,21 @@ begin
         end if;
     end process; 
 
-    -- FB = "101" UNUSED (HR)
+    --*********************************
+    --* SCORE : Current player score. *
+    --*********************************
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if (rst = '1') then
+                SCORE <= (others => '0');
+            elsif (FB = "101") then
+                SCORE <= DATA_BUS;
+            else
+                null;
+            end if;
+        end if;
+    end process; 
     
     --****************************
     --* GR0 : General Register 0 *
@@ -775,7 +792,7 @@ begin
     PM                                  when (TB = "010") else
     to_signed(0,10) & PC                when (TB = "011") else
     AR                                  when (TB = "100") else
-    --NULL                                when (TB = "101") else
+    SCORE                               when (TB = "101") else
     GR0                                 when (TB = "110" and GRX = "000") else 
     GR1                                 when (TB = "110" and GRX = "001") else 
     GR2                                 when (TB = "110" and GRX = "010") else 
@@ -856,6 +873,7 @@ begin
     move_req_out <= MOVE_REQ;
     tog_sound_icon_out <= TOG_SOUND_ICON;
     goal_reached_out <= WON;
+    score_out <= SCORE;
     
 
     --*************
