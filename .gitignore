@@ -17,3 +17,9 @@ ZigSoundDemo.cr.mti
 ZigSoundSound.mpf
 ZigSoundSound.cr.mti
 
+ZigSoundCPU.mpf
+ZigSoundCPU.cr.mti
+
+#*
+*#
+.~lock*
