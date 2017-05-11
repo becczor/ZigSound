@@ -279,9 +279,9 @@ begin
     --* Random number generation *
     --****************************
     free_pos_lmt <= 
-    to_signed(987,11)   when (SEL_TRACK = "00") else
-    to_signed(1063,11)  when (SEL_TRACK = "01") else
-    to_signed(986,11)   when (SEL_TRACK = "10") else
+    to_signed(987,11)   when (next_track = "00") else
+    to_signed(1063,11)  when (next_track = "01") else
+    to_signed(986,11)   when (next_track = "10") else
     (others => '0');
     
     process(clk)
