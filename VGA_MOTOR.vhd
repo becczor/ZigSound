@@ -53,6 +53,8 @@ architecture Behavioral of VGA_MOTOR is
     -- Sprite memory type
     type ram_s_r is array (0 to 2047) of std_logic_vector(7 downto 0);
     
+    type ram_s_goal is array (0 to 64) of std_logic_vector(7 downto 0);
+    
     -- Sprite memory RAINBOW
     signal spriteMemRb : ram_s_r := 
     (
@@ -91,6 +93,16 @@ x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"
 
               
           );
+          
+    signal spriteMemGoal : ram_s_goal := 
+    (     x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",  -- G
+		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
+		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
+		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
+		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
+		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
+		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
+		  x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0");
 
 
 
@@ -404,12 +416,12 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        if (rst = '1' or goal_reached = '0') then
+        if (rst = '1') then -- or goal_reached = '0'
             time_cnt <= (others => '0');
-        elsif (goal_reached = '1') then
+        else --if (goal_reached = '1') then
             time_cnt <= time_cnt + 1;
-        else
-            null;
+        --else
+        --    null;
         end if;
     end if;
     end process;
@@ -421,7 +433,7 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        if (rst = '1' or goal_reached = '0') then
+        if (rst = '1') then -- or goal_reached = '0'
             x_cnt <= "0001000000";
         elsif x_cnt = "1001100100" then
             null;

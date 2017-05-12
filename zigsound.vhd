@@ -22,10 +22,8 @@ entity zigsound is
         JB1                     : out std_logic;   -- the pmod is plugged in to the upper row of second slot
    
         -- Test
-        debug_PS2CLK            : out std_logic;
-        debug_PS2Data           : out std_logic;
-        test_diod   		    : out std_logic;
-        test2_diod   		    : out std_logic
+		test_diod1   	        : out std_logic;
+		test_diod2   	        : out std_logic
         --switch                  : in std_logic
         );
         
@@ -56,8 +54,9 @@ architecture Behavioral of zigsound is
 		    sel_track_out       : out unsigned(1 downto 0);
 		    sel_sound_out       : out std_logic;
             goal_reached_out    : out std_logic;
-            score_out           : out signed(5 downto 0)
-		    --test_diod   	      : out std_logic;
+            score_out           : out unsigned(5 downto 0);
+		    test_diod1   	    : out std_logic;
+		    test_diod2   	    : out std_logic
 		    --switch              : in std_logic
 		    );
   	end component;
@@ -144,8 +143,6 @@ architecture Behavioral of zigsound is
 		PS2KeyboardCLK          : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData         : in std_logic;  -- USB keyboard PS2 data
         PS2cmd				    : out unsigned(17 downto 0)
-        --TEST
-	    --test_diod		          : out std_logic  
 		);
 	end component;
 	
@@ -157,9 +154,7 @@ architecture Behavioral of zigsound is
         goal_pos                : in signed(17 downto 0);  -- goal position
         curr_pos                : in signed(17 downto 0);  -- current position
         channel                 : in std_logic;            -- deciding which of the two sounds that should be played, 0 = curr, 1 = goal.
-        sound_data              : out std_logic;           --
-        test_diod		        : out std_logic;           --
-        test2_diod              : out std_logic            --
+        sound_data              : out std_logic            --
         );
     end component;
 
@@ -178,7 +173,7 @@ architecture Behavioral of zigsound is
 	signal sel_track_con        : unsigned(1 downto 0);
 	signal sel_sound_con        : std_logic;
     signal goal_reached_con     : std_logic;
-    signal score_con            : signed(5 downto 0);
+    signal score_con            : unsigned(5 downto 0);
     
     -- uMem signals
     signal uData_con            : unsigned(24 downto 0);
@@ -199,21 +194,14 @@ architecture Behavioral of zigsound is
 	
 	-- VGA MOTOR signals 
     signal addr_vga_con         : unsigned(10 downto 0);
-    --TEST
-    --signal vgaGreen_dummy   	: std_logic_vector(2 downto 0);
     
     -- KBD_ENC signals
     signal PS2cmd_con           : unsigned(17 downto 0);
 
     -- SOUND signals
     signal sound_data_con       : std_logic;
-    
-
 	
 begin
-
-    debug_PS2CLK <= PS2KeyboardCLK;
-    debug_PS2Data <= PS2KeyboardData;
     
     JB1 <= sound_data_con;
 
@@ -239,8 +227,9 @@ begin
                 sel_track_out => sel_track_con,
                 sel_sound_out => sel_sound_con,
                 goal_reached_out => goal_reached_con,
-                score_out => score_con
-                --test_diod => test_diod,
+                score_out => score_con,
+                test_diod1 => test_diod1,
+                test_diod2 => test_diod2
                 --switch => switch 
                 );
 
@@ -299,13 +288,10 @@ begin
 	            addr => addr_vga_con,
 	            vgaRed => vgaRed,
 	            vgaGreen => vgaGreen,
-	            --vgaGreen => vgaGreen_dummy,
 	            vgaBlue => vgaBlue,
 	            Hsync => Hsync,
 	            Vsync => Vsync
 	            );
-	            
-	--vgaGreen <= "111" when PS2cmd_con(2) = '1' or vgaGreen = "111" else "000";
 	            
 	-- KBD_ENC Component Connection            
     U6 : KBD_ENC port map(
@@ -323,9 +309,7 @@ begin
                 goal_pos => goal_pos_con,
                 curr_pos => curr_pos_con,
                 channel => sel_sound_con,
-                sound_data => sound_data_con,
-                test_diod => test_diod,
-                test2_diod => test2_diod
+                sound_data => sound_data_con
                 );
 
   end Behavioral;

@@ -23,9 +23,10 @@ entity CPU is
 		sel_track_out       : out unsigned(1 downto 0);
 		sel_sound_out       : out std_logic;
         goal_reached_out    : out std_logic;
-        score_out           : out signed(5 downto 0)
+        score_out           : out unsigned(5 downto 0);
 		--TEST
-        --test_diod           : out std_logic;
+        test_diod1   	    : out std_logic;
+        test_diod2   	    : out std_logic
         --switch              : in std_logic
         );
 end CPU;
@@ -302,12 +303,12 @@ begin
 
     RND_SEL_TRACK <= free_pos_cnt(1 downto 0) when (not (free_pos_cnt(1 downto 0) = "11")) else "00";
     --RND_GOAL_POS <= "000010100000001111";
-    RND_GOAL_POS <= "000000001000000001";    
-    --RND_GOAL_POS <= 
-    --track_1_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "00") else
-    --track_2_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "01") else
-    --track_3_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "10") else
-    --(others => '0');
+    --RND_GOAL_POS <= "000000001000000001";    
+    RND_GOAL_POS <= 
+    track_1_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "00") else
+    track_2_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "01") else
+    track_3_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "10") else
+    (others => '0');
 
     
 	--*****************************
@@ -636,52 +637,37 @@ begin
         else
             case ALU is
                 when "0000" =>  -- NO FUNCTION (No flags) 
-                    null;
-                    
+                    null;      
                 when "0001" => -- AR := DATA_BUS (No flags)
-                    AR <= DATA_BUS;
-                    
+                    AR <= DATA_BUS;      
                 --when "0010" =>  -- ONES' COMPLEMENT, (No flags) ***UNUSED***
-                
                 when "0011" =>  -- SET TO ZERO (Z/N)            ***UNUSED***
-                    AR <= (others => '0'); 
-                    
+                    AR <= (others => '0');   
                 when "0100" => -- AR := AR + DATA_BUS (Z/N/O/C)
                     AR <= AR + DATA_BUS;
-                    -- SHOULD SET OVERFLOW AND CARRY AS WELL
-                    
+                    -- SHOULD SET OVERFLOW AND CARRY AS WELL   
                 when "0101" => -- AR := AR - DATA_BUS (Z/N/O/C)
                     AR <= AR - DATA_BUS;
-                    -- SHOULD SET OVERFLOW AND CARRY AS WELL
-                    
+                    -- SHOULD SET OVERFLOW AND CARRY AS WELL       
                 when "0110" => -- AR := AR and DATA_BUS (Z/N)
-                    AR <= AR and DATA_BUS;
-                        
+                    AR <= AR and DATA_BUS;        
                  --when "0111" => -- AR := AR or DATA_BUS (Z/N)       ***UNUSED***
-                 --   AR <= AR or DATA_BUS;
-                    
+                 --   AR <= AR or DATA_BUS;     
                 when "1000" => -- AR := 1 (Z/N)
-                    AR <= to_signed(1,18);                     
-                    
+                    AR <= to_signed(1,18);                      
                 --when "1001" => -- AR LSL, zero is shifted in, bit shifted out to C. (Z/N(C) ***UNUSED***
                 --    AR <= AR(16 downto 0) & '0';
-                --    flag_C <= AR(17);
-                    
-                --when "1010" => -- AR LSL, 32-bit,                   ***UNUSED***
-                    
+                --    flag_C <= AR(17);   
+                --when "1010" => -- AR LSL, 32-bit,                   ***UNUSED*** 
                 --when "1011" => -- AR ASR, sign bit is shifted in, bit shifted out to C. (Z/N/C) ***UNUSED***
                 --    AR <= AR(17) & AR(17 downto 1);
                 --    flag_C <= AR(0);
-                
                 --when "1100" => -- ARHR ASR,                         ***UNUSED***
-                
                 when "1101" => -- AR LSR, zero is shifted in, bit shifted out to C. (Z/N/C)
                     AR <= '0' & AR(17 downto 1);
                     --flag_C <= AR(0);
-                
                 --when "1110" => -- Rotate AR to the left,            ***UNUSED***
                 --when "1111" => -- Rotate ARHR to the left (32-bit), ***UNUSED***
-     
                 when others =>
                     null;
      
@@ -702,7 +688,6 @@ begin
     if rising_edge(clk) then
         if rst = '1' then
             LC_cnt <= (others => '0');
-            --flag_L <= '0';
         else
             if (LC = "01" and LC_cnt > 0) then
                 LC_cnt <= LC_cnt - 1;
@@ -713,17 +698,13 @@ begin
             else
                 null;
             end if;
-            -- Set flag_L to '1' if we're done looping.
-            --if (LC_cnt = 0) then
-            --    flag_L <= '1';            
-            --else
-            --    flag_L <= '0';
-            --end if;
         end if;
     end if;
     end process;
     
     flag_L <= '1' when (LC_cnt = 0) else '0';
+    test_diod1 <= '1' when (flag_L = '0') else '0';  -- Looping in µMem
+    test_diod2 <= '1' when (flag_L = '1') else '0';  -- Not looping in µMem
 
     --***********************
     --* Data Bus Assignment *
@@ -814,7 +795,7 @@ begin
     move_req_out <= MOVE_REQ;
     tog_sound_icon_out <= TOG_SOUND_ICON;
     goal_reached_out <= WON;
-    score_out <= SCORE(5 downto 0);
+    score_out <= unsigned(SCORE(5 downto 0));
     
 
     --*************
