@@ -23,12 +23,19 @@ entity VGA_MOTOR is
     vgaGreen	        	: out std_logic_vector(2 downto 0);
     vgaBlue		        	: out std_logic_vector(2 downto 1);
     Hsync		        	: out std_logic;
-    Vsync		        	: out std_logic);
+    Vsync		        	: out std_logic
+    
+    goal_pos              : in unsigned(18 downto 0);
+    dis_goal_pos          : in std_logic);
 end VGA_MOTOR;
 
 
 -- architecture
 architecture Behavioral of VGA_MOTOR is
+
+    
+    alias goal_x : signed(5 downto 0) is goal_pos(14 downto 9);
+    alias goal_y : signed(4 downto 0) is goal_pos(4 downto 0);
 
     signal Xpixel	        : unsigned(9 downto 0);     -- Horizontal pixel counter
     signal Ypixel	        : unsigned(9 downto 0);		-- Vertical pixel counter
@@ -41,6 +48,14 @@ architecture Behavioral of VGA_MOTOR is
     signal isRbSprite       : std_logic;                -- '1' if VGA should show sprite '0' if tile
     signal sprite_x_offset_rb  : unsigned(9 downto 0);     -- xPixel - start of sprite x-position
     signal sprite_y_offset_rb  : unsigned(9 downto 0);     -- yPixel - start of y-position
+    
+    signal sprite_xstart_g    : unsigned(9 downto 0);
+    signal sprite_xend_g      : unsigned(9 downto 0);
+    signal sprite_ystart_g    : unsigned(9 downto 0);
+    signal sprite_yend_g      : unsigned(9 downto 0);
+    signal spriteAddrG        : unsigned(2 downto 0);
+    signal isGoalSprite       : std_logic;
+    
     
     -- Test animation
     
@@ -537,6 +552,10 @@ begin
 
     isRbSprite <= '1' when ((Xpixel > 64 and Xpixel < x_cnt) and (Ypixel > 200 and Ypixel < 456) and not (spriteMemRb(to_integer(spriteAddrRb)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
 
+    
+
+    isGoalSprite <= '1' when (dis_goal_pos = '1' and (Xpixel > sprite_xstart_g and Xpixel < sprite_xend_g) and (Ypixel > sprite_ystart_g and Ypixel < sprite_yend_g) else '0';
+
     -- Tile memory
     process(clk)
     begin
@@ -547,6 +566,8 @@ begin
             pixel <= spriteMemRb(to_integer(spriteAddrRb));
         elsif (blank = '0') then
             pixel <= tileMem(to_integer(tileAddr));
+        elsif (isGoalSprite ='1') then
+            pixel <= spriteMemG(to_integer(spriteAddG));
         else
             pixel <= (others => '0');
         end if;
@@ -560,10 +581,21 @@ begin
     sprite_x_offset_rb <= Xpixel - to_unsigned(64,10);
     sprite_y_offset_rb <= Ypixel - to_unsigned(200,10);
 
+    -- Calculates goal coordinates in pixels
+    
+    sprite_xstart_g <= to_unsigned(16,5) * goal_x; 
+    sprite_xend_g <= to_unsigned(16,5) * (goal_x+1);
+    sprite_ystart_g <= to_unsigned(16,5) * goal_y; 
+    sprite_yend_g <= to_unsigned(16,5) * (goal_y+1);
+
+    
+
     -- Tile memory address composite
     tileAddr <= unsigned(data(4 downto 0)) & Ypixel(3 downto 0) & Xpixel(3 downto 0);
     spriteAddrRb <= sprite_y_offset_rb(7 downto 3) & sprite_x_offset_rb(8 downto 3); --Ändras när vi ändrar spriteMem
     --spritePixel <= spriteMem(to_integer(spriteAddr));
+    
+    spriteAddrG <= Ypixel(3 downto 1) & Xpixel(3 downto 1);
 
     -- Picture memory address composite
     --addr <= to_unsigned(20, 7) * Ypixel(8 downto 5) + Xpixel(9 downto 5);
