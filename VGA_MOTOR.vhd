@@ -25,9 +25,8 @@ entity VGA_MOTOR is
     vgaGreen	        	: out std_logic_vector(2 downto 0);
     vgaBlue		        	: out std_logic_vector(2 downto 1);
     Hsync		        	: out std_logic;
-    Vsync		        	: out std_logic
+    Vsync		        	: out std_logic;
     
-    goal_pos              : in unsigned(18 downto 0);
     dis_goal_pos          : in std_logic);
 end VGA_MOTOR;
 
@@ -70,7 +69,7 @@ architecture Behavioral of VGA_MOTOR is
     -- Sprite memory type
     type ram_s_r is array (0 to 2047) of std_logic_vector(7 downto 0);
     
-    type ram_s_goal is array (0 to 64) of std_logic_vector(7 downto 0);
+    type ram_s_goal is array (0 to 63) of std_logic_vector(7 downto 0);
     
     -- Sprite memory RAINBOW
     signal spriteMemRb : ram_s_r := 
@@ -107,9 +106,23 @@ x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"
 x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",
 x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",
 x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE"
-
               
           );
+          
+          
+          
+                   
+    signal spriteMemGoal : ram_s_goal := 
+    (     x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",  -- G
+		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
+		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
+		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
+		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
+		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
+		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
+		  x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0");
+
+
     
     -- Tile memory
     signal tileMem : ram_t := 
@@ -543,7 +556,7 @@ begin
 
     
 
-    isGoalSprite <= '1' when (dis_goal_pos = '1' and (Xpixel > sprite_xstart_g and Xpixel < sprite_xend_g) and (Ypixel > sprite_ystart_g and Ypixel < sprite_yend_g) else '0';
+    isGoalSprite <= '1' when (disp_goal_pos = '1' and (Xpixel > sprite_xstart_g and Xpixel <= sprite_xend_g) and (Ypixel > sprite_ystart_g and Ypixel <= sprite_yend_g) and not (spriteMemGoal(to_integer(spriteAddrG)) = x"FE")) else '0';
 
     -- Tile memory
     process(clk)
@@ -556,7 +569,7 @@ begin
         elsif (blank = '0') then
             pixel <= tileMem(to_integer(tileAddr));
         elsif (isGoalSprite ='1') then
-            pixel <= spriteMemG(to_integer(spriteAddG));
+            pixel <= spriteMemGoal(to_integer(spriteAddrG));
         else
             pixel <= (others => '0');
         end if;
@@ -571,12 +584,15 @@ begin
     sprite_y_offset_rb <= Ypixel - to_unsigned(200,10);
 
     -- Calculates goal coordinates in pixels
-    
-    sprite_xstart_g <= to_unsigned(16,5) * goal_x; 
-    sprite_xend_g <= to_unsigned(16,5) * (goal_x+1);
-    sprite_ystart_g <= to_unsigned(16,5) * goal_y; 
-    sprite_yend_g <= to_unsigned(16,5) * (goal_y+1);
+    -- FIX NOT RIGHT!
+    sprite_xstart_g <= to_unsigned(16 * to_integer(goal_x), 10); 
+    sprite_xend_g <= to_unsigned(16 * to_integer(goal_x + 1), 10);
+    sprite_ystart_g <= to_unsigned(16 * to_integer(goal_y), 10); 
+    sprite_yend_g <= to_unsigned(16 * (to_integer(goal_y) + 1),10);
 
+
+--goal_pos(14 downto 9));
+--    alias goal_y : unsigned(4 downto 0) is unsigned(goal_pos(4 downto 0));
     
 
     -- Tile memory address composite
