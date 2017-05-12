@@ -22,7 +22,8 @@ entity CPU is
         goal_pos_out        : out signed(17 downto 0);
 		sel_track_out       : out unsigned(1 downto 0);
 		sel_sound_out       : out std_logic;
-        goal_reached_out    : out std_logic;
+		goal_reached_out    : out std_logic;
+		disp_goal_pos_out   : out std_logic;
         score_out           : out unsigned(5 downto 0);
 		--TEST
         test_diod1   	    : out std_logic;
@@ -82,6 +83,7 @@ architecture Behavioral of CPU is
     signal next_track       : signed(1 downto 0) := "00"; -- Temp for saving next track before we can apply it to SEL_TRACK.
     -- To SOUND
     signal SEL_SOUND        : std_logic := '0'; -- Sound select (sel_sound_out)
+    signal DISP_GOAL_POS    : std_logic := '0'; -- Display goal pos on screen (disp_goal_pos_out)
     signal GOAL_POS         : signed(17 downto 0) := (others => '0');  -- Goal position (goal_pos_out)
     signal RND_GOAL_POS     : signed(17 downto 0) := (others => '0');
     signal SCORE            : signed(17 downto 0) := (others => '0');
@@ -767,6 +769,10 @@ begin
                             NEXT_XPOS <= CURR_XPOS + 1;
                             MOVE_REQ <= '1';
                         when "101" => -- SOUND TOGGLE (SPACE)
+                            DISP_GOAL_POS <= not DISP_GOAL_POS;
+                            TOG_SOUND_ICON <= '1';
+                            MOVE_REQ <= '0';
+                        when "110" => -- SOUND TOGGLE (SPACE)
                             SEL_SOUND <= not SEL_SOUND;
                             TOG_SOUND_ICON <= '1';
                             MOVE_REQ <= '0';
@@ -795,6 +801,7 @@ begin
     move_req_out <= MOVE_REQ;
     tog_sound_icon_out <= TOG_SOUND_ICON;
     goal_reached_out <= WON;
+    disp_goal_pos_out <= DISP_GOAL_POS;
     score_out <= unsigned(SCORE(5 downto 0));
     
 

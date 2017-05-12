@@ -196,7 +196,8 @@ begin
             "000000000000000010" when x"1C",	-- A (LEFT)
             "000000000000000011" when x"1B",	-- S (DOWN)
             "000000000000000100" when x"23",	-- D (RIGHT)
-            "000000000000000101" when x"29",	-- space
+            "000000000000000101" when x"34",	-- G (TOGGLE DISPLAY GOAL POS)
+            "000000000000000110" when x"29",	-- space
             (others =>'0') when others;
 						  
 end behavioral;
