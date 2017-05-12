@@ -27,7 +27,7 @@ constant p_mem_c : p_mem_t := (
     b"01101_100_00_00000000",  -- 1.  SETRND : GOAL_POS <= RND_GOAL_POS
     b"01100_000_00_11111111",  -- 2.  BCT : BRA back here while G = 0 (ADDR = -1)
     b"01110_000_00_00000000",  -- 3.  SHOWGOALMSG : WON <= '1'
-    b"00010_000_01_00000000",  -- 4.  LOAD : GR0 <= LOOPCNT (5.)
+    b"00000_000_01_00000000",  -- 4.  LOAD : GR0 <= LOOPCNT (5.)
     b"011111111111111111",     -- 5.  Value LOOPCNT : Num of WAIT before INCRSCORE (11.)
     b"10000_000_01_00000000",  -- 6.  WAIT : Wait a while depending on µLOOPCNT (7.)
     b"011111111111111111",     -- 7.  Value µLOOPCNT : LC_cnt <= µLOOPCNT
@@ -35,7 +35,7 @@ constant p_mem_c : p_mem_t := (
     b"000000000000000001",     -- 9.  Value 1 : Arg for SUB (8. and 16.)
     b"01000_000_00_11111011",  -- 10. BNE : BRA back to WAIT (6.) if GR0 (LOOPCNT) != 0 (Z=0) (ADDR = -5)
     b"10001_000_00_00000000",  -- 11. INCRSCORE : SCORE <= SCORE + 1
-    b"00010_000_01_00000000",  -- 12. LOAD : GR0 <= LOOPCNT (13.)
+    b"00000_000_01_00000000",  -- 12. LOAD : GR0 <= LOOPCNT (13.)
     b"011111111111111111",     -- 13. Value LOOPCNT : Num of WAIT before HIDEGOALMSG (19.)
     b"10000_000_01_00000000",  -- 14. WAIT : Wait a while depending on µLOOPCNT (15.)
     b"011111111111111111",     -- 15. Value µLOOPCNT : LC_cnt <= µLOOPCNT

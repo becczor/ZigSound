@@ -404,10 +404,12 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        if rst = '1' then
+        if (rst = '1' or goal_reached = '0') then
             time_cnt <= (others => '0');
-        else
+        elsif (goal_reached = '1') then
             time_cnt <= time_cnt + 1;
+        else
+            null;
         end if;
     end if;
     end process;
@@ -419,12 +421,14 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        if rst = '1' then
+        if (rst = '1' or goal_reached = '0') then
             x_cnt <= "0001000000";
         elsif x_cnt = "1001100100" then
             null;
         elsif time_cnt = "1111111111111111111" then     
             x_cnt <= x_cnt + 1;
+        else
+            null;
         end if;
     end if;
     end process;
