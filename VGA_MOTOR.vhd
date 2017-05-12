@@ -17,7 +17,9 @@ entity VGA_MOTOR is
     clk	    	    		: in std_logic;
     rst		        		: in std_logic;
     data		    		: in unsigned(7 downto 0);
+    goal_pos                : in signed(17 downto 0);
     goal_reached            : in std_logic;
+    disp_goal_pos           : in std_logic;
     addr		    		: out unsigned(10 downto 0);
     vgaRed		        	: out std_logic_vector(2 downto 0);
     vgaGreen	        	: out std_logic_vector(2 downto 0);
@@ -108,19 +110,6 @@ x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"
 
               
           );
-          
-    signal spriteMemGoal : ram_s_goal := 
-    (     x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",  -- G
-		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
-		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
-		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
-		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
-		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
-		  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
-		  x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0");
-
-
-
     
     -- Tile memory
     signal tileMem : ram_t := 
