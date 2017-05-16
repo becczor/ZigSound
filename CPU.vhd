@@ -768,7 +768,7 @@ begin
                             NEXT_YPOS <= CURR_YPOS;
                             NEXT_XPOS <= CURR_XPOS + 1;
                             MOVE_REQ <= '1';
-                        when "101" => -- SOUND TOGGLE (SPACE)
+                        when "101" => -- DISPPLAY GOAL POS TOGGLE (G)
                             DISP_GOAL_POS <= not DISP_GOAL_POS;
                             TOG_SOUND_ICON <= '1';
                             MOVE_REQ <= '0';
@@ -791,7 +791,7 @@ begin
     --*******************************
     --* Outgoing signals assignment *
     --*******************************
-    pAddr <= ASR when (ASR >= to_signed(0,8) and ASR <= to_signed(19,8)) else to_signed(0,8);
+    pAddr <= ASR when (ASR >= to_signed(0,8) and ASR <= to_signed(25,8)) else to_signed(0,8);
     uAddr <= uPC; 
     curr_pos_out <= CURR_POS;
     next_pos_out <= NEXT_POS;

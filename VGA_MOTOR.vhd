@@ -51,7 +51,7 @@ architecture Behavioral of VGA_MOTOR is
     signal sprite_xend_g      : unsigned(9 downto 0);
     signal sprite_ystart_g    : unsigned(9 downto 0);
     signal sprite_yend_g      : unsigned(9 downto 0);
-    signal spriteAddrG        : unsigned(2 downto 0);
+    signal spriteAddrG        : unsigned(5 downto 0);
     signal isGoalSprite       : std_logic;
     
     -- Test animation
@@ -103,7 +103,8 @@ x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"
           
                
     signal spriteMemGoal : ram_s_goal := 
-    (     x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",  -- G
+    (     
+      x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",  -- G
 	  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
 	  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
 	  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
@@ -467,7 +468,7 @@ begin
     -- Calculates goal coordinates in pixels
     -- FIX NOT RIGHT!
     sprite_xstart_g <= to_unsigned(16 * to_integer(goal_x), 10); 
-    sprite_xend_g <= to_unsigned(16 * to_integer(goal_x + 1), 10);
+    sprite_xend_g <= to_unsigned(16 * (to_integer(goal_x) + 1), 10);
     sprite_ystart_g <= to_unsigned(16 * to_integer(goal_y), 10); 
     sprite_yend_g <= to_unsigned(16 * (to_integer(goal_y) + 1),10);
 
