@@ -15,18 +15,15 @@ use IEEE.NUMERIC_STD.ALL;               -- IEEE library for the unsigned type
 entity GPU is
     port (
         clk                 : in std_logic;			-- system clock (100 MHz)
-        rst	        		: in std_logic;			-- reset signal
-        
+        rst	        		: in std_logic;			-- reset signal       
         -- FROM SOUND
-        sound_channel       : in std_logic;
-        
+        sound_channel       : in std_logic;      
         -- TO/FROM CPU
         move_req            : in std_logic;         -- move request
         tog_sound_icon      : in std_logic;
         move_resp			: out std_logic := '0';		-- response to move request
         curr_pos            : in signed(17 downto 0); -- current position
-        next_pos            : in signed(17 downto 0); -- next position
-   
+        next_pos            : in signed(17 downto 0); -- next position 
         -- TO/FROM PIC_MEM
         data_nextpos        : in unsigned(7 downto 0);  -- tile data at nextpos
         addr_nextpos        : out unsigned(10 downto 0) := (others => '0'); -- tile addr of nextpos
