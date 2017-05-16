@@ -88,6 +88,7 @@ architecture Behavioral of zigsound is
         -- From SOUND
         sound_channel           : in std_logic;
         -- TO/FROM CPU
+        sel_track               : in unsigned(1 downto 0);
         move_req                : in std_logic;  -- move request
         tog_sound_icon          : in std_logic;   -- signal for changing the sound icon
         curr_pos                : in signed(17 downto 0);  -- current position
@@ -262,6 +263,7 @@ begin
 	            clk => clk, 
 	            rst => rst,
 	            sound_channel => sel_sound_con, 
+	            sel_track => sel_track_con,
 	            move_req => move_req_con,
 	            tog_sound_icon => tog_sound_icon_con,
 	            move_resp => move_resp_con,

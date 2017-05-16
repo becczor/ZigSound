@@ -19,6 +19,7 @@ entity GPU is
         -- FROM SOUND
         sound_channel       : in std_logic;      
         -- TO/FROM CPU
+        sel_track           : in unsigned(1 downto 0);
         move_req            : in std_logic;         -- move request
         tog_sound_icon      : in std_logic;
         move_resp			: out std_logic := '0';		-- response to move request
@@ -39,9 +40,12 @@ architecture behavioral of GPU is
     signal move             : std_logic := '0';
     signal ypos             : unsigned(4 downto 0);  -- curr y position
     signal xpos             : unsigned(5 downto 0);  -- curr x position
+    signal unicorn	        : unsigned(7 downto 0);	-- unicorn tile index
+    signal bg_tile	        : unsigned(7 downto 0);	-- background tile index
     signal tile		        : unsigned(7 downto 0);	-- tile index
-    signal addr_change_calc		: unsigned(10 downto 0);
+    signal addr_change_calc : unsigned(10 downto 0);
     signal sound_icon       : unsigned(7 downto 0);	-- sound icon index
+    signal curr_sound_icon  : unsigned(7 downto 0); -- curr pos sound icon
 
     type wr_type is (IDLE, DRAW);  -- declare state types for write cycle
     signal WRstate : wr_type;  -- write cycle state
@@ -76,7 +80,7 @@ begin
         else
             case WRstate is
                 when IDLE =>
-                    if (move_req = '1' and data_nextpos = x"00") then  -- We should move.
+                    if (move_req = '1' and (data_nextpos = x"00" or data_nextpos = x"07")) then  -- We should move.
                         addr_change <= addr_change_calc; -- Translates curr x- and y-pos into PIC_MEM-address.
                         data_change <= tile;    -- Sets data to BG-tile.
                         move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
@@ -104,6 +108,26 @@ begin
     --*********************
     --* Signal assignment *
     --*********************
+    with sel_track select  -- Set correct curr pos sound icon depending on track theme
+    unicorn <=
+    x"01" when "00", -- Track 1
+    x"0B" when "01", -- Track 2
+    x"01" when "10", -- Track 3
+    x"00" when others;
+    
+    with sel_track select -- Set correct bg tile depending on track theme
+    bg_tile <=
+    x"00" when "00", -- Track 1
+    x"07" when "01", -- Track 2
+    x"00" when "10", -- Track 3
+    x"00" when others;
+    
+    with sel_track select  -- Set correct curr pos sound icon depending on track theme
+    curr_sound_icon <=
+    x"05" when "00", -- Track 1
+    x"0A" when "01", -- Track 2
+    x"05" when "10", -- Track 3
+    x"00" when others;
     
     addr_change_calc <= xpos + (to_unsigned(40, 6) * ypos);
     
@@ -111,8 +135,8 @@ begin
     -- Takes x- and y-pos from curr_pos if we're in CLEAR, else from next_pos.
     xpos <= unsigned(CURR_XPOS) when (WRstate = IDLE) else unsigned(NEXT_XPOS);
     ypos <= unsigned(CURR_YPOS) when (WRstate = IDLE) else unsigned(NEXT_YPOS);
-    tile <= x"00" when (WRstate = IDLE) else x"01";
-    sound_icon <= x"05" when (sound_channel = '0') else x"06";
+    tile <= bg_tile when (WRstate = IDLE) else unicorn;
+    sound_icon <= curr_sound_icon when (sound_channel = '0') else x"06";
     
   
     end behavioral;

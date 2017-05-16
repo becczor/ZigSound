@@ -126,7 +126,7 @@ x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"
     );
 
     -- Tile memory type
-    type ram_t is array (0 to 2559) of std_logic_vector(7 downto 0);
+    type ram_t is array (0 to 4351) of std_logic_vector(7 downto 0);
     -- Tile memory
     -- There is room for 32 different tiles.
     signal tileMem : ram_t := 
@@ -250,56 +250,175 @@ x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"
         x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",
         x"9A",x"9A",x"96",x"D6",x"96",x"96",x"9A",x"96",x"D6",x"D6",x"96",x"96",x"96",x"D6",x"D6",x"D6",
         
-        x"BE",x"BE",x"94",x"BE",x"94",x"DA",x"90",x"BE",x"BE",x"DA",x"90",x"DA",x"DA",x"DA",x"90",x"90",    -- x"07" AUTUMN GRASS
-        x"90",x"DA",x"DA",x"94",x"90",x"DA",x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"BE",x"BE",x"DA",x"94",
-        x"94",x"BE",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"90",x"BE",x"90",x"94",x"BE",x"DA",x"BE",x"94",
-        x"94",x"94",x"BE",x"90",x"BE",x"BE",x"90",x"DA",x"94",x"BE",x"90",x"90",x"BE",x"94",x"DA",x"DA",    
-        x"DA",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"DA",x"94",x"DA",x"90",
-        x"94",x"DA",x"94",x"94",x"94",x"DA",x"90",x"DA",x"94",x"DA",x"DA",x"94",x"DA",x"DA",x"94",x"DA",
-        x"DA",x"90",x"90",x"DA",x"90",x"DA",x"90",x"BE",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"94",x"DA",    
-        x"BE",x"94",x"90",x"DA",x"94",x"90",x"BE",x"BE",x"DA",x"90",x"90",x"94",x"BE",x"BE",x"DA",x"94",
-        x"BE",x"DA",x"DA",x"90",x"94",x"90",x"94",x"DA",x"BE",x"94",x"94",x"94",x"94",x"DA",x"DA",x"94",
-        x"DA",x"DA",x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"90",x"DA",x"DA",x"94",x"94",x"90",x"DA",    
-        x"90",x"94",x"DA",x"94",x"DA",x"BE",x"BE",x"94",x"90",x"90",x"94",x"DA",x"94",x"DA",x"90",x"DA",
-        x"DA",x"90",x"DA",x"90",x"90",x"94",x"BE",x"DA",x"90",x"94",x"94",x"BE",x"DA",x"DA",x"94",x"94",
-        x"DA",x"94",x"90",x"94",x"90",x"94",x"BE",x"DA",x"DA",x"DA",x"94",x"BE",x"DA",x"90",x"DA",x"DA",
-        x"DA",x"90",x"90",x"94",x"94",x"90",x"DA",x"94",x"DA",x"DA",x"BE",x"90",x"90",x"94",x"DA",x"94",
-        x"90",x"DA",x"DA",x"BE",x"DA",x"94",x"DA",x"94",x"94",x"DA",x"90",x"94",x"90",x"DA",x"DA",x"DA",
-        x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"DA",x"BE",x"BE",x"90",x"DA",x"DA",x"BE",x"BE",x"90",
+        x"F5",x"F5",x"F9",x"F5",x"F9",x"D1",x"ED",x"F5",x"F5",x"D1",x"ED",x"D1",x"D1",x"D1",x"ED",x"ED",    -- x"07" AUTUMN GRASS
+        x"ED",x"D1",x"D1",x"F9",x"ED",x"D1",x"ED",x"D1",x"D1",x"F5",x"D1",x"D1",x"F5",x"F5",x"D1",x"F9",
+        x"F9",x"F5",x"F5",x"D1",x"F5",x"F9",x"F9",x"D1",x"ED",x"F5",x"ED",x"F9",x"F5",x"D1",x"F5",x"F9",
+        x"F9",x"F9",x"F5",x"ED",x"F5",x"F5",x"ED",x"D1",x"F9",x"F5",x"ED",x"ED",x"F5",x"F9",x"D1",x"D1",    
+        x"D1",x"D1",x"F9",x"ED",x"D1",x"D1",x"F5",x"D1",x"F5",x"F9",x"F9",x"D1",x"D1",x"F9",x"D1",x"ED",
+        x"F9",x"D1",x"F9",x"F9",x"F9",x"D1",x"ED",x"D1",x"F9",x"D1",x"D1",x"F9",x"D1",x"D1",x"F9",x"D1",
+        x"D1",x"ED",x"ED",x"D1",x"ED",x"D1",x"ED",x"F5",x"D1",x"F9",x"ED",x"D1",x"D1",x"F5",x"F9",x"D1",    
+        x"F5",x"F9",x"ED",x"D1",x"F9",x"ED",x"F5",x"F5",x"D1",x"ED",x"ED",x"F9",x"F5",x"F5",x"D1",x"F9",
+        x"F5",x"D1",x"D1",x"ED",x"F9",x"ED",x"F9",x"D1",x"F5",x"F9",x"F9",x"F9",x"F9",x"D1",x"D1",x"F9",
+        x"D1",x"D1",x"ED",x"ED",x"D1",x"F5",x"D1",x"F9",x"ED",x"ED",x"D1",x"D1",x"F9",x"F9",x"ED",x"D1",    
+        x"ED",x"F9",x"D1",x"F9",x"D1",x"F5",x"F5",x"F9",x"ED",x"ED",x"F9",x"D1",x"F9",x"D1",x"ED",x"D1",
+        x"D1",x"ED",x"D1",x"ED",x"ED",x"F9",x"F5",x"D1",x"ED",x"F9",x"F9",x"F5",x"D1",x"D1",x"F9",x"F9",
+        x"D1",x"F9",x"ED",x"F9",x"ED",x"F9",x"F5",x"D1",x"D1",x"D1",x"F9",x"F5",x"D1",x"ED",x"D1",x"D1",
+        x"D1",x"ED",x"ED",x"F9",x"F9",x"ED",x"D1",x"F9",x"D1",x"D1",x"F5",x"ED",x"ED",x"F9",x"D1",x"F9",
+        x"ED",x"D1",x"D1",x"F5",x"D1",x"F9",x"D1",x"F9",x"F9",x"D1",x"ED",x"F9",x"ED",x"D1",x"D1",x"D1",
+        x"ED",x"ED",x"D1",x"F5",x"D1",x"F9",x"ED",x"D1",x"F5",x"F5",x"ED",x"D1",x"D1",x"F5",x"F5",x"ED",
 
-        x"BE",x"BE",x"94",x"BE",x"94",x"DA",x"90",x"BE",x"BE",x"DA",x"90",x"DA",x"DA",x"DA",x"90",x"90",    -- x"08" GRASS
-        x"90",x"DA",x"DA",x"94",x"90",x"DA",x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"BE",x"BE",x"DA",x"94",
-        x"94",x"BE",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"90",x"BE",x"90",x"94",x"BE",x"DA",x"BE",x"94",
-        x"94",x"94",x"BE",x"90",x"BE",x"BE",x"90",x"DA",x"94",x"BE",x"90",x"90",x"BE",x"94",x"DA",x"DA",    
-        x"DA",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"DA",x"94",x"DA",x"90",
-        x"94",x"DA",x"94",x"94",x"94",x"DA",x"90",x"DA",x"94",x"DA",x"DA",x"94",x"DA",x"DA",x"94",x"DA",
-        x"DA",x"90",x"90",x"DA",x"90",x"DA",x"90",x"BE",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"94",x"DA",    
-        x"BE",x"94",x"90",x"DA",x"94",x"90",x"BE",x"BE",x"DA",x"90",x"90",x"94",x"BE",x"BE",x"DA",x"94",
-        x"BE",x"DA",x"DA",x"90",x"94",x"90",x"94",x"DA",x"BE",x"94",x"94",x"94",x"94",x"DA",x"DA",x"94",
-        x"DA",x"DA",x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"90",x"DA",x"DA",x"94",x"94",x"90",x"DA",    
-        x"90",x"94",x"DA",x"94",x"DA",x"BE",x"BE",x"94",x"90",x"90",x"94",x"DA",x"94",x"DA",x"90",x"DA",
-        x"DA",x"90",x"DA",x"90",x"90",x"94",x"FF",x"DA",x"90",x"94",x"94",x"BE",x"DA",x"DA",x"94",x"94",
-        x"DA",x"94",x"90",x"94",x"90",x"94",x"FF",x"DA",x"DA",x"DA",x"94",x"BE",x"DA",x"90",x"DA",x"DA",
-        x"DA",x"90",x"90",x"94",x"94",x"90",x"DA",x"94",x"DA",x"DA",x"BE",x"90",x"90",x"94",x"DA",x"94",
-        x"90",x"DA",x"DA",x"BE",x"DA",x"94",x"DA",x"94",x"94",x"DA",x"90",x"94",x"90",x"DA",x"DA",x"DA",
-        x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"DA",x"BE",x"BE",x"90",x"DA",x"DA",x"BE",x"BE",x"90",
-
-        x"BE",x"BE",x"94",x"BE",x"94",x"DA",x"90",x"BE",x"BE",x"DA",x"90",x"DA",x"DA",x"DA",x"90",x"90",    -- x"09" GRASS
-        x"90",x"DA",x"DA",x"94",x"90",x"DA",x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"BE",x"BE",x"DA",x"94",
-        x"94",x"BE",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"90",x"BE",x"90",x"94",x"BE",x"DA",x"BE",x"94",
-        x"94",x"94",x"BE",x"90",x"BE",x"BE",x"90",x"DA",x"94",x"BE",x"90",x"90",x"BE",x"94",x"DA",x"DA",    
-        x"DA",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"DA",x"94",x"DA",x"90",
-        x"94",x"DA",x"94",x"94",x"94",x"DA",x"90",x"DA",x"94",x"DA",x"DA",x"94",x"DA",x"DA",x"94",x"DA",
-        x"DA",x"90",x"90",x"DA",x"90",x"DA",x"90",x"BE",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"94",x"DA",    
-        x"BE",x"94",x"90",x"DA",x"94",x"90",x"BE",x"BE",x"DA",x"90",x"90",x"94",x"BE",x"BE",x"DA",x"94",
-        x"BE",x"DA",x"DA",x"90",x"94",x"90",x"94",x"DA",x"BE",x"94",x"94",x"94",x"94",x"DA",x"DA",x"94",
-        x"DA",x"DA",x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"90",x"DA",x"DA",x"94",x"94",x"90",x"DA",    
-        x"90",x"94",x"DA",x"94",x"DA",x"BE",x"BE",x"94",x"90",x"90",x"94",x"DA",x"94",x"DA",x"90",x"DA",
-        x"DA",x"90",x"DA",x"90",x"90",x"94",x"FF",x"DA",x"90",x"94",x"94",x"BE",x"DA",x"DA",x"94",x"94",
-        x"DA",x"94",x"90",x"94",x"90",x"94",x"FF",x"DA",x"DA",x"DA",x"94",x"BE",x"DA",x"90",x"DA",x"DA",
-        x"DA",x"90",x"90",x"94",x"94",x"90",x"DA",x"94",x"DA",x"DA",x"BE",x"90",x"90",x"94",x"DA",x"94",
-        x"90",x"DA",x"DA",x"BE",x"DA",x"94",x"DA",x"94",x"94",x"DA",x"90",x"94",x"90",x"DA",x"DA",x"DA",
-        x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"DA",x"BE",x"BE",x"90",x"DA",x"DA",x"BE",x"BE",x"90"
+        x"F5",x"F5",x"F9",x"F5",x"F9",x"D0",x"D0",x"F5",x"F5",x"D1",x"D0",x"D1",x"D1",x"D1",x"ED",x"ED",    -- x"08" AUTUMN TREE 1
+        x"ED",x"D1",x"D1",x"D0",x"D0",x"E0",x"E0",x"D0",x"D0",x"D0",x"E0",x"FC",x"FC",x"F5",x"D1",x"F9",    -- WITH GRASS
+        x"F9",x"F5",x"F5",x"B4",x"B4",x"D0",x"D0",x"E0",x"B4",x"E0",x"D0",x"E0",x"C8",x"FC",x"F5",x"F9",
+        x"F9",x"F9",x"D0",x"B4",x"D0",x"C8",x"D0",x"B4",x"E0",x"D0",x"B4",x"C8",x"E0",x"F5",x"FC",x"D1",            
+        x"D1",x"D0",x"B4",x"E0",x"E0",x"D0",x"B4",x"C8",x"D0",x"F5",x"C8",x"E0",x"C8",x"FC",x"D1",x"ED",
+        x"F9",x"B4",x"B4",x"D0",x"D0",x"F5",x"B4",x"C8",x"B4",x"B4",x"F5",x"C8",x"E0",x"F5",x"FC",x"D1",
+        x"D1",x"D0",x"B4",x"B4",x"B4",x"B4",x"F5",x"B4",x"C8",x"C8",x"B4",x"E0",x"C8",x"C8",x"C8",x"FC",
+        x"F5",x"B4",x"D0",x"B4",x"F5",x"B4",x"B4",x"E0",x"E0",x"B4",x"E0",x"C8",x"E0",x"E0",x"C8",x"FC",
+        x"B4",x"D0",x"E0",x"E0",x"B4",x"B4",x"E0",x"C8",x"E0",x"C8",x"C8",x"E0",x"B4",x"C8",x"FC",x"F9",
+        x"D1",x"B4",x"B4",x"B4",x"AC",x"F5",x"C8",x"C8",x"C8",x"C8",x"E0",x"B4",x"C8",x"C8",x"E0",x"FC",
+        x"ED",x"F9",x"B4",x"B4",x"D1",x"AC",x"AC",x"C8",x"E0",x"AC",x"E0",x"C8",x"C8",x"FC",x"FC",x"D1",
+        x"D1",x"ED",x"B4",x"ED",x"ED",x"AC",x"AC",x"C8",x"AC",x"FC",x"C8",x"FC",x"FC",x"D1",x"F9",x"F9",
+        x"D1",x"F9",x"ED",x"F9",x"ED",x"F9",x"AC",x"AC",x"D1",x"D1",x"FC",x"F5",x"D1",x"ED",x"D1",x"D1",
+        x"D1",x"ED",x"ED",x"F9",x"F9",x"ED",x"AC",x"AC",x"D1",x"D1",x"F5",x"ED",x"ED",x"F9",x"D1",x"F9",
+        x"ED",x"D1",x"D1",x"F5",x"D1",x"F9",x"AC",x"AC",x"AC",x"D1",x"ED",x"F9",x"ED",x"D1",x"D1",x"D1",
+        x"ED",x"ED",x"D1",x"F5",x"D1",x"AC",x"AC",x"AC",x"AC",x"F5",x"ED",x"D1",x"D1",x"F5",x"F5",x"ED",
+        
+        x"F5",x"F5",x"F9",x"F5",x"F9",x"D1",x"D0",x"F5",x"F5",x"D1",x"ED",x"D1",x"D1",x"D1",x"ED",x"ED",  -- x"09" AUTUMN TREE 2
+        x"ED",x"D1",x"D1",x"F9",x"D0",x"D0",x"FC",x"D0",x"E0",x"D0",x"D1",x"D1",x"F5",x"F5",x"D1",x"F9",  -- WITH GRASS
+        x"F9",x"F5",x"D0",x"FC",x"C8",x"FC",x"F5",x"FC",x"D0",x"FC",x"E0",x"FC",x"F5",x"E0",x"F5",x"F9",
+        x"F9",x"D0",x"D0",x"FC",x"C8",x"C8",x"D0",x"FC",x"C8",x"C8",x"FC",x"E0",x"FC",x"E0",x"D1",x"D1",
+        x"D1",x"D0",x"FC",x"C8",x"D0",x"C8",x"FC",x"C8",x"E0",x"FC",x"C8",x"F5",x"E0",x"C8",x"D1",x"ED",
+        x"D0",x"FC",x"D0",x"C8",x"F5",x"FC",x"E0",x"E0",x"FC",x"C8",x"F5",x"E0",x"19",x"D1",x"F9",x"D1",
+        x"FC",x"C8",x"C8",x"F5",x"D0",x"D0",x"C8",x"FC",x"FC",x"E0",x"FC",x"C8",x"C8",x"E0",x"F9",x"D1",
+        x"D0",x"D0",x"FC",x"D0",x"C8",x"C8",x"E0",x"F5",x"E0",x"FC",x"C8",x"C8",x"E0",x"FC",x"E0",x"F9",
+        x"F5",x"D0",x"FC",x"FC",x"E0",x"E0",x"C8",x"E0",x"E0",x"C8",x"E0",x"E0",x"FC",x"E0",x"D1",x"F9",
+        x"D1",x"D1",x"D0",x"FC",x"C8",x"C8",x"C8",x"E0",x"C8",x"E0",x"C8",x"E0",x"FC",x"E0",x"ED",x"D1",
+        x"ED",x"F9",x"FC",x"F9",x"E0",x"E0",x"E0",x"AC",x"E0",x"AC",x"AC",x"E0",x"C8",x"D1",x"ED",x"D1",
+        x"D1",x"ED",x"D1",x"ED",x"ED",x"E0",x"F5",x"AC",x"AC",x"AC",x"E0",x"C8",x"E0",x"D1",x"F9",x"F9",
+        x"D1",x"F9",x"ED",x"F9",x"ED",x"F9",x"AC",x"AC",x"AC",x"D1",x"F9",x"E0",x"D1",x"ED",x"D1",x"D1",
+        x"D1",x"ED",x"ED",x"F9",x"F9",x"ED",x"D1",x"AC",x"AC",x"D1",x"F5",x"ED",x"ED",x"F9",x"D1",x"F9",
+        x"ED",x"D1",x"D1",x"F5",x"D1",x"F9",x"D1",x"AC",x"AC",x"D1",x"ED",x"F9",x"ED",x"D1",x"D1",x"D1",
+        x"ED",x"ED",x"D1",x"F5",x"D1",x"F9",x"ED",x"AC",x"AC",x"F5",x"ED",x"D1",x"D1",x"F5",x"F5",x"ED",
+        
+        x"F5",x"F5",x"F9",x"F5",x"F9",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"D1",x"D1",x"D1",x"ED",x"ED", -- x"0A" TOGGLE CURRPOS AUTUMN
+        x"ED",x"D1",x"D1",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"F5",x"D1",x"F9",
+        x"F9",x"F5",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"F5",x"F9",
+        x"F9",x"F9",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"D1",x"D1",
+        x"D1",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"ED",    
+        x"F9",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"D1",
+        x"D1",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"D1",
+        x"F5",x"F9",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"D1",x"F9",
+        x"F5",x"D1",x"D1",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"D1",x"D1",x"F9",
+        x"D1",x"D1",x"ED",x"ED",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"F9",x"F9",x"ED",x"D1",
+        x"ED",x"F9",x"D1",x"F9",x"D1",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"D1",x"F9",x"D1",x"ED",x"D1",    
+        x"D1",x"ED",x"D1",x"ED",x"ED",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"F5",x"D1",x"D1",x"F9",x"F9",
+        x"D1",x"F9",x"ED",x"F9",x"ED",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"F5",x"D1",x"ED",x"D1",x"D1",
+        x"D1",x"ED",x"ED",x"F9",x"F9",x"ED",x"E0",x"E0",x"E0",x"E0",x"F5",x"ED",x"ED",x"F9",x"D1",x"F9",
+        x"ED",x"D1",x"D1",x"F5",x"D1",x"F9",x"E0",x"E0",x"E0",x"E0",x"ED",x"F9",x"ED",x"D1",x"D1",x"D1",
+        x"ED",x"ED",x"D1",x"F5",x"D1",x"F9",x"ED",x"E0",x"E0",x"F5",x"ED",x"D1",x"D1",x"F5",x"F5",x"ED",
+        
+        x"F5",x"F5",x"F9",x"F5",x"F9",x"D1",x"ED",x"F5",x"F5",x"D1",x"ED",x"D1",x"D1",x"D1",x"ED",x"02",    -- x"0B" BLUINICORN AUTUMN
+        x"ED",x"D1",x"D1",x"F9",x"ED",x"D1",x"ED",x"D1",x"D1",x"F5",x"02",x"D1",x"F5",x"F5",x"02",x"F9",    -- WITH GRASS
+        x"F9",x"F5",x"F5",x"D1",x"F5",x"F9",x"F9",x"D1",x"ED",x"02",x"02",x"F9",x"02",x"02",x"F5",x"F9",
+        x"F9",x"F9",x"F5",x"ED",x"F5",x"F5",x"ED",x"D1",x"02",x"02",x"9B",x"9B",x"9B",x"F9",x"D1",x"D1",
+        x"D1",x"D1",x"02",x"ED",x"D1",x"D1",x"F5",x"02",x"02",x"02",x"9B",x"02",x"9B",x"9B",x"9B",x"ED",
+        x"F9",x"02",x"02",x"02",x"F9",x"D1",x"02",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"02",x"02",x"D1",
+        x"D1",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"F9",x"D1",
+        x"F5",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"F5",x"D1",x"F9",
+        x"02",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"F9",x"D1",x"D1",x"F9",
+        x"02",x"02",x"ED",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"F9",x"F9",x"ED",x"D1",        
+        x"ED",x"F9",x"D1",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"F9",x"D1",x"ED",x"D1",
+        x"D1",x"ED",x"D1",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"D1",x"D1",x"F9",x"F9",
+        x"D1",x"F9",x"ED",x"9B",x"9B",x"F9",x"F5",x"D1",x"D1",x"D1",x"9B",x"9B",x"D1",x"ED",x"D1",x"D1",
+        x"D1",x"ED",x"ED",x"9B",x"9B",x"ED",x"D1",x"F9",x"D1",x"D1",x"9B",x"9B",x"ED",x"F9",x"D1",x"F9",
+        x"ED",x"D1",x"D1",x"9B",x"9B",x"F9",x"D1",x"F9",x"F9",x"D1",x"9B",x"9B",x"ED",x"D1",x"D1",x"D1",
+        x"ED",x"ED",x"D1",x"02",x"02",x"F9",x"ED",x"D1",x"F5",x"F5",x"02",x"02",x"D1",x"F5",x"F5",x"ED",
+        
+        x"DF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  -- x"0C" SNOW
+        x"FF",x"FF",x"FF",x"FF",x"DF",x"FB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"DF",x"FB",x"FF",x"FF",x"FF",x"DF",x"FB",
+        x"FF",x"FF",x"DF",x"FB",x"FF",x"FF",x"DF",x"FB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"DF",x"DF",x"DF",x"FB",x"FF",x"FF",
+        x"FF",x"DF",x"FB",x"FF",x"FF",x"FB",x"FF",x"FF",x"FF",x"FF",x"DF",x"DF",x"DF",x"FB",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"DF",x"FB",x"DF",x"DF",x"DF",x"FB",x"DF",x"FF",
+        x"FF",x"DF",x"DF",x"DF",x"FB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"DF",x"DF",x"DF",x"FB",x"FF",x"FF",x"FF",x"FF",x"DF",x"DF",x"DF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"DF",x"DF",x"DF",x"DF",x"FF",x"FF",x"DF",x"DF",x"DF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"DF",x"DF",x"DF",x"DF",x"FF",x"DF",x"FF",x"FF",x"FF",x"FF",x"DF",x"FB",x"FF",
+        x"FF",x"FF",x"FF",x"FB",x"FB",x"FB",x"FB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"DF",x"DF",x"DF",x"FF",x"DF",x"FF",x"FF",x"DF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FB",x"FB",x"FB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"DF",x"DF",x"DF",x"DF",x"DF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FB",x"FB",x"FB",x"FB",x"FB",
+        x"DF",x"DF",x"DF",x"DF",x"FB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"DF",x"DF",x"DF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"0D" ROCK SNOW
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"FF",x"FF",x"FF",x"FF",x"FF",    -- WITH SNOW
+        x"FF",x"FF",x"DF",x"DF",x"FF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"FF",x"FF",x"FF",
+        x"FF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"FF",x"FF",
+        x"FF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"B6",x"FF",
+        x"B6",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"B6",x"FF",
+        x"B6",x"B6",x"B6",x"B6",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"B6",x"92",x"B6",
+        x"B6",x"92",x"B6",x"B6",x"92",x"B6",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"B6",x"B6",x"B6",x"B6",
+        x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"DF",x"B6",x"DF",x"DF",x"92",x"B6",x"92",x"B6",x"B6",
+        x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",
+        x"92",x"92",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"FF",
+        x"FF",x"92",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"92",x"FF",x"92",x"92",x"B6",x"FF",
+        x"FF",x"92",x"92",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"FF",x"FF",
+        x"FF",x"FF",x"92",x"92",x"92",x"B6",x"92",x"92",x"B6",x"B6",x"92",x"92",x"B6",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"92",x"92",x"92",x"92",x"B6",x"B6",x"92",x"92",x"B6",x"FF",x"FF",x"FF",x"FF",
+        
+        x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",    -- x"0E" TREE WINTER
+        x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",    -- WITH SNOW  
+        x"AB",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",x"AB",
+        x"AB",x"AB",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"AB",x"AB",x"AB",
+        x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"AB",x"AB",x"FF",x"FF",x"AB",x"FF",x"FF",
+        x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"AB",x"AB",x"FF",x"AB",x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",
+        x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"AB",x"AB",x"FF",x"AB",x"AB",x"AB",x"AB",x"FF",x"AB",x"AB",
+        x"FF",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",
+        x"AB",x"AB",x"FF",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",
+        x"AB",x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",
+        
+        x"F5",x"F5",x"F9",x"F5",x"F9",x"D1",x"ED",x"F5",x"F5",x"D1",x"ED",x"D1",x"D1",x"D1",x"ED",x"02",    -- x"0F" BLUINICORN SNOW (MÅSTE FIXAS)
+        x"ED",x"D1",x"D1",x"F9",x"ED",x"D1",x"ED",x"D1",x"D1",x"F5",x"02",x"D1",x"F5",x"F5",x"02",x"F9",    -- WITH SNOW
+        x"F9",x"F5",x"F5",x"D1",x"F5",x"F9",x"F9",x"D1",x"ED",x"02",x"02",x"F9",x"02",x"02",x"F5",x"F9",
+        x"F9",x"F9",x"F5",x"ED",x"F5",x"F5",x"ED",x"D1",x"02",x"02",x"9B",x"9B",x"9B",x"F9",x"D1",x"D1",
+        x"D1",x"D1",x"02",x"ED",x"D1",x"D1",x"F5",x"02",x"02",x"02",x"9B",x"02",x"9B",x"9B",x"9B",x"ED",
+        x"F9",x"02",x"02",x"02",x"F9",x"D1",x"02",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"02",x"02",x"D1",
+        x"D1",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"F9",x"D1",
+        x"F5",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"F5",x"D1",x"F9",
+        x"02",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"F9",x"D1",x"D1",x"F9",
+        x"02",x"02",x"ED",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"F9",x"F9",x"ED",x"D1",        
+        x"ED",x"F9",x"D1",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"F9",x"D1",x"ED",x"D1",
+        x"D1",x"ED",x"D1",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"D1",x"D1",x"F9",x"F9",
+        x"D1",x"F9",x"ED",x"9B",x"9B",x"F9",x"F5",x"D1",x"D1",x"D1",x"9B",x"9B",x"D1",x"ED",x"D1",x"D1",
+        x"D1",x"ED",x"ED",x"9B",x"9B",x"ED",x"D1",x"F9",x"D1",x"D1",x"9B",x"9B",x"ED",x"F9",x"D1",x"F9",
+        x"ED",x"D1",x"D1",x"9B",x"9B",x"F9",x"D1",x"F9",x"F9",x"D1",x"9B",x"9B",x"ED",x"D1",x"D1",x"D1",
+        x"ED",x"ED",x"D1",x"02",x"02",x"F9",x"ED",x"D1",x"F5",x"F5",x"02",x"02",x"D1",x"F5",x"F5",x"ED",
+        
+        x"F5",x"F5",x"F9",x"F5",x"F9",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"D1",x"D1",x"D1",x"ED",x"ED",    -- x"10" TOGGLE CURRPOS SNOW (MÅSTE FIXAS)
+        x"ED",x"D1",x"D1",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"F5",x"D1",x"F9",    -- WITH SNOW 
+        x"F9",x"F5",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"F5",x"F9",
+        x"F9",x"F9",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"D1",x"D1",
+        x"D1",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"ED",    
+        x"F9",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"D1",
+        x"D1",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"D1",
+        x"F5",x"F9",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"D1",x"F9",
+        x"F5",x"D1",x"D1",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"D1",x"D1",x"F9",
+        x"D1",x"D1",x"ED",x"ED",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"F9",x"F9",x"ED",x"D1",
+        x"ED",x"F9",x"D1",x"F9",x"D1",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"D1",x"F9",x"D1",x"ED",x"D1",    
+        x"D1",x"ED",x"D1",x"ED",x"ED",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"F5",x"D1",x"D1",x"F9",x"F9",
+        x"D1",x"F9",x"ED",x"F9",x"ED",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"F5",x"D1",x"ED",x"D1",x"D1",
+        x"D1",x"ED",x"ED",x"F9",x"F9",x"ED",x"E0",x"E0",x"E0",x"E0",x"F5",x"ED",x"ED",x"F9",x"D1",x"F9",
+        x"ED",x"D1",x"D1",x"F5",x"D1",x"F9",x"E0",x"E0",x"E0",x"E0",x"ED",x"F9",x"ED",x"D1",x"D1",x"D1",
+        x"ED",x"ED",x"D1",x"F5",x"D1",x"F9",x"ED",x"E0",x"E0",x"F5",x"ED",x"D1",x"D1",x"F5",x"F5",x"ED"
         );
   
 begin

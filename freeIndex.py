@@ -23,7 +23,7 @@ for lines in all_lines:
     tiles = lines.split(',') # Splits the line at ',' 
     for tile in tiles:   
         if pos_cnt != 1200:
-            if "x\"00\"" in tile: # Checks if background 
+            if pos_cnt != 41 and "x\"00\"" in tile or "x\"07\"" in tile: # Checks if background 
                 coord_str = calc_coord(pos_cnt)
                 track_pos.write("b\"" + coord_str + "\"" + ",")   # Adds the free pos to track_free_pos       
                 elems_on_row_cnt += 1
