@@ -18,7 +18,7 @@ architecture Behavioral of uMem is
 --************************
 --* u_mem : Micro Memory *
 --************************
-type u_mem_t is array (0 to 60) of unsigned(24 downto 0);
+type u_mem_t is array (0 to 66) of unsigned(24 downto 0);
 -- Maximum array length is 127, change when adding/deleting from uMem.
 constant u_mem_c : u_mem_t := (
         -- ALU_TB_FB_S_P_LC_SEQ_MICROADDR
@@ -139,7 +139,18 @@ constant u_mem_c : u_mem_t := (
         -- SCORE <= SCORE + 1
         b"1000_000_000_0_0_00_0000_0000000",    --HEX       AR := '1'
         b"0100_101_000_0_0_00_0000_0000000",    --HEX       AR := AR + SCORE via buss
-        b"0000_100_101_0_0_00_0011_0000000"     --HEX       SCORE := AR, µPC := 0
+        b"0000_100_101_0_0_00_0011_0000000",     --HEX       SCORE := AR, µPC := 0
+        --SENDWONSIG 3D
+        -- WON <= '1', WON <= '0'
+        b"1000_000_000_0_0_00_0000_0000000",    --HEX       AR := '1'
+        b"0000_100_100_0_0_00_0000_0000000",    --HEX       WON := '1' via buss (AR)
+        b"0011_000_000_0_0_00_0000_0000000",    --HEX       AR := '0'
+        b"0000_100_100_0_0_00_0011_0000000",    --HEX       WON := '0' via buss (AR), µPC := 0
+        --BSW 41
+        --PC := PC + 1 + ADR
+        --om G = 0, annars PC++
+		b"0000_000_000_0_0_00_0110_0000000",	--HEX	    µPC := 0 om S = 0
+		b"0000_000_000_0_0_00_0101_0011011"	    --HEX	    Hopp till BRA
         );
 
 signal u_mem : u_mem_t := u_mem_c;
