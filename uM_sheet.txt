@@ -18,6 +18,7 @@ SHOWGOALMSG-------"01110"
 HIDEGOALMSG-------"01111"
 WAIT--------------"10000"
 INCRSCORE---------"10001"
+SENDWONSIG--------"10010"
 
 **** DATA_BUS <= REG ****
 REG-------------TB----GRX	

@@ -22,8 +22,8 @@ entity zigsound is
         JB1                     : out std_logic;   -- the pmod is plugged in to the upper row of second slot
    
         -- Test
-		test_diod1   	        : out std_logic;
-		test_diod2   	        : out std_logic
+		--test_diod1   	        : out std_logic;
+		--test_diod2   	        : out std_logic
         --switch                  : in std_logic
         );
         
@@ -57,8 +57,8 @@ architecture Behavioral of zigsound is
 		    showing_goal_msg    : in std_logic;
 		    disp_goal_pos_out   : out std_logic;
             score_out           : out unsigned(5 downto 0);
-		    test_diod1   	    : out std_logic;
-		    test_diod2   	    : out std_logic
+		    --test_diod1   	      : out std_logic;
+		    --test_diod2   	      : out std_logic
 		    --switch              : in std_logic
 		    );
   	end component;
@@ -238,8 +238,8 @@ begin
                 showing_goal_msg => showing_goal_msg_con,
                 disp_goal_pos_out => disp_goal_pos_con,
                 score_out => score_con,
-                test_diod1 => test_diod1,
-                test_diod2 => test_diod2
+                --test_diod1 => test_diod1,
+                --test_diod2 => test_diod2
                 --switch => switch 
                 );
 

@@ -27,8 +27,8 @@ entity CPU is
 		disp_goal_pos_out   : out std_logic;
         score_out           : out unsigned(5 downto 0);
 		--TEST
-        test_diod1   	    : out std_logic;
-        test_diod2   	    : out std_logic
+        --test_diod1     	  : out std_logic;
+        --test_diod2   	      : out std_logic
         --switch              : in std_logic
         );
 end CPU;
@@ -121,7 +121,7 @@ architecture Behavioral of CPU is
     --************
     signal free_pos_lmt     : signed(10 downto 0) := (others => '0');
     signal free_pos_cnt     : signed(10 downto 0) := (others => '0');
-    signal dly_cnt          : unsigned(1 downto 0) := (others => '0');
+    signal dly_cnt          : unsigned(2 downto 0) := (others => '0');
     signal LC_cnt           : signed(16 downto 0) := (others => '0');
 
      --TEST                             
@@ -1294,22 +1294,47 @@ begin
     ----****************************************
     ----* SEL_TRACK : Track-selection Register *
     ----****************************************
+    --process(clk)
+    --begin
+    --    if rising_edge(clk) then
+    --        if (rst = '1') then
+    --            SEL_TRACK <= "00";
+    --            dly_cnt <= to_unsigned(0,2);
+    --        -- In process of changing track, locking keyboard.
+    --        elsif (dly_cnt = "00" and FB = "110" and GRX = "101") then
+    --            next_track <= DATA_BUS(1 downto 0); 
+    --            dly_cnt <= to_unsigned(1,2);
+    --        elsif (dly_cnt = "01") then
+    --            dly_cnt <= to_unsigned(2,2);
+    --        -- Unlocking keyboard and changing track.
+    --        elsif (dly_cnt = "10") then
+    --            dly_cnt <= to_unsigned(0,2);
+    --            SEL_TRACK <= next_track;
+    --        else
+    --            null;
+    --        end if;
+    --    end if;
+    --end process;    
     process(clk)
     begin
         if rising_edge(clk) then
             if (rst = '1') then
                 SEL_TRACK <= "00";
-                dly_cnt <= to_unsigned(0,2);
+                dly_cnt <= to_unsigned(0,3);
             -- In process of changing track, locking keyboard.
-            elsif (dly_cnt = "00" and FB = "110" and GRX = "101") then
+            elsif (dly_cnt = "000" and FB = "110" and GRX = "101") then
                 next_track <= DATA_BUS(1 downto 0); 
-                dly_cnt <= to_unsigned(1,2);
-            elsif (dly_cnt = "01") then
-                dly_cnt <= to_unsigned(2,2);
-            -- Unlocking keyboard and changing track.
-            elsif (dly_cnt = "10") then
-                dly_cnt <= to_unsigned(0,2);
+                dly_cnt <= to_unsigned(1,3);
+            elsif (dly_cnt = "001") then
+                dly_cnt <= to_unsigned(2,3);
+            -- Changing track and requesting updated sound icon (in key pressed section).
+            elsif (dly_cnt = "010") then
+                dly_cnt <= to_unsigned(3,3);
                 SEL_TRACK <= next_track;
+            elsif (dly_cnt = "011") then
+                dly_cnt <= to_unsigned(4,3);
+            elsif (dly_cnt = "100") then
+                dly_cnt <= to_unsigned(0,3);
             else
                 null;
             end if;
@@ -1516,8 +1541,6 @@ begin
     end process;
     
     flag_L <= '1' when (LC_cnt = 0) else '0';
-    test_diod1 <= '1' when (flag_L = '0') else '0';  -- Looping in µMem
-    test_diod2 <= '1' when (flag_L = '1') else '0';  -- Not looping in µMem
 
     --***********************
     --* Data Bus Assignment *
@@ -1557,6 +1580,7 @@ begin
                     CURR_POS <= NEXT_POS;
                 end if;
                 TOG_SOUND_ICON <= '0';
+                MOVE_REQ <= '0';
                 -- We're changing track, send move_req back to start.
                 if (dly_cnt = 0 and FB = "110" and GRX = "101") then  
                     NEXT_POS <= "000000001000000001";
@@ -1580,20 +1604,21 @@ begin
                             NEXT_YPOS <= CURR_YPOS;
                             NEXT_XPOS <= CURR_XPOS + 1;
                             MOVE_REQ <= '1';
-                        when "101" => -- DISPPLAY GOAL POS TOGGLE (G)
+                        when "101" => -- DISPLAY GOAL POS TOGGLE (G)
                             DISP_GOAL_POS <= not DISP_GOAL_POS;
-                            --TOG_SOUND_ICON <= '1';
-                            MOVE_REQ <= '0';
                         when "110" => -- SOUND TOGGLE (SPACE)
                             SEL_SOUND <= not SEL_SOUND;
                             TOG_SOUND_ICON <= '1';
-                            MOVE_REQ <= '0';
                         when others =>
-                            MOVE_REQ <= '0';
+                            null;
                     end case;
                 -- In locked mode, don't check for key pressed.
+                -- Time to set sound icon
+                elsif (dly_cnt = 2) then
+                    TOG_SOUND_ICON <= '1';
+                -- Do nothing, GPU busy
                 else    
-                    MOVE_REQ <= '0';
+                    null;
                 end if;
             end if;
         end if;
@@ -1615,7 +1640,6 @@ begin
     goal_reached_out <= WON;
     disp_goal_pos_out <= DISP_GOAL_POS;
     score_out <= unsigned(SCORE(5 downto 0));
-    --test_diotd1 <= DISP_GOAL_POS;    
 
     --*************
     --* TEST DIOD *

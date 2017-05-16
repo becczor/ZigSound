@@ -40,19 +40,13 @@ constant u_mem_c : u_mem_t := (
 		b"0001_001_000_0_0_00_0000_0000000",	--0240000	AR := IR via buss
 		b"0100_110_000_1_0_00_0000_0000000",	--0984000	AR := GR3 + AR
 		b"0000_100_111_0_0_00_0001_0000000",	--0138080	ASR := AR, µPC := K1 (OP-fältet)
-
-
 		--LOAD 0A
 		--GRx := PM(A)
 		b"0000_010_110_0_0_00_0011_0000000",	--00B0180	GRx := PM(A), µPC = 0
-
-
 		--STORE 0B
 		--PM(A) := GRx	
         -- UNUSABLE WITH NO WAY TO WRITE TO PM FROM CPU.
 		b"0000_110_010_0_0_00_0011_0000000",	--0190180	PM(A) := GRx, µPC = 0
-
-
 		--ADD 0C
 		--GRx := GRx + PM(A)
 		b"0001_110_000_0_0_00_0000_0000000",	--0380000	AR := GRx via buss
@@ -157,18 +151,8 @@ signal u_mem : u_mem_t := u_mem_c;
 
 begin
 
-    --********************
-    --* uData Assignment *
-    --********************
-    --process(clk)
-    --begin
-    --    if rising_edge(clk) then
-            uData <= u_mem(to_integer(uAddr));
-    --    else
-    --        null;
-    --    end if;
-    --end process;
-    
+    uData <= u_mem(to_integer(uAddr));
+   
 end Behavioral;
 
 

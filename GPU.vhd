@@ -63,7 +63,8 @@ begin
     --*************************************************************
     --* Check if we have a move request and if it can be approved *
     --*************************************************************
-    --move <= '1' when move_req = '1' and data_nextpos = x"00" else '0';
+    nextpos_free <= '1' when (data_next = x"00" or data_next = x"01" or data_next = x"01") else '0'
+    move <= '1' when move_req = '1' and nextpos_free = '1' else '0';
     
     --*******************************************************************
     --* Move handler : Sets address, data and enable-signal for PIC_MEM *
@@ -80,21 +81,21 @@ begin
         else
             case WRstate is
                 when IDLE =>
-                    if (move_req = '1' and (data_nextpos = x"00" or data_nextpos = x"07")) then  -- We should move.
-                        addr_change <= addr_change_calc; -- Translates curr x- and y-pos into PIC_MEM-address.
+                    if (move = '1') then  -- We should move.
+                        addr_change <= addr_change_calc; 
                         data_change <= tile;    -- Sets data to BG-tile.
                         move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
                         we_picmem <= '1';   -- PIC_MEM can now use address and data to clear curr_pos.
                         WRstate <= DRAW;    -- Set state to DRAW so we get addr and data from next_pos.
-                    elsif (tog_sound_icon = '1') then
-                        addr_change <= to_unsigned(1199,11);
-                        data_change <= sound_icon;
+                    elsif (tog_sound_icon = '1') then  -- Toggle what sound icon is shown
+                        addr_change <= to_unsigned(1199,11);  -- Select position (38,28) bottom-right
+                        data_change <= sound_icon;  -- Set it to correct sound_icon
                         we_picmem <= '1';
                     else   
                         we_picmem <= '0';
                     end if;
                 when DRAW =>
-                    addr_change <= addr_change_calc; -- Translates x- and y-pos into PIC_MEM-address.
+                    addr_change <= addr_change_calc; 
                     data_change <= tile;  -- Sets data to character tile.
                     move_resp <= '0'; 
                     WRstate <= IDLE;
@@ -108,35 +109,36 @@ begin
     --*********************
     --* Signal assignment *
     --*********************
-    with sel_track select  -- Set correct curr pos sound icon depending on track theme
-    unicorn <=
-    x"01" when "00", -- Track 1
-    x"0B" when "01", -- Track 2
-    x"01" when "10", -- Track 3
-    x"00" when others;
-    
-    with sel_track select -- Set correct bg tile depending on track theme
+    -- Set correct bg tile depending on track theme
+    with sel_track select
     bg_tile <=
     x"00" when "00", -- Track 1
-    x"07" when "01", -- Track 2
-    x"00" when "10", -- Track 3
+    x"01" when "01", -- Track 2
+    x"02" when "10", -- Track 3
     x"00" when others;
-    
-    with sel_track select  -- Set correct curr pos sound icon depending on track theme
+    -- Set correct curr pos sound icon depending on track theme
+    with sel_track select
+    unicorn <=
+    x"04" when "00", -- Track 1
+    x"05" when "01", -- Track 2
+    x"06" when "10", -- Track 3
+    x"00" when others;
+    -- Set correct curr pos sound icon depending on track theme
+    with sel_track select
     curr_sound_icon <=
-    x"05" when "00", -- Track 1
-    x"0A" when "01", -- Track 2
-    x"05" when "10", -- Track 3
+    x"10" when "00", -- Track 1
+    x"11" when "01", -- Track 2
+    x"12" when "10", -- Track 3
     x"00" when others;
     
-    addr_change_calc <= xpos + (to_unsigned(40, 6) * ypos);
+    addr_change_calc <= xpos + (to_unsigned(40, 6) * ypos); -- Translates x- and y-pos into PIC_MEM-address.
     
     addr_nextpos <= unsigned(NEXT_XPOS) + (to_unsigned(40, 6) * unsigned(NEXT_YPOS));
-    -- Takes x- and y-pos from curr_pos if we're in CLEAR, else from next_pos.
+    -- Takes x- and y-pos from curr_pos if we're in IDLE, else from next_pos.
     xpos <= unsigned(CURR_XPOS) when (WRstate = IDLE) else unsigned(NEXT_XPOS);
     ypos <= unsigned(CURR_YPOS) when (WRstate = IDLE) else unsigned(NEXT_YPOS);
     tile <= bg_tile when (WRstate = IDLE) else unicorn;
-    sound_icon <= curr_sound_icon when (sound_channel = '0') else x"06";
+    sound_icon <= curr_sound_icon when (sound_channel = '0') else x"13"; -- else x"13" means toggle icon for goal sound
     
   
     end behavioral;
