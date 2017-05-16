@@ -1,9 +1,5 @@
-﻿--------------------------------------------------------------------------------
--- VGA MOTOR
+--VGA MOTOR
 -- ZigSound
--- 04-apr-2017
--- Version 0.1
-
 
 -- library declaration
 library IEEE;
@@ -21,6 +17,7 @@ entity VGA_MOTOR is
     goal_reached                : in std_logic;
     showing_goal_msg_out        : out std_logic;
     disp_goal_pos               : in std_logic;
+    score                       : in unsigned(5 downto 0);
     addr		    		    : out unsigned(10 downto 0);
     vgaRed		        	    : out std_logic_vector(2 downto 0);
     vgaGreen	        	    : out std_logic_vector(2 downto 0);
@@ -33,42 +30,42 @@ end VGA_MOTOR;
 
 -- architecture
 architecture Behavioral of VGA_MOTOR is
-    
-    --alias goal_x : signed(6 downto 0) is goal_pos(15 downto 9);
-    --alias goal_y : signed(5 downto 0) is goal_pos(5 downto 0);
+
     alias goal_x : signed(5 downto 0) is goal_pos(14 downto 9);
     alias goal_y : signed(4 downto 0) is goal_pos(4 downto 0);
     
-    signal Xpixel	        : unsigned(9 downto 0);     -- Horizontal pixel counter
-    signal Ypixel	        : unsigned(9 downto 0);		-- Vertical pixel counter
-    signal ClkDiv	        : unsigned(1 downto 0);		-- Clock divisor, to generate 25 MHz signal
-    signal Clk25			: std_logic;			    -- One pulse width 25 MHz signal
-    signal pixel            : std_logic_vector(7 downto 0);	-- Tile pixel data
-    signal tileAddr         : unsigned(12 downto 0);	-- Tile address
-    signal blank            : std_logic;                -- blanking signal
-    signal spriteAddrRb       : unsigned(10 downto 0);     -- The sprite addr
-    signal isRbSprite       : std_logic;                -- '1' if VGA should show sprite '0' if tile
-    signal sprite_x_offset_rb  : unsigned(9 downto 0);     -- xPixel - start of sprite x-position
-    signal sprite_y_offset_rb  : unsigned(9 downto 0);     -- yPixel - start of y-position
-    signal sprite_xstart_g    : unsigned(9 downto 0);
-    signal sprite_xend_g      : unsigned(9 downto 0);
-    signal sprite_ystart_g    : unsigned(9 downto 0);
-    signal sprite_yend_g      : unsigned(9 downto 0);
-    signal spriteAddrG        : unsigned(7 downto 0);
-    signal isGoalSprite       : std_logic;
+    signal Xpixel	            : unsigned(9 downto 0);     -- Horizontal pixel counter
+    signal Ypixel	            : unsigned(9 downto 0);		-- Vertical pixel counter
+    signal ClkDiv	            : unsigned(1 downto 0);		-- Clock divisor, to generate 25 MHz signal
+    signal Clk25			    : std_logic;			    -- One pulse width 25 MHz signal
+    signal pixel                : std_logic_vector(7 downto 0);	-- Tile pixel data
+    signal tileAddr             : unsigned(12 downto 0);	-- Tile address
+    signal blank                : std_logic;                -- blanking signal
+    signal spriteAddrRb         : unsigned(10 downto 0);     -- The sprite addr
+    signal isRbSprite           : std_logic;                -- '1' if VGA should show sprite '0' if tile
+    signal sprite_x_offset_rb   : unsigned(9 downto 0);     -- xPixel - start of sprite x-position
+    signal sprite_y_offset_rb   : unsigned(9 downto 0);     -- yPixel - start of y-position
+    signal sprite_xstart_g      : unsigned(9 downto 0);
+    signal sprite_xend_g        : unsigned(9 downto 0);
+    signal sprite_ystart_g      : unsigned(9 downto 0);
+    signal sprite_yend_g        : unsigned(9 downto 0);
+    signal spriteAddrG          : unsigned(7 downto 0);
+    signal isGoalSprite         : std_logic;
     
-    signal sprite_y_offset_c  : unsigned(9 downto 0);     -- yPixel - start of y-position
-    signal spriteAddrc       : unsigned(10 downto 0);     -- The sprite addr
-    signal isCSprite           : std_logic;                -- '1' if VGA should show sprite '0' if tile
+    signal sprite_y_offset_c    : unsigned(9 downto 0);     -- yPixel - start of y-position
+    signal spriteAddrc          : unsigned(10 downto 0);     -- The sprite addr
+    signal isCSprite            : std_logic;                -- '1' if VGA should show sprite '0' if tile
     
     
     -- signals for score
-    signal x_s_limit    : unsigned(10 downto 0);     -- The limit of shown score in x-pos
+    signal x_s_limit    : unsigned(9 downto 0);     -- The limit of shown score in x-pos
     signal tileIndex    : unsigned(4 downto 0);
-    signal score        : unsigned(4 downto 0) := "00000";
-    -- Test animation
-    signal time_cnt             : unsigned(20 downto 0);
-    signal x_cnt                : unsigned(9 downto 0);       
+
+    -- Animation and goal message showing
+    signal time_cnt             : unsigned(18 downto 0);
+    signal x_cnt                : unsigned(9 downto 0);
+    signal showing_Xpixel_cnt    : unsigned(9 downto 0);
+    signal showing_goal_msg      : std_logic;              
     
     -- Sprite memory type
     type ram_s_r is array (0 to 2047) of std_logic_vector(7 downto 0);
@@ -179,7 +176,7 @@ x"FE",x"FE",x"FE",x"FE",x"A6",x"A6",x"FE",x"FE",x"FE",x"FE",x"A6",x"A6",x"FE",x"
     
 
     -- Tile memory type
-    type ram_t is array (0 to 2559) of std_logic_vector(7 downto 0);
+    type ram_t is array (0 to 2815) of std_logic_vector(7 downto 0);
 
     -- Tile memory
     -- There is room for 32 different tiles.
@@ -376,7 +373,7 @@ x"FE",x"FE",x"FE",x"FE",x"A6",x"A6",x"FE",x"FE",x"FE",x"FE",x"A6",x"A6",x"FE",x"
         );
   
 begin
-    showing_goal_msg_out <= '1';
+
 
     -- Clock divisor
     -- Divide system clock (100 MHz) by 4
@@ -411,6 +408,7 @@ begin
     end if;
     end process;
     
+
     
     
     --- testing animation thing
@@ -418,11 +416,14 @@ begin
     process(clk)
     begin
     if rising_edge(clk) then
-        if rst = '1' then
+        if rst = '1'  then
             x_cnt <= to_unsigned(192,10); -- Start x-cord
-        elsif x_cnt = to_unsigned(448,10) then
-            null;
-        elsif time_cnt = "1111111111111111111" then -- Stop counter     
+        elsif goal_reached = '1' then
+            showing_goal_msg <= '1';
+            x_cnt <= to_unsigned(192,10);
+        elsif x_cnt = "1001011000" then 
+            showing_goal_msg <= '0';
+        elsif (time_cnt = "11111111111111111" and showing_goal_msg = '1') then -- Stop counter     
             x_cnt <= x_cnt + 1;
         else
             null;
@@ -430,7 +431,8 @@ begin
     end if;
     end process;
 
-    
+    showing_goal_msg_out <= showing_goal_msg;
+    showing_Xpixel_cnt <= x_cnt when (x_cnt < 449) else to_unsigned(448,10);  
 
     -- 25 MHz clock (one system clock pulse width)
     Clk25 <= '1' when (ClkDiv = 3) else '0';
@@ -520,11 +522,10 @@ begin
 
     blank <= '1' when ((Xpixel > 639 and Xpixel <= 799) or (Ypixel > 479 and Ypixel <= 520)) else '0';
 
-    isRbSprite <= '1' when ((Xpixel > 192 and Xpixel < x_cnt) and (Ypixel > 100 and Ypixel < 228) and not (spriteMemRb(to_integer(spriteAddrRb)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
+    isRbSprite <= '1' when ((Xpixel > 192 and Xpixel < showing_Xpixel_cnt) and (Ypixel > 100 and Ypixel < 228) and not (spriteMemRb(to_integer(spriteAddrRb)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
     
-    isCSprite <= '1' when ((Xpixel > 192 and Xpixel < 448 and x_cnt = to_unsigned(448,10)) and (Ypixel > 240 and Ypixel < 368) and not (spriteMemC(to_integer(spriteAddrC)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
+    isCSprite <= '1' when ((Xpixel > 192 and Xpixel < 448 and showing_Xpixel_cnt = to_unsigned(448,10)) and (Ypixel > 240 and Ypixel < 368) and not (spriteMemC(to_integer(spriteAddrC)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
 
-    
     isGoalSprite <= '1' when ((Xpixel > sprite_xstart_g and Xpixel < sprite_xend_g) and (Ypixel > sprite_ystart_g and Ypixel < sprite_yend_g) and not (spriteMemGoal(to_integer(spriteAddrG)) = x"FE")) else '0';
 
     -- Tile memory
@@ -533,9 +534,9 @@ begin
     if rising_edge(clk) then
         if (rst = '1') then
             pixel <= (others => '0');
-        elsif (isCSprite = '1') then
+        elsif (isCSprite = '1' and showing_goal_msg = '1') then
             pixel <= spriteMemC(to_integer(spriteAddrC));
-        elsif (isRbSprite = '1' and goal_reached = '1') then
+        elsif (isRbSprite = '1' and showing_goal_msg = '1') then
             pixel <= spriteMemRb(to_integer(spriteAddrRb));    
         elsif (isGoalSprite ='1' and disp_goal_pos = '1') then 
             pixel <= spriteMemGoal(to_integer(spriteAddrG));
@@ -556,8 +557,8 @@ begin
     sprite_y_offset_c <= Ypixel - to_unsigned(240,10);
 
     -- chooses the tile index 
-    x_s_limit <= score * to_unsigned(16,5);
-    tileIndex <= x"05" when ((Xpixel > 0 and Xpixel < x_s_limit) and (Ypixel > 464 and Ypixel < 480)) else unsigned(data(4 downto 0));
+    x_s_limit <= to_unsigned(to_integer(score * 16), 10) when score < 40 else to_unsigned(624, 10);
+    tileIndex <= "00111" when ((Xpixel > 0 and Xpixel < x_s_limit) and (Ypixel > 464 and Ypixel < 480)) else unsigned(data(4 downto 0));
 
     -- Calculates goal coordinates in pixels
     -- FIX NOT RIGHT!

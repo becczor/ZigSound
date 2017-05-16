@@ -26,7 +26,7 @@ constant p_mem_c : p_mem_t := (
     b"01101_101_00_00000000",  -- 0.  SETRND : SEL_TRACK <= RND_SEL_TRACK
     b"01101_100_00_00000000",  -- 1.  SETRND : GOAL_POS <= RND_GOAL_POS
     b"01100_000_00_11111111",  -- 2.  BCT : BRA back here while G = 0 (ADDR = -1)
-    b"01110_000_00_00000000",  -- 3.  SENDWONSIG : WON <= '1', WON <= '0'
+    b"10010_000_00_00000000",  -- 3.  SENDWONSIG : WON <= '1', WON <= '0'
     b"00000_000_01_00000000",  -- 4.  LOAD : GR0 <= LOOPCNT (5.)
     b"011111111111111111",     -- 5.  Value LOOPCNT : Num of WAIT before INCRSCORE (11.)
     b"10000_000_01_00000000",  -- 6.  WAIT : Wait a while depending on µLOOPCNT (7.)
