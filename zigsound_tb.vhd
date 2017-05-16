@@ -23,10 +23,14 @@ ARCHITECTURE behavior OF zigsound_tb IS
             PS2KeyboardCLK          : in std_logic;  -- USB keyboard PS2 clock
             PS2KeyboardData         : in std_logic;  -- USB keyboard PS2 data
             -- Test
-            test_diod               : buffer std_logic;  -- Test diod
-            test2_diod              : buffer std_logic;
+            --test_diod               : buffer std_logic;  -- Test diod
+            --test2_diod              : buffer std_logic;
             -- Sound
-            JB1              : out std_logic
+            JB1              : out std_logic;
+            
+            --test
+            test_diod1   	        : out std_logic;
+		    test_diod2   	        : out std_logic
             );
             
     END COMPONENT;

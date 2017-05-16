@@ -33,6 +33,8 @@ end VGA_MOTOR;
 -- architecture
 architecture Behavioral of VGA_MOTOR is
     
+    --alias goal_x : signed(6 downto 0) is goal_pos(15 downto 9);
+    --alias goal_y : signed(5 downto 0) is goal_pos(5 downto 0);
     alias goal_x : signed(5 downto 0) is goal_pos(14 downto 9);
     alias goal_y : signed(4 downto 0) is goal_pos(4 downto 0);
     
@@ -51,7 +53,7 @@ architecture Behavioral of VGA_MOTOR is
     signal sprite_xend_g      : unsigned(9 downto 0);
     signal sprite_ystart_g    : unsigned(9 downto 0);
     signal sprite_yend_g      : unsigned(9 downto 0);
-    signal spriteAddrG        : unsigned(5 downto 0);
+    signal spriteAddrG        : unsigned(7 downto 0);
     signal isGoalSprite       : std_logic;
     
     -- Test animation
@@ -61,7 +63,7 @@ architecture Behavioral of VGA_MOTOR is
     -- Sprite memory type
     type ram_s_r is array (0 to 2047) of std_logic_vector(7 downto 0);
     
-    type ram_s_goal is array (0 to 63) of std_logic_vector(7 downto 0);
+    type ram_s_goal is array (0 to 255) of std_logic_vector(7 downto 0);
     
     -- Sprite memory RAINBOW
     signal spriteMemRb : ram_s_r := 
@@ -104,14 +106,23 @@ x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"
                
     signal spriteMemGoal : ram_s_goal := 
     (     
-      x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",  -- G
-	  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
-	  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
-	  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
-	  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
-	  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
-	  x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",
-	  x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0");
+    x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",
+    x"FE",x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",
+    x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",
+    x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",
+    x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",
+    x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",
+    x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",
+    x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",
+    x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FE",x"FE",
+    x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FE",x"FE",
+    x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",x"E0",x"E0",x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",
+    x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",
+    x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"E0",x"FE",x"FE",
+    x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FE",x"FE",
+    x"FE",x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",
+    x"FE",x"FE",x"FE",x"FE",x"FE",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FE",x"FE",x"FE",x"FE"
+    );
 
     -- Tile memory type
     type ram_t is array (0 to 2559) of std_logic_vector(7 downto 0);
@@ -437,8 +448,7 @@ begin
     isRbSprite <= '1' when ((Xpixel > 64 and Xpixel < x_cnt) and (Ypixel > 200 and Ypixel < 456) and not (spriteMemRb(to_integer(spriteAddrRb)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
 
     
-
-    isGoalSprite <= '1' when (disp_goal_pos = '1' and (Xpixel > sprite_xstart_g and Xpixel <= sprite_xend_g) and (Ypixel > sprite_ystart_g and Ypixel <= sprite_yend_g) and not (spriteMemGoal(to_integer(spriteAddrG)) = x"FE")) else '0';
+    isGoalSprite <= '1' when ((Xpixel > sprite_xstart_g and Xpixel < sprite_xend_g) and (Ypixel > sprite_ystart_g and Ypixel < sprite_yend_g) and not (spriteMemGoal(to_integer(spriteAddrG)) = x"FE")) else '0';
 
     -- Tile memory
     process(clk)
@@ -447,11 +457,11 @@ begin
         if (rst = '1') then
             pixel <= (others => '0');
         elsif (isRbSprite = '1' and goal_reached = '1') then
-            pixel <= spriteMemRb(to_integer(spriteAddrRb));
+            pixel <= spriteMemRb(to_integer(spriteAddrRb));    
+        elsif (isGoalSprite ='1' and disp_goal_pos = '1') then 
+            pixel <= spriteMemGoal(to_integer(spriteAddrG));
         elsif (blank = '0') then
             pixel <= tileMem(to_integer(tileAddr));
-        elsif (isGoalSprite ='1') then
-            pixel <= spriteMemGoal(to_integer(spriteAddrG));
         else
             pixel <= (others => '0');
         end if;
@@ -467,10 +477,10 @@ begin
 
     -- Calculates goal coordinates in pixels
     -- FIX NOT RIGHT!
-    sprite_xstart_g <= to_unsigned(16 * to_integer(goal_x), 10); 
-    sprite_xend_g <= to_unsigned(16 * (to_integer(goal_x) + 1), 10);
-    sprite_ystart_g <= to_unsigned(16 * to_integer(goal_y), 10); 
-    sprite_yend_g <= to_unsigned(16 * (to_integer(goal_y) + 1),10);
+    sprite_xstart_g <= to_unsigned(16 * to_integer(unsigned(goal_x)), 10); 
+    sprite_xend_g <= to_unsigned(16 * (to_integer(unsigned(goal_x)) + 1), 10);
+    sprite_ystart_g <= to_unsigned(16 * to_integer(unsigned(goal_y)), 10); 
+    sprite_yend_g <= to_unsigned(16 * (to_integer(unsigned(goal_y)) + 1),10);
 
 
 --goal_pos(14 downto 9));
@@ -482,7 +492,7 @@ begin
     spriteAddrRb <= sprite_y_offset_rb(7 downto 3) & sprite_x_offset_rb(8 downto 3); --Ändras när vi ändrar spriteMem
     --spritePixel <= spriteMem(to_integer(spriteAddr));
     
-    spriteAddrG <= Ypixel(3 downto 1) & Xpixel(3 downto 1);
+    spriteAddrG <= Ypixel(3 downto 0) & Xpixel(3 downto 0);
 
     -- Picture memory address composite
     --addr <= to_unsigned(20, 7) * Ypixel(8 downto 5) + Xpixel(9 downto 5);

@@ -739,6 +739,7 @@ begin
                 NEXT_POS <= "000000001000000001";
                 MOVE_REQ <= '0';
                 TOG_SOUND_ICON <= '0';
+                DISP_GOAL_POS <= '0';
                 SEL_SOUND <= '0';
             else
                 if (move_resp = '1') then
@@ -770,7 +771,7 @@ begin
                             MOVE_REQ <= '1';
                         when "101" => -- DISPPLAY GOAL POS TOGGLE (G)
                             DISP_GOAL_POS <= not DISP_GOAL_POS;
-                            TOG_SOUND_ICON <= '1';
+                            --TOG_SOUND_ICON <= '1';
                             MOVE_REQ <= '0';
                         when "110" => -- SOUND TOGGLE (SPACE)
                             SEL_SOUND <= not SEL_SOUND;
@@ -803,7 +804,7 @@ begin
     goal_reached_out <= WON;
     disp_goal_pos_out <= DISP_GOAL_POS;
     score_out <= unsigned(SCORE(5 downto 0));
-    
+    --test_diotd1 <= DISP_GOAL_POS;    
 
     --*************
     --* TEST DIOD *
