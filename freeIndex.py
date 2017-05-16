@@ -1,48 +1,53 @@
 from sys import argv
 
-
-def calc_coord(counter):
-    x_coord = bin(counter%39)[2:]
-    y_coord = bin(counter//40)[2:]
-    x_zeros = (6 - len(str(x_coord)))*'0'
-    y_zeros = (5 - len(str(y_coord)))*'0'
-    final_coord = "b\"000_" + x_zeros + x_coord + "_0000_" + y_zeros + y_coord + "\""
-    return final_coord
-
-
+def calc_coord(pos_cnt):
+    x_coord = bin(pos_cnt%40)[2:].zfill(9) # returns binary representation of x-pos
+    y_coord = bin(pos_cnt//40)[2:].zfill(9) # returns binary representation of x-pos
+    position = x_coord + y_coord
+    return position
 
 script, filename = argv
 track = open(filename, 'r')
-track_pos = open("free_track_pos", 'a')
+track_pos = open("free_track_pos.txt", 'a')
 free_pos_cnt = 0
-counter = 0
+elems_on_row_cnt = 0
+row_cnt = 0
+col_cnt = 1
+pos_cnt = 0
 
+track_pos.write("------------" + filename + "------------\n")
+track_pos.write("-- Row: 0\n")
 
-track_pos.write("\n")
-track_pos.write(" ------------" + filename + "------------ ")
-track_pos.write("\n")
-
-
-all_lines = track.readlines() #Gettis a list with all lines
+all_lines = track.readlines() #Gets a list with all lines
 for lines in all_lines:
     tiles = lines.split(',') # Splits the line at ',' 
     for tile in tiles:   
-        if "x\"00\"" in tile: # checks if background 
-            coord_str = calc_coord(counter)
-            track_pos.write(coord_str)   # adds the free pos to track_free_pos 
-            track_pos.write(", ")
-            counter += 1
-            free_pos_cnt += 1
-        elif "--" in tile:
-            track_pos.write(tile)
-        else:
-            counter += 1
+        if pos_cnt != 1200:
+            if "x\"00\"" in tile: # Checks if background 
+                coord_str = calc_coord(pos_cnt)
+                track_pos.write("b\"" + coord_str + "\"" + ",")   # Adds the free pos to track_free_pos       
+                elems_on_row_cnt += 1
+                free_pos_cnt += 1    
+                if elems_on_row_cnt % 4 == 0:
+                    elems_on_row_cnt = 0
+                    track_pos.write("\n")       
+            if col_cnt == 0:
+                row_cnt += 1
+                if elems_on_row_cnt == 0:
+                    track_pos.write("-- Row: " + str(row_cnt) + "\n")
+                else:
+                    elems_on_row_cnt = 0
+                    track_pos.write("\n-- Row: " + str(row_cnt) + "\n")
+            if not "--" in tile:
+                pos_cnt += 1
+                col_cnt = pos_cnt % 40
+            else:
+                col_cnt = 1
 
 track_pos.write("\n" + "Number of elements: " + str(free_pos_cnt))        
 
-for i in range(0,5):
+for i in range(0,3):
     track_pos.write("\n")
-
 
 track_pos.close()
 

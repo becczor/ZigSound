@@ -54,6 +54,7 @@ architecture Behavioral of zigsound is
 		    sel_track_out       : out unsigned(1 downto 0);
 		    sel_sound_out       : out std_logic;
 		    goal_reached_out    : out std_logic;
+		    showing_goal_msg    : in std_logic;
 		    disp_goal_pos_out   : out std_logic;
             score_out           : out unsigned(5 downto 0);
 		    test_diod1   	    : out std_logic;
@@ -128,6 +129,7 @@ architecture Behavioral of zigsound is
 		data	    		    : in unsigned(7 downto 0);
 		goal_pos                : in signed(17 downto 0);
         goal_reached            : in std_logic;
+        showing_goal_msg_out    : out std_logic;
         disp_goal_pos           : in std_logic;
 		addr	    		    : out unsigned(10 downto 0);
 		vgaRed	       		    : out std_logic_vector(2 downto 0);
@@ -198,6 +200,7 @@ architecture Behavioral of zigsound is
 	
 	-- VGA MOTOR signals 
     signal addr_vga_con         : unsigned(10 downto 0);
+    signal showing_goal_msg_con : std_logic;
     
     -- KBD_ENC signals
     signal PS2cmd_con           : unsigned(17 downto 0);
@@ -231,6 +234,7 @@ begin
                 sel_track_out => sel_track_con,
                 sel_sound_out => sel_sound_con,
                 goal_reached_out => goal_reached_con,
+                showing_goal_msg => showing_goal_msg_con,
                 disp_goal_pos_out => disp_goal_pos_con,
                 score_out => score_con,
                 test_diod1 => test_diod1,
@@ -291,6 +295,7 @@ begin
 	            data => data_vga_con,
 	            goal_pos => goal_pos_con,
 	            goal_reached => goal_reached_con,
+	            showing_goal_msg_out => showing_goal_msg_con,
 	            disp_goal_pos => disp_goal_pos_con, 
 	            addr => addr_vga_con,
 	            vgaRed => vgaRed,
