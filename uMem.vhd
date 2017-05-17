@@ -111,7 +111,7 @@ constant u_mem_c : u_mem_t := (
         --om G = 0, annars PC++
 		b"0000_000_000_0_0_00_1101_0000000",	--0000680	µPC := 0 om G = 1
 		b"0000_000_000_0_0_00_0101_0011011",	--000029B	Hopp till BRA
-        --SETRND 31
+        --SETNEXT 31
         --GOAL_POS := RND_GOAL_POS if GRX = "100"    
         --SEL_TRACK := RND_SEL_TRACK if GRX = "101" 
         b"0000_110_110_0_0_00_0011_0000000", 	--01B0000	REG := RND_REG

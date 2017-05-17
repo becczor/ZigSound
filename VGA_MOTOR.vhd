@@ -41,11 +41,18 @@ architecture Behavioral of VGA_MOTOR is
     --***********
     --* Signals *
     --***********
+    signal Xpixel_next          : unsigned(9 downto 0);     -- Next horizontal pixel counter
+    signal Ypixel_next          : unsigned(9 downto 0);		-- Next vertical pixel counter
     signal Xpixel	            : unsigned(9 downto 0);     -- Horizontal pixel counter
     signal Ypixel	            : unsigned(9 downto 0);		-- Vertical pixel counter
     signal ClkDiv	            : unsigned(1 downto 0);		-- Clock divisor, to generate 25 MHz signal
     signal Clk25			    : std_logic;			    -- One pulse width 25 MHz signal
-    signal pixel                : std_logic_vector(7 downto 0);	-- Tile pixel data
+    signal pixel_out            : std_logic_vector(7 downto 0);	 -- Tile pixel data
+    signal goalCarrotPixel      : std_logic_vector(7 downto 0);  -- Yay! Carrot ++
+    signal goalRbPixel          : std_logic_vector(7 downto 0);  -- Rainbow
+    signal dispGoalPosPixel     : std_logic_vector(7 downto 0);  -- Display goal pos
+    signal bgPixel              : std_logic_vector(7 downto 0);  -- Background tile
+    signal dataPixel            : std_logic_vector(7 downto 0);  -- Regular tile data
     signal isTransparent        : std_logic := '0';         -- Signal for checking if current tile represents transparancy
     signal bgTileAddr           : unsigned(12 downto 0);	-- Background tile address
     signal tileAddr             : unsigned(12 downto 0);	-- Tile address
@@ -418,23 +425,22 @@ x"FE",x"FE",x"FE",x"FE",x"A6",x"A6",x"FE",x"FE",x"FE",x"FE",x"A6",x"A6",x"FE",x"
         x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",
         x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",
         
-        x"BE",x"BE",x"94",x"BE",x"94",x"DA",x"90",x"BE",x"2C",x"DA",x"2C",x"DA",x"2C",x"2C",x"90",x"2C",    -- x"0E" CARROT 
-        x"90",x"DA",x"DA",x"94",x"90",x"DA",x"90",x"DA",x"2C",x"2C",x"DA",x"2C",x"2C",x"BE",x"DA",x"2C",
-        x"94",x"BE",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"2C",x"BE",x"2C",x"94",x"BE",x"2C",x"2C",x"2C",
-        x"94",x"94",x"BE",x"90",x"BE",x"BE",x"90",x"EC",x"2C",x"2C",x"2C",x"2C",x"BE",x"2C",x"DA",x"DA",
-        x"DA",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"A8",x"EC",x"2C",x"2C",x"DA",x"2C",x"94",x"DA",x"2C",
-        x"94",x"DA",x"94",x"94",x"94",x"DA",x"EC",x"EC",x"EC",x"A8",x"2C",x"2C",x"2C",x"2C",x"2C",x"2C",
-        x"DA",x"90",x"90",x"DA",x"90",x"A8",x"EC",x"EC",x"EC",x"EC",x"EC",x"2C",x"2C",x"BE",x"94",x"DA",
-        x"BE",x"94",x"90",x"DA",x"94",x"EC",x"EC",x"EC",x"A8",x"EC",x"EC",x"EC",x"BE",x"BE",x"DA",x"94",
-        x"BE",x"DA",x"DA",x"90",x"A8",x"EC",x"EC",x"EC",x"EC",x"A8",x"EC",x"94",x"94",x"DA",x"DA",x"94",
-        x"DA",x"DA",x"90",x"EC",x"EC",x"A8",x"EC",x"EC",x"EC",x"90",x"DA",x"DA",x"94",x"94",x"90",x"DA",
-        x"90",x"94",x"A8",x"EC",x"EC",x"EC",x"EC",x"EC",x"A8",x"90",x"94",x"DA",x"94",x"DA",x"90",x"DA",
-        x"DA",x"90",x"EC",x"A8",x"EC",x"EC",x"EC",x"DA",x"90",x"94",x"94",x"BE",x"DA",x"DA",x"94",x"94",
-        x"DA",x"EC",x"EC",x"EC",x"EC",x"EC",x"BE",x"DA",x"DA",x"DA",x"94",x"BE",x"DA",x"90",x"DA",x"DA",
-        x"DA",x"EC",x"A8",x"EC",x"EC",x"90",x"DA",x"94",x"DA",x"DA",x"BE",x"90",x"90",x"94",x"DA",x"94",
-        x"EC",x"EC",x"EC",x"A8",x"DA",x"94",x"DA",x"94",x"94",x"DA",x"90",x"94",x"90",x"DA",x"DA",x"DA",
-        x"EC",x"EC",x"DA",x"BE",x"DA",x"94",x"90",x"DA",x"BE",x"BE",x"90",x"DA",x"DA",x"BE",x"BE",x"90"
-        
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"2C",x"01",x"2C",x"01",x"2C",x"2C",x"01",x"2C",    -- x"0E" CARROT 
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"2C",x"2C",x"01",x"2C",x"2C",x"01",x"01",x"2C",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"2C",x"01",x"2C",x"01",x"01",x"2C",x"2C",x"2C",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"EC",x"2C",x"2C",x"2C",x"2C",x"01",x"2C",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"A8",x"EC",x"2C",x"2C",x"01",x"2C",x"01",x"01",x"2C",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"EC",x"EC",x"EC",x"A8",x"2C",x"2C",x"2C",x"2C",x"2C",x"2C",
+        x"01",x"01",x"01",x"01",x"01",x"A8",x"EC",x"EC",x"EC",x"EC",x"EC",x"2C",x"2C",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"EC",x"EC",x"EC",x"A8",x"EC",x"EC",x"EC",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"A8",x"EC",x"EC",x"EC",x"EC",x"A8",x"EC",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"EC",x"EC",x"A8",x"EC",x"EC",x"EC",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"A8",x"EC",x"EC",x"EC",x"EC",x"EC",x"A8",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"EC",x"A8",x"EC",x"EC",x"EC",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"EC",x"EC",x"EC",x"EC",x"EC",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"EC",x"A8",x"EC",x"EC",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"EC",x"EC",x"EC",x"A8",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"EC",x"EC",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01"       
         );
   
 begin
@@ -509,13 +515,24 @@ begin
     begin
     if rising_edge(clk) then
 	    if rst = '1' then
+            Xpixel_next <= (others => '0');
+        elsif Clk25 = '1' then
+		    if Xpixel_next = 799 then	-- vi har nått slutet av pixelantalet
+			    Xpixel_next <= (others => '0');
+		    else
+			    Xpixel_next <= Xpixel_next + 1;
+		    end if;
+	    end if;
+    end if;
+    end process;
+    
+    process(clk)
+    begin
+    if rising_edge(clk) then
+	    if rst = '1' then
             Xpixel <= (others => '0');
         elsif Clk25 = '1' then
-		    if Xpixel = 799 then	-- vi har nått slutet av pixelantalet
-			    Xpixel <= (others => '0');
-		    else
-			    Xpixel <= Xpixel + 1;
-		    end if;
+		    Xpixel <= Xpixel_next;
 	    end if;
     end if;
     end process;
@@ -543,14 +560,25 @@ begin
     begin
     if rising_edge(clk) then
         if rst = '1' then
-	        Ypixel <= (others => '0');
-        elsif Clk25 = '1' and Xpixel = 799 then
-            if Ypixel = 520 then	-- vi har nått slutet av pixelantalet
-	            Ypixel <= (others => '0');
+	        Ypixel_next <= (others => '0');
+        elsif Clk25 = '1' and Xpixel_next = 799 then
+            if Ypixel_next = 520 then	-- vi har nått slutet av pixelantalet
+	            Ypixel_next <= (others => '0');
             else 
-	            Ypixel <= Ypixel + 1;
+	            Ypixel_next <= Ypixel_next + 1;
             end if;
         end if;
+    end if;
+    end process;
+    
+    process(clk)
+    begin
+    if rising_edge(clk) then
+	    if rst = '1' then
+            Ypixel <= (others => '0');
+        elsif Clk25 = '1' then
+		    Ypixel <= Ypixel_next;
+	    end if;
     end if;
     end process;
 
@@ -582,32 +610,57 @@ begin
 
     isGoalSprite <= '1' when ((Xpixel > sprite_xstart_g and Xpixel < sprite_xend_g) and (Ypixel > sprite_ystart_g and Ypixel < sprite_yend_g) and not (spriteMemGoal(to_integer(spriteAddrG)) = x"FE")) else '0';
 
-    -- Tile memory
+    -- Tile memory access   
     process(clk)
     begin
     if rising_edge(clk) then
         if (rst = '1') then
-            pixel <= (others => '0');
+            goalCarrotPixel <= spriteMemC(0);  -- Yay! Carrot ++
+            goalRbPixel <= spriteMemRb(0);  -- Rainbow
+            dispGoalPosPixel <= spriteMemGoal(0);  -- Display goal pos
+            bgPixel <= tileMem(0); -- Background tile
+            dataPixel <= tileMem(0);  -- Regular tile data
+        else
+            goalCarrotPixel <= spriteMemC(to_integer(spriteAddrC));  -- Yay! Carrot ++
+            goalRbPixel <= spriteMemRb(to_integer(spriteAddrRb));  -- Rainbow
+            dispGoalPosPixel <= spriteMemGoal(to_integer(spriteAddrG));  -- Display goal pos
+            bgPixel <= tileMem(to_integer(bgTileAddr)); -- Background tile
+            dataPixel <= tileMem(to_integer(tileAddr));  -- Regular tile data
+        end if;
+    end if;
+    end process;
+    
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if (rst = '1') then
+            pixel_out <= (others => '0');
         elsif (isCSprite = '1' and showing_goal_msg = '1') then
-            pixel <= spriteMemC(to_integer(spriteAddrC));
+            --pixel <= spriteMemC(to_integer(spriteAddrC));
+            pixel_out <= goalCarrotPixel;
         elsif (isRbSprite = '1' and showing_goal_msg = '1') then
-            pixel <= spriteMemRb(to_integer(spriteAddrRb));    
+            --pixel <= spriteMemRb(to_integer(spriteAddrRb));   
+            pixel_out <= goalRbPixel ;
         elsif (isGoalSprite ='1' and disp_goal_pos = '1') then 
-            pixel <= spriteMemGoal(to_integer(spriteAddrG));
+            --pixel <= spriteMemGoal(to_integer(spriteAddrG));
+            pixel_out <= dispGoalPosPixel;
         elsif (blank = '0') then
             if (isTransparent = '1') then -- If current tile is transparent, we should display bg
-                pixel <= tileMem(to_integer(bgTileAddr));
+                --pixel <= tileMem(to_integer(bgTileAddr));
+                pixel_out <= bgPixel;
             else
-                pixel <= tileMem(to_integer(tileAddr));
+                --pixel <= tileMem(to_integer(tileAddr));
+                pixel_out <= dataPixel;
             end if;
         else
-            pixel <= (others => '0');
+            pixel_out <= (others => '0');
         end if;
     end if;
     end process;
 
     -- Check if current tile represents transparancy
-    isTransparent <= '1' when (tileMem(to_integer(tileAddr)) = x"01") else '0';
+    --isTransparent <= '1' when (tileMem(to_integer(tileAddr)) = x"01") else '0';
+    isTransparent <= '1' when (dataPixel = x"01") else '0';
     
     -- Sets the offset of x and y pixel coords for sprite-drawing. 
     -- Sprite starts at 300 and 200 
@@ -617,7 +670,7 @@ begin
 
     -- chooses the tile index 
     x_s_limit <= to_unsigned(to_integer(score * 16), 10) when score < 40 else to_unsigned(624, 10);
-    tileIndex <= "00111" when ((Xpixel > 0 and Xpixel < x_s_limit) and (Ypixel > 464 and Ypixel < 480)) else unsigned(data(4 downto 0));
+    tileIndex <= "01110" when ((Xpixel > 0 and Xpixel < x_s_limit) and (Ypixel > 464 and Ypixel < 480)) else unsigned(data(4 downto 0)); -- Carrot tile or data tile
 
     -- Calculates goal coordinates in pixels
     sprite_xstart_g <= to_unsigned(16 * to_integer(unsigned(goal_x)), 10); 
@@ -636,14 +689,14 @@ begin
     addr <= to_unsigned(40, 6) * Ypixel(8 downto 4) + Xpixel(9 downto 4);
 
     -- VGA generation
-    vgaRed(2) <= pixel(7);
-    vgaRed(1) <= pixel(6);
-    vgaRed(0) <= pixel(5);
-    vgaGreen(2) <= pixel(4);
-    vgaGreen(1) <= pixel(3);
-    vgaGreen(0) <= pixel(2);
-    vgaBlue(2) <= pixel(1);
-    vgaBlue(1) <= pixel(0);
+    vgaRed(2) <= pixel_out(7);
+    vgaRed(1) <= pixel_out(6);
+    vgaRed(0) <= pixel_out(5);
+    vgaGreen(2) <= pixel_out(4);
+    vgaGreen(1) <= pixel_out(3);
+    vgaGreen(0) <= pixel_out(2);
+    vgaBlue(2) <= pixel_out(1);
+    vgaBlue(1) <= pixel_out(0);
 
 
 end Behavioral;

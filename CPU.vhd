@@ -26,10 +26,6 @@ entity CPU is
 		showing_goal_msg    : in std_logic;
 		disp_goal_pos_out   : out std_logic;
         score_out           : out unsigned(5 downto 0)
-		--TEST
-        --test_diod1     	  : out std_logic;
-        --test_diod2   	      : out std_logic
-        --switch              : in std_logic
         );
 end CPU;
 
@@ -81,7 +77,7 @@ architecture Behavioral of CPU is
     signal CURR_POS         : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
     signal NEXT_POS         : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
     signal SEL_TRACK        : signed(1 downto 0) := "00";  -- Track select (sel_track_out)
-    signal RND_SEL_TRACK    : signed(1 downto 0) := "00"; -- Randomly generated track selector.
+    signal NEXT_SEL_TRACK   : signed(1 downto 0) := "00"; -- Randomly generated track selector.
     signal next_track       : signed(1 downto 0) := "00"; -- Temp for saving next track before we can apply it to SEL_TRACK.
     -- To SOUND
     signal SEL_SOUND        : std_logic := '0'; -- Sound select (sel_sound_out)
@@ -1003,11 +999,12 @@ begin
     --* Random number generation *
     --****************************
     free_pos_lmt <= 
-    to_signed(913,11)   when (next_track = "00") else
-    to_signed(886,11)  when (next_track = "01") else
-    to_signed(932,11)   when (next_track = "10") else
+    to_signed(913,11)   when (sel_track = "00") else
+    to_signed(886,11)  when (sel_track = "01") else
+    to_signed(932,11)   when (sel_track = "10") else
     (others => '0');
     
+    -- Counter to take bits from
     process(clk)
     begin
         if rising_edge(clk) then
@@ -1020,18 +1017,41 @@ begin
             end if;
         end if;
     end process;
+    
+    --*********************************************************
+    --* RND_GOAL_POS : Random, free position in current track *
+    --*********************************************************
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if (rst = '1') then
+                RND_GOAL_POS <= track_1_free_pos_mem(0);
+            else
+                case sel_track is
+                    when "00" =>
+                        RND_GOAL_POS <= track_1_free_pos_mem(to_integer(free_pos_cnt));
+                    when "01" =>
+                        RND_GOAL_POS <= track_2_free_pos_mem(to_integer(free_pos_cnt));
+                    when "10" =>
+                        RND_GOAL_POS <= track_3_free_pos_mem(to_integer(free_pos_cnt));
+                    when others =>
+                        null;
+                end case;
+            end if;
+        end if;
+    end process;
 
     -- The chance of getting track 1 is much greater than the others... fix?
-    RND_SEL_TRACK <= free_pos_cnt(1 downto 0) when (not (free_pos_cnt(1 downto 0) = "11")) else "00"; 
+    --RND_SEL_TRACK <= free_pos_cnt(1 downto 0) when (not (free_pos_cnt(1 downto 0) = "11")) else "00"; 
     --RND_SEL_TRACK <= "01";
     
     --RND_GOAL_POS <= "000010100000001111";
     --RND_GOAL_POS <= "000000001000000001";    
-    RND_GOAL_POS <= 
-    track_1_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "00") else
-    track_2_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "01") else
-    track_3_free_pos_mem(to_integer(free_pos_cnt))      when (SEL_TRACK = "10") else
-    (others => '0');
+    --RND_GOAL_POS <= 
+    --track_1_free_pos_mem(to_integer(free_pos_cnt))      when (sel_track = "00") else
+    --track_2_free_pos_mem(to_integer(free_pos_cnt))      when (sel_track = "01") else
+    --track_3_free_pos_mem(to_integer(free_pos_cnt))      when (sel_track = "10") else
+    --(others => '0');
 
     
 	--*****************************
@@ -1241,10 +1261,16 @@ begin
         if rising_edge(clk) then
             if (rst = '1') then
                 SEL_TRACK <= "00";
+                NEXT_SEL_TRACK <= "01";
                 dly_cnt <= to_unsigned(0,3);
             -- In process of changing track, locking keyboard.
             elsif (dly_cnt = "000" and FB = "110" and GRX = "101") then
                 next_track <= DATA_BUS(1 downto 0); 
+                if (NEXT_SEL_TRACK + 1 = "11") then
+                    NEXT_SEL_TRACK <= "00";
+                else
+                    NEXT_SEL_TRACK <= NEXT_SEL_TRACK + 1;
+                end if;
                 dly_cnt <= to_unsigned(1,3);
             elsif (dly_cnt = "001") then
                 dly_cnt <= to_unsigned(2,3);
@@ -1477,7 +1503,7 @@ begin
     GR2                                 when (TB = "110" and GRX = "010") else 
     GR3                                 when (TB = "110" and GRX = "011") else
     RND_GOAL_POS                        when (TB = "110" and GRX = "100") else
-    to_signed(0,16) & RND_SEL_TRACK     when (TB = "110" and GRX = "101") else 
+    to_signed(0,16) & NEXT_SEL_TRACK    when (TB = "110" and GRX = "101") else 
     GOAL_POS                            when (TB = "110" and GRX = "110") else 
     to_signed(0,16) & SEL_TRACK         when (TB = "110" and GRX = "111") else
     to_signed(0,10) & ASR               when (TB = "111") else
@@ -1549,7 +1575,7 @@ begin
     --*******************************
     --* Outgoing signals assignment *
     --*******************************
-    pAddr <= ASR when (ASR >= to_signed(0,8) and ASR <= to_signed(13,8)) else to_signed(0,8);
+    pAddr <= ASR when (ASR >= to_signed(0,8) and ASR <= to_signed(15,8)) else to_signed(0,8);
     uAddr <= uPC; 
     curr_pos_out <= CURR_POS;
     next_pos_out <= NEXT_POS;
