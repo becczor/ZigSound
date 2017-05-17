@@ -5,6 +5,9 @@ def calc_coord(pos_cnt):
     y_coord = bin(pos_cnt//40)[2:].zfill(9) # returns binary representation of x-pos
     position = x_coord + y_coord
     return position
+    
+def isBgTile(tile):
+    return "x\"00\"" in tile or "x\"01\"" in tile or "x\"02\"" in tile
 
 script, filename = argv
 track = open(filename, 'r')
@@ -16,14 +19,19 @@ col_cnt = 1
 pos_cnt = 0
 
 track_pos.write("------------" + filename + "------------\n")
-track_pos.write("-- Row: 0\n")
+#track_pos.write("-- Row: 0\n")
 
 all_lines = track.readlines() #Gets a list with all lines
 for lines in all_lines:
-    tiles = lines.split(',') # Splits the line at ',' 
-    for tile in tiles:   
-        if pos_cnt != 1200:
-            if pos_cnt != 41 and "x\"00\"" in tile or "x\"07\"" in tile: # Checks if background 
+    if row_cnt != 30: # WHY THE FUCK WOULD YOU GO UP TO 30 BUT W/E
+        tiles = lines.split(',') # Splits the line at ',' 
+        if elems_on_row_cnt == 0:
+            track_pos.write("-- Row: " + str(row_cnt) + "\n")
+        else:
+            elems_on_row_cnt = 0
+            track_pos.write("\n-- Row: " + str(row_cnt) + "\n")
+        for tile in tiles:   
+            if pos_cnt != 41 and isBgTile(tile): # Checks not start pos and if background 
                 coord_str = calc_coord(pos_cnt)
                 track_pos.write("b\"" + coord_str + "\"" + ",")   # Adds the free pos to track_free_pos       
                 elems_on_row_cnt += 1
@@ -31,18 +39,10 @@ for lines in all_lines:
                 if elems_on_row_cnt % 4 == 0:
                     elems_on_row_cnt = 0
                     track_pos.write("\n")       
-            if col_cnt == 0:
-                row_cnt += 1
-                if elems_on_row_cnt == 0:
-                    track_pos.write("-- Row: " + str(row_cnt) + "\n")
-                else:
-                    elems_on_row_cnt = 0
-                    track_pos.write("\n-- Row: " + str(row_cnt) + "\n")
             if not "--" in tile:
                 pos_cnt += 1
-                col_cnt = pos_cnt % 40
-            else:
-                col_cnt = 1
+        row_cnt += 1
+    
 
 track_pos.write("\n" + "Number of elements: " + str(free_pos_cnt))        
 

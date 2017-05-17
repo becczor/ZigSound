@@ -48,6 +48,7 @@ architecture Behavioral of VGA_MOTOR is
     signal ClkDiv	            : unsigned(1 downto 0);		-- Clock divisor, to generate 25 MHz signal
     signal Clk25			    : std_logic;			    -- One pulse width 25 MHz signal
     signal pixel                : std_logic_vector(7 downto 0);	-- Tile pixel data
+    signal isTransparent        : std_logic := '0';         -- Signal for checking if current tile represents transparancy
     signal bgTileAddr           : unsigned(12 downto 0);	-- Background tile address
     signal tileAddr             : unsigned(12 downto 0);	-- Tile address
     signal blank                : std_logic;                -- blanking signal
@@ -132,7 +133,7 @@ x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"
     );
 
     -- Tile memory type
-    type ram_t is array (0 to 4607) of std_logic_vector(7 downto 0);
+    type ram_t is array (0 to 3583) of std_logic_vector(7 downto 0);
     -- Tile memory : There is room for 32 different tiles.
     signal tileMem : ram_t := 
         (
@@ -187,143 +188,177 @@ x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"
         x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FB",x"FB",x"FB",x"FB",x"FB",
         x"DF",x"DF",x"DF",x"DF",x"FB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
 
-        x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"02",    -- x"03" BLUINICORN
-        x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"02",x"FE",x"FE",x"FE",x"02",x"FE",    
-        x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"02",x"02",x"FE",x"02",x"02",x"FE",x"FE",
-        x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"02",x"02",x"9B",x"9B",x"9B",x"FE",x"FE",x"FE",
-        x"FE",x"FE",x"02",x"FE",x"FE",x"FE",x"FE",x"02",x"02",x"02",x"9B",x"02",x"9B",x"9B",x"9B",x"FE",
-        x"FE",x"02",x"02",x"02",x"FE",x"FE",x"02",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"02",x"02",x"FE",
-        x"FE",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FE",x"FE",
-        x"FE",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FE",x"FE",x"FE",
-        x"02",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FE",x"FE",x"FE",x"FE",    
-        x"02",x"02",x"FE",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FE",x"FE",x"FE",x"FE",
-        x"FE",x"FE",x"FE",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FE",x"FE",x"FE",x"FE",
-        x"FE",x"FE",x"FE",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FE",x"FE",x"FE",x"FE",
-        x"FE",x"FE",x"FE",x"9B",x"9B",x"FE",x"FE",x"FE",x"FE",x"FE",x"9B",x"9B",x"FE",x"FE",x"FE",x"FE",
-        x"FE",x"FE",x"FE",x"9B",x"9B",x"FE",x"FE",x"FE",x"FE",x"FE",x"9B",x"9B",x"FE",x"FE",x"FE",x"FE",
-        x"FE",x"FE",x"FE",x"9B",x"9B",x"FE",x"FE",x"FE",x"FE",x"FE",x"9B",x"9B",x"FE",x"FE",x"FE",x"FE",
-        x"FE",x"FE",x"FE",x"02",x"02",x"FE",x"FE",x"FE",x"FE",x"FE",x"02",x"02",x"FE",x"FE",x"FE",x"FE",
-
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"96",x"96",x"FF",x"FF",x"FF",x"96",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"04" TREE 1 SUMMER
-        x"FF",x"FF",x"FF",x"96",x"96",x"1A",x"1A",x"96",x"96",x"96",x"1A",x"12",x"12",x"FF",x"FF",x"FF",    
-        x"FF",x"FF",x"FF",x"10",x"10",x"96",x"96",x"1A",x"10",x"1A",x"96",x"1A",x"18",x"12",x"FF",x"FF",
-        x"FF",x"FF",x"96",x"10",x"96",x"18",x"96",x"10",x"1A",x"96",x"10",x"18",x"1A",x"D6",x"12",x"FF",    
-        x"FF",x"96",x"10",x"1A",x"1A",x"96",x"10",x"18",x"96",x"D6",x"18",x"1A",x"18",x"12",x"FF",x"FF",
-        x"FF",x"10",x"10",x"96",x"96",x"D6",x"10",x"18",x"10",x"10",x"D6",x"18",x"1A",x"D6",x"12",x"FF",
-        x"FF",x"96",x"10",x"10",x"10",x"10",x"D6",x"10",x"18",x"18",x"10",x"1A",x"18",x"18",x"18",x"12",
-        x"FF",x"10",x"96",x"10",x"D6",x"10",x"10",x"1A",x"1A",x"10",x"1A",x"18",x"1A",x"1A",x"18",x"12",
-        x"10",x"96",x"1A",x"1A",x"10",x"10",x"1A",x"18",x"1A",x"18",x"18",x"1A",x"10",x"18",x"12",x"FF",	
-        x"FF",x"10",x"10",x"10",x"D0",x"D6",x"18",x"18",x"18",x"18",x"1A",x"10",x"18",x"18",x"1A",x"12",
-        x"FF",x"FF",x"10",x"10",x"FF",x"D0",x"D0",x"18",x"1A",x"D0",x"1A",x"18",x"18",x"12",x"12",x"FF",	
-        x"FF",x"FF",x"10",x"FF",x"FF",x"D0",x"D0",x"18",x"D0",x"12",x"18",x"12",x"12",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"12",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"96",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  -- x"05" TREE 2 SUMMER
-        x"FF",x"FF",x"FF",x"FF",x"96",x"96",x"12",x"96",x"1A",x"96",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  
-        x"FF",x"FF",x"96",x"12",x"18",x"12",x"D6",x"12",x"96",x"12",x"1A",x"12",x"FF",x"1A",x"FF",x"FF",
-        x"FF",x"96",x"96",x"12",x"18",x"18",x"96",x"12",x"18",x"18",x"12",x"1A",x"12",x"1A",x"FF",x"FF",
-        x"FF",x"96",x"12",x"18",x"96",x"18",x"12",x"18",x"1A",x"12",x"18",x"D6",x"1A",x"18",x"FF",x"FF",
-        x"96",x"12",x"96",x"18",x"D6",x"12",x"1A",x"1A",x"12",x"18",x"D6",x"1A",x"19",x"FF",x"FF",x"FF",
-        x"12",x"18",x"18",x"D6",x"96",x"96",x"18",x"12",x"12",x"1A",x"12",x"18",x"18",x"1A",x"FF",x"FF",
-        x"96",x"96",x"12",x"96",x"18",x"18",x"1A",x"D6",x"1A",x"12",x"18",x"18",x"1A",x"12",x"1A",x"FF",
-        x"FF",x"96",x"12",x"12",x"1A",x"1A",x"18",x"1A",x"1A",x"18",x"1A",x"1A",x"12",x"1A",x"FF",x"FF",
-        x"FF",x"FF",x"96",x"12",x"18",x"18",x"18",x"1A",x"18",x"1A",x"18",x"1A",x"12",x"1A",x"FF",x"FF",
-        x"FF",x"FF",x"12",x"FF",x"1A",x"1A",x"1A",x"D0",x"1A",x"D0",x"D0",x"1A",x"18",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"1A",x"FF",x"D0",x"D0",x"D0",x"1A",x"18",x"1A",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"D0",x"FF",x"FF",x"1A",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-
-        x"F5",x"F5",x"F9",x"F5",x"F9",x"D0",x"D0",x"F5",x"F5",x"D1",x"D0",x"D1",x"D1",x"D1",x"ED",x"ED",    -- x"06" TREE 1 AUTUMN
-        x"ED",x"D1",x"D1",x"D0",x"D0",x"E0",x"E0",x"D0",x"D0",x"D0",x"E0",x"FC",x"FC",x"F5",x"D1",x"F9",    
-        x"F9",x"F5",x"F5",x"B4",x"B4",x"D0",x"D0",x"E0",x"B4",x"E0",x"D0",x"E0",x"C8",x"FC",x"F5",x"F9",
-        x"F9",x"F9",x"D0",x"B4",x"D0",x"C8",x"D0",x"B4",x"E0",x"D0",x"B4",x"C8",x"E0",x"F5",x"FC",x"D1",            
-        x"D1",x"D0",x"B4",x"E0",x"E0",x"D0",x"B4",x"C8",x"D0",x"F5",x"C8",x"E0",x"C8",x"FC",x"D1",x"ED",
-        x"F9",x"B4",x"B4",x"D0",x"D0",x"F5",x"B4",x"C8",x"B4",x"B4",x"F5",x"C8",x"E0",x"F5",x"FC",x"D1",
-        x"D1",x"D0",x"B4",x"B4",x"B4",x"B4",x"F5",x"B4",x"C8",x"C8",x"B4",x"E0",x"C8",x"C8",x"C8",x"FC",
-        x"F5",x"B4",x"D0",x"B4",x"F5",x"B4",x"B4",x"E0",x"E0",x"B4",x"E0",x"C8",x"E0",x"E0",x"C8",x"FC",
-        x"B4",x"D0",x"E0",x"E0",x"B4",x"B4",x"E0",x"C8",x"E0",x"C8",x"C8",x"E0",x"B4",x"C8",x"FC",x"F9",
-        x"D1",x"B4",x"B4",x"B4",x"AC",x"F5",x"C8",x"C8",x"C8",x"C8",x"E0",x"B4",x"C8",x"C8",x"E0",x"FC",
-        x"ED",x"F9",x"B4",x"B4",x"D1",x"AC",x"AC",x"C8",x"E0",x"AC",x"E0",x"C8",x"C8",x"FC",x"FC",x"D1",
-        x"D1",x"ED",x"B4",x"ED",x"ED",x"AC",x"AC",x"C8",x"AC",x"FC",x"C8",x"FC",x"FC",x"D1",x"F9",x"F9",
-        x"D1",x"F9",x"ED",x"F9",x"ED",x"F9",x"AC",x"AC",x"D1",x"D1",x"FC",x"F5",x"D1",x"ED",x"D1",x"D1",
-        x"D1",x"ED",x"ED",x"F9",x"F9",x"ED",x"AC",x"AC",x"D1",x"D1",x"F5",x"ED",x"ED",x"F9",x"D1",x"F9",
-        x"ED",x"D1",x"D1",x"F5",x"D1",x"F9",x"AC",x"AC",x"AC",x"D1",x"ED",x"F9",x"ED",x"D1",x"D1",x"D1",
-        x"ED",x"ED",x"D1",x"F5",x"D1",x"AC",x"AC",x"AC",x"AC",x"F5",x"ED",x"D1",x"D1",x"F5",x"F5",x"ED",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"02",    -- x"03" BLUINICORN
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"02",x"01",x"01",x"01",x"02",x"01",    
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"02",x"02",x"01",x"02",x"02",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"02",x"02",x"9B",x"9B",x"9B",x"01",x"01",x"01",
+        x"01",x"01",x"02",x"01",x"01",x"01",x"01",x"02",x"02",x"02",x"9B",x"02",x"9B",x"9B",x"9B",x"01",
+        x"01",x"02",x"02",x"02",x"01",x"01",x"02",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"02",x"02",x"01",
+        x"01",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"01",x"01",
+        x"01",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"01",x"01",x"01",
+        x"02",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"01",x"01",x"01",x"01",    
+        x"02",x"02",x"01",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"9B",x"9B",x"01",x"01",x"01",x"01",x"01",x"9B",x"9B",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"9B",x"9B",x"01",x"01",x"01",x"01",x"01",x"9B",x"9B",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"9B",x"9B",x"01",x"01",x"01",x"01",x"01",x"9B",x"9B",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"02",x"02",x"01",x"01",x"01",x"01",x"01",x"02",x"02",x"01",x"01",x"01",x"01",
         
-        x"F5",x"F5",x"F9",x"F5",x"F9",x"D1",x"D0",x"F5",x"F5",x"D1",x"ED",x"D1",x"D1",x"D1",x"ED",x"ED",    -- x"07" TREE 2 AUTUMN
-        x"ED",x"D1",x"D1",x"F9",x"D0",x"D0",x"FC",x"D0",x"E0",x"D0",x"D1",x"D1",x"F5",x"F5",x"D1",x"F9",    
-        x"F9",x"F5",x"D0",x"FC",x"C8",x"FC",x"F5",x"FC",x"D0",x"FC",x"E0",x"FC",x"F5",x"E0",x"F5",x"F9",
-        x"F9",x"D0",x"D0",x"FC",x"C8",x"C8",x"D0",x"FC",x"C8",x"C8",x"FC",x"E0",x"FC",x"E0",x"D1",x"D1",
-        x"D1",x"D0",x"FC",x"C8",x"D0",x"C8",x"FC",x"C8",x"E0",x"FC",x"C8",x"F5",x"E0",x"C8",x"D1",x"ED",
-        x"D0",x"FC",x"D0",x"C8",x"F5",x"FC",x"E0",x"E0",x"FC",x"C8",x"F5",x"E0",x"19",x"D1",x"F9",x"D1",
-        x"FC",x"C8",x"C8",x"F5",x"D0",x"D0",x"C8",x"FC",x"FC",x"E0",x"FC",x"C8",x"C8",x"E0",x"F9",x"D1",
-        x"D0",x"D0",x"FC",x"D0",x"C8",x"C8",x"E0",x"F5",x"E0",x"FC",x"C8",x"C8",x"E0",x"FC",x"E0",x"F9",
-        x"F5",x"D0",x"FC",x"FC",x"E0",x"E0",x"C8",x"E0",x"E0",x"C8",x"E0",x"E0",x"FC",x"E0",x"D1",x"F9",
-        x"D1",x"D1",x"D0",x"FC",x"C8",x"C8",x"C8",x"E0",x"C8",x"E0",x"C8",x"E0",x"FC",x"E0",x"ED",x"D1",
-        x"ED",x"F9",x"FC",x"F9",x"E0",x"E0",x"E0",x"AC",x"E0",x"AC",x"AC",x"E0",x"C8",x"D1",x"ED",x"D1",
-        x"D1",x"ED",x"D1",x"ED",x"ED",x"E0",x"F5",x"AC",x"AC",x"AC",x"E0",x"C8",x"E0",x"D1",x"F9",x"F9",
-        x"D1",x"F9",x"ED",x"F9",x"ED",x"F9",x"AC",x"AC",x"AC",x"D1",x"F9",x"E0",x"D1",x"ED",x"D1",x"D1",
-        x"D1",x"ED",x"ED",x"F9",x"F9",x"ED",x"D1",x"AC",x"AC",x"D1",x"F5",x"ED",x"ED",x"F9",x"D1",x"F9",
-        x"ED",x"D1",x"D1",x"F5",x"D1",x"F9",x"D1",x"AC",x"AC",x"D1",x"ED",x"F9",x"ED",x"D1",x"D1",x"D1",
-        x"ED",x"ED",x"D1",x"F5",x"D1",x"F9",x"ED",x"AC",x"AC",x"F5",x"ED",x"D1",x"D1",x"F5",x"F5",x"ED",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"92",x"B6",x"B6",x"01",x"01",x"01",x"01",x"01",x"01",x"01",    -- x"04" ROCK SUMMER/AUTUMN
+        x"01",x"01",x"01",x"01",x"01",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"92",x"B6",x"01",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"01",x"01",x"01",
+        x"01",x"92",x"B6",x"B6",x"92",x"B6",x"92",x"92",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"01",x"01",
+        x"01",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"01",
+        x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"92",x"B6",x"B6",x"B6",x"01",
+        x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"B6",x"B6",x"92",x"B6",
+        x"B6",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",
+        x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",x"92",x"B6",x"92",x"B6",x"B6",
+        x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",
+        x"92",x"92",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"01",
+        x"01",x"92",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"92",x"B6",x"92",x"92",x"B6",x"01",
+        x"01",x"92",x"92",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"01",x"01",
+        x"01",x"01",x"92",x"92",x"92",x"B6",x"92",x"92",x"B6",x"B6",x"92",x"92",x"B6",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"92",x"92",x"92",x"92",x"B6",x"B6",x"92",x"92",x"B6",x"01",x"01",x"01",x"01",
+        
+        X"01",X"01",X"01",X"01",X"01",X"01",x"DF",x"DF",x"DF",X"01",X"01",X"01",X"01",X"01",X"01",X"01",    -- x"05" ROCK WINTER
+        X"01",X"01",X"01",X"01",X"01",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",X"01",X"01",X"01",X"01",X"01",
+        X"01",X"01",x"DF",x"DF",X"01",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",X"01",X"01",X"01",X"01",
+        X"01",X"01",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",X"01",X"01",X"01",
+        X"01",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",X"01",X"01",
+        X"01",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"B6",X"01",
+        x"B6",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"B6",X"01",
+        x"B6",x"B6",x"B6",x"B6",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"B6",x"92",x"B6",
+        x"B6",x"92",x"B6",x"B6",x"92",x"B6",x"DF",x"DF",x"DF",x"DF",x"DF",x"DF",x"B6",x"B6",x"B6",x"B6",
+        x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"DF",x"B6",x"DF",x"DF",x"92",x"B6",x"92",x"B6",x"B6",
+        x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",
+        x"92",x"92",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",X"01",
+        X"01",x"92",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"92",x"B6",x"92",x"92",x"B6",X"01",
+        X"01",x"92",x"92",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"B6",X"01",X"01",
+        X"01",X"01",x"92",x"92",x"92",x"B6",x"92",x"92",x"B6",x"B6",x"92",x"92",x"B6",X"01",X"01",X"01",
+        X"01",X"01",X"01",x"92",x"92",x"92",x"92",x"B6",x"B6",x"92",x"92",x"B6",X"01",X"01",X"01",X"01",
 
-        x"DF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",    -- x"08" TREE 1 WINTER
-        x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",    
-        x"AB",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",x"DF",x"AB",x"AB",x"FF",x"FF",x"DF",x"AB",
-        x"AB",x"AB",x"DF",x"FB",x"FF",x"AB",x"AB",x"FB",x"FF",x"FF",x"AB",x"AB",x"FF",x"AB",x"AB",x"AB",
-        x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"AB",x"AB",x"DF",x"DF",x"AB",x"FF",x"FF",
-        x"FF",x"DF",x"AB",x"AB",x"FF",x"FB",x"AB",x"AB",x"FF",x"AB",x"DF",x"DF",x"AB",x"AB",x"AB",x"FF",
-        x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"AB",x"AB",x"DF",x"AB",x"AB",x"AB",x"AB",x"FB",x"AB",x"AB",
-        x"FF",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",
-        x"AB",x"AB",x"DF",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"DF",x"DF",x"DF",x"FF",x"FF",x"AB",x"AB",
-        x"AB",x"FF",x"FF",x"DF",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"AB",x"DF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"DF",x"DF",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"DF",x"FB",x"FF",
-        x"FF",x"FF",x"FF",x"FB",x"FB",x"FB",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"DF",x"DF",x"DF",x"FF",x"DF",x"FF",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FB",x"FB",x"FB",x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"FF",x"DF",x"DF",x"DF",x"DF",x"DF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"FF",x"FB",x"FB",x"FB",x"FB",x"FB",
-        x"DF",x"DF",x"DF",x"DF",x"FB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"01",x"01",x"01",x"01",x"01",x"96",x"96",x"01",x"01",x"01",x"96",x"01",x"01",x"01",x"01",x"01",    -- x"06" TREE 1 SUMMER
+        x"01",x"01",x"01",x"96",x"96",x"1A",x"1A",x"96",x"96",x"96",x"1A",x"12",x"12",x"01",x"01",x"01",    
+        x"01",x"01",x"01",x"10",x"10",x"96",x"96",x"1A",x"10",x"1A",x"96",x"1A",x"18",x"12",x"01",x"01",
+        x"01",x"01",x"96",x"10",x"96",x"18",x"96",x"10",x"1A",x"96",x"10",x"18",x"1A",x"D6",x"12",x"01",    
+        x"01",x"96",x"10",x"1A",x"1A",x"96",x"10",x"18",x"96",x"D6",x"18",x"1A",x"18",x"12",x"01",x"01",
+        x"01",x"10",x"10",x"96",x"96",x"D6",x"10",x"18",x"10",x"10",x"D6",x"18",x"1A",x"D6",x"12",x"01",
+        x"01",x"96",x"10",x"10",x"10",x"10",x"D6",x"10",x"18",x"18",x"10",x"1A",x"18",x"18",x"18",x"12",
+        x"01",x"10",x"96",x"10",x"D6",x"10",x"10",x"1A",x"1A",x"10",x"1A",x"18",x"1A",x"1A",x"18",x"12",
+        x"10",x"96",x"1A",x"1A",x"10",x"10",x"1A",x"18",x"1A",x"18",x"18",x"1A",x"10",x"18",x"12",x"01",
+        x"01",x"10",x"10",x"10",x"D0",x"D6",x"18",x"18",x"18",x"18",x"1A",x"10",x"18",x"18",x"1A",x"12",
+        x"01",x"01",x"10",x"10",x"01",x"D0",x"D0",x"18",x"1A",x"D0",x"1A",x"18",x"18",x"12",x"12",x"01",
+        x"01",x"01",x"10",x"01",x"01",x"D0",x"D0",x"18",x"D0",x"12",x"18",x"12",x"12",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"12",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
 
-        x"DF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",    -- x"09" TREE 2 WINTER (CURRENTLY SAME AS TREE 1)
-        x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",    
-        x"AB",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",x"DF",x"AB",x"AB",x"FF",x"FF",x"DF",x"AB",
-        x"AB",x"AB",x"DF",x"FB",x"FF",x"AB",x"AB",x"FB",x"FF",x"FF",x"AB",x"AB",x"FF",x"AB",x"AB",x"AB",
-        x"FF",x"AB",x"AB",x"FF",x"FF",x"FF",x"AB",x"AB",x"FF",x"AB",x"AB",x"DF",x"DF",x"AB",x"FF",x"FF",
-        x"FF",x"DF",x"AB",x"AB",x"FF",x"FB",x"AB",x"AB",x"FF",x"AB",x"DF",x"DF",x"AB",x"AB",x"AB",x"FF",
-        x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"AB",x"AB",x"DF",x"AB",x"AB",x"AB",x"AB",x"FB",x"AB",x"AB",
-        x"FF",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",
-        x"AB",x"AB",x"DF",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"DF",x"DF",x"DF",x"FF",x"FF",x"AB",x"AB",
-        x"AB",x"FF",x"FF",x"DF",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"AB",x"DF",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"DF",x"DF",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"DF",x"FB",x"FF",
-        x"FF",x"FF",x"FF",x"FB",x"FB",x"FB",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"DF",x"DF",x"DF",x"FF",x"DF",x"FF",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FB",x"FB",x"FB",x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"FF",x"DF",x"DF",x"DF",x"DF",x"DF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"AB",x"AB",x"AB",x"FF",x"FF",x"FB",x"FB",x"FB",x"FB",x"FB",
-        x"DF",x"DF",x"DF",x"DF",x"FB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"96",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",  -- x"07" TREE 2 SUMMER
+        x"01",x"01",x"01",x"01",x"96",x"96",x"12",x"96",x"1A",x"96",x"01",x"01",x"01",x"01",x"01",x"01",  
+        x"01",x"01",x"96",x"12",x"18",x"12",x"D6",x"12",x"96",x"12",x"1A",x"12",x"01",x"1A",x"01",x"01",
+        x"01",x"96",x"96",x"12",x"18",x"18",x"96",x"12",x"18",x"18",x"12",x"1A",x"12",x"1A",x"01",x"01",
+        x"01",x"96",x"12",x"18",x"96",x"18",x"12",x"18",x"1A",x"12",x"18",x"D6",x"1A",x"18",x"01",x"01",
+        x"96",x"12",x"96",x"18",x"D6",x"12",x"1A",x"1A",x"12",x"18",x"D6",x"1A",x"19",x"01",x"01",x"01",
+        x"12",x"18",x"18",x"D6",x"96",x"96",x"18",x"12",x"12",x"1A",x"12",x"18",x"18",x"1A",x"01",x"01",
+        x"96",x"96",x"12",x"96",x"18",x"18",x"1A",x"D6",x"1A",x"12",x"18",x"18",x"1A",x"12",x"1A",x"01",
+        x"01",x"96",x"12",x"12",x"1A",x"1A",x"18",x"1A",x"1A",x"18",x"1A",x"1A",x"12",x"1A",x"01",x"01",
+        x"01",x"01",x"96",x"12",x"18",x"18",x"18",x"1A",x"18",x"1A",x"18",x"1A",x"12",x"1A",x"01",x"01",
+        x"01",x"01",x"12",x"01",x"1A",x"1A",x"1A",x"D0",x"1A",x"D0",x"D0",x"1A",x"18",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"1A",x"01",x"D0",x"D0",x"D0",x"1A",x"18",x"1A",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"D0",x"01",x"01",x"1A",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
 
-        x"DF",x"FF",x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"0A" TOGGLE CURRPOS WINTER
-        x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",    
-        x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"DF",x"FB",
-        x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
-        x"FF",x"E0",x"E0",x"E0",x"FF",x"00",x"00",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"FF",
-        x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",
-        x"FF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",
-        x"FF",x"DF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",
-        x"FF",x"DF",x"DF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"DF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",
-        x"FF",x"FF",x"FF",x"DF",x"DF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"DF",x"FB",x"FF",
-        x"FF",x"FF",x"FF",x"FB",x"FB",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"DF",x"DF",x"DF",x"FF",x"DF",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",
-        x"FB",x"FB",x"FB",x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"DF",x"DF",x"DF",x"DF",x"DF",
-        x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"E0",x"E0",x"E0",x"E0",x"FF",x"FB",x"FB",x"FB",x"FB",x"FB",
-        x"DF",x"DF",x"DF",x"DF",x"FB",x"FF",x"FF",x"E0",x"E0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+        x"01",x"01",x"01",x"01",x"01",x"96",x"96",x"01",x"01",x"01",x"96",x"01",x"01",x"01",x"01",x"01",    -- x"08" TREE 1 AUTUMN (FIX COLORS!!)
+        x"01",x"01",x"01",x"96",x"96",x"1A",x"1A",x"96",x"96",x"96",x"1A",x"12",x"12",x"01",x"01",x"01",    
+        x"01",x"01",x"01",x"10",x"10",x"96",x"96",x"1A",x"10",x"1A",x"96",x"1A",x"18",x"12",x"01",x"01",
+        x"01",x"01",x"96",x"10",x"96",x"18",x"96",x"10",x"1A",x"96",x"10",x"18",x"1A",x"D6",x"12",x"01",    
+        x"01",x"96",x"10",x"1A",x"1A",x"96",x"10",x"18",x"96",x"D6",x"18",x"1A",x"18",x"12",x"01",x"01",
+        x"01",x"10",x"10",x"96",x"96",x"D6",x"10",x"18",x"10",x"10",x"D6",x"18",x"1A",x"D6",x"12",x"01",
+        x"01",x"96",x"10",x"10",x"10",x"10",x"D6",x"10",x"18",x"18",x"10",x"1A",x"18",x"18",x"18",x"12",
+        x"01",x"10",x"96",x"10",x"D6",x"10",x"10",x"1A",x"1A",x"10",x"1A",x"18",x"1A",x"1A",x"18",x"12",
+        x"10",x"96",x"1A",x"1A",x"10",x"10",x"1A",x"18",x"1A",x"18",x"18",x"1A",x"10",x"18",x"12",x"01",
+        x"01",x"10",x"10",x"10",x"D0",x"D6",x"18",x"18",x"18",x"18",x"1A",x"10",x"18",x"18",x"1A",x"12",
+        x"01",x"01",x"10",x"10",x"01",x"D0",x"D0",x"18",x"1A",x"D0",x"1A",x"18",x"18",x"12",x"12",x"01",
+        x"01",x"01",x"10",x"01",x"01",x"D0",x"D0",x"18",x"D0",x"12",x"18",x"12",x"12",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"12",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
 
-        x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",    -- x"0B" TOGGLE GOALPOS 
+        x"01",x"01",x"01",x"01",x"01",x"01",x"96",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",  -- x"09" TREE 2 AUTUMN (FIX COLORS!!)
+        x"01",x"01",x"01",x"01",x"96",x"96",x"12",x"96",x"1A",x"96",x"01",x"01",x"01",x"01",x"01",x"01",  
+        x"01",x"01",x"96",x"12",x"18",x"12",x"D6",x"12",x"96",x"12",x"1A",x"12",x"01",x"1A",x"01",x"01",
+        x"01",x"96",x"96",x"12",x"18",x"18",x"96",x"12",x"18",x"18",x"12",x"1A",x"12",x"1A",x"01",x"01",
+        x"01",x"96",x"12",x"18",x"96",x"18",x"12",x"18",x"1A",x"12",x"18",x"D6",x"1A",x"18",x"01",x"01",
+        x"96",x"12",x"96",x"18",x"D6",x"12",x"1A",x"1A",x"12",x"18",x"D6",x"1A",x"19",x"01",x"01",x"01",
+        x"12",x"18",x"18",x"D6",x"96",x"96",x"18",x"12",x"12",x"1A",x"12",x"18",x"18",x"1A",x"01",x"01",
+        x"96",x"96",x"12",x"96",x"18",x"18",x"1A",x"D6",x"1A",x"12",x"18",x"18",x"1A",x"12",x"1A",x"01",
+        x"01",x"96",x"12",x"12",x"1A",x"1A",x"18",x"1A",x"1A",x"18",x"1A",x"1A",x"12",x"1A",x"01",x"01",
+        x"01",x"01",x"96",x"12",x"18",x"18",x"18",x"1A",x"18",x"1A",x"18",x"1A",x"12",x"1A",x"01",x"01",
+        x"01",x"01",x"12",x"01",x"1A",x"1A",x"1A",x"D0",x"1A",x"D0",x"D0",x"1A",x"18",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"1A",x"01",x"D0",x"D0",x"D0",x"1A",x"18",x"1A",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"D0",x"01",x"01",x"1A",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+
+        x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",    -- x"0A" TREE 1 WINTER
+        x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",    
+        x"AB",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",x"AB",
+        x"AB",x"AB",x"01",x"FB",x"01",x"AB",x"AB",x"FB",x"01",x"01",x"AB",x"AB",x"01",x"AB",x"AB",x"AB",
+        x"01",x"AB",x"AB",x"01",x"01",x"01",x"AB",x"AB",x"01",x"AB",x"AB",x"01",x"01",x"AB",x"01",x"01",
+        x"01",x"01",x"AB",x"AB",x"01",x"FB",x"AB",x"AB",x"01",x"AB",x"01",x"01",x"AB",x"AB",x"AB",x"01",
+        x"01",x"01",x"AB",x"AB",x"AB",x"01",x"AB",x"AB",x"01",x"AB",x"AB",x"AB",x"AB",x"FB",x"AB",x"AB",
+        x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"AB",x"AB",
+        x"AB",x"AB",x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",
+        x"AB",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"AB",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"FB",x"01",
+        x"01",x"01",x"01",x"FB",x"FB",x"FB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"FB",x"FB",x"FB",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"FB",x"FB",x"FB",x"FB",x"FB",
+        x"01",x"01",x"01",x"01",x"FB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",
+
+        x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",    -- x"0B" TREE 2 WINTER (CURRENTLY SAME AS TREE 1)  
+        x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",    
+        x"AB",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",x"AB",
+        x"AB",x"AB",x"01",x"FB",x"01",x"AB",x"AB",x"FB",x"01",x"01",x"AB",x"AB",x"01",x"AB",x"AB",x"AB",
+        x"01",x"AB",x"AB",x"01",x"01",x"01",x"AB",x"AB",x"01",x"AB",x"AB",x"01",x"01",x"AB",x"01",x"01",
+        x"01",x"01",x"AB",x"AB",x"01",x"FB",x"AB",x"AB",x"01",x"AB",x"01",x"01",x"AB",x"AB",x"AB",x"01",
+        x"01",x"01",x"AB",x"AB",x"AB",x"01",x"AB",x"AB",x"01",x"AB",x"AB",x"AB",x"AB",x"FB",x"AB",x"AB",
+        x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"AB",x"AB",
+        x"AB",x"AB",x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",
+        x"AB",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"AB",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"FB",x"01",
+        x"01",x"01",x"01",x"FB",x"FB",x"FB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"FB",x"FB",x"FB",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"FB",x"FB",x"FB",x"FB",x"FB",
+        x"01",x"01",x"01",x"01",x"FB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",
+
+        x"01",x"01",x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",x"01",x"01",    -- x"0C" SOUND ICON CURR
+        x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",    
+        x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",
+        x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"01",x"01",
+        x"01",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"01",
+        x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",
+        x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"00",x"00",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",
+        x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",
+        x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"E0",x"E0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+
+        x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",    -- x"0D" SOUND ICON GOAL 
         x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",
         x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00", 
         x"00",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"00",
@@ -339,8 +374,321 @@ x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"
         x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",
         x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",
         x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00"
+        );
+  
+begin
+    showing_goal_msg_out <= '1';
 
-        --BACKUP OM TRANSPARENT INTE FUNKAR
+    -- Clock divisor
+    -- Divide system clock (100 MHz) by 4
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if rst = '1' then
+            ClkDiv <= (others => '0');
+        else
+            ClkDiv <= ClkDiv + 1;
+        end if;
+    end if;
+    end process;
+
+    -- 25 MHz clock (one system clock pulse width)
+    Clk25 <= '1' when (ClkDiv = 3) else '0';
+
+
+
+    --- testing animation thing
+    --- slows the speed of time_cnt
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if (rst = '1') then -- or goal_reached = '0'
+            time_cnt <= (others => '0');
+        else --if (goal_reached = '1') then
+            time_cnt <= time_cnt + 1;
+        --else
+        --    null;
+        end if;
+    end if;
+    end process;
+    
+    
+    
+    --- testing animation thing
+    --- 
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if (rst = '1') then -- or goal_reached = '0'
+            x_cnt <= "0001000000";
+        elsif x_cnt = "1001100100" then
+            null;
+        elsif time_cnt = "1111111111111111111" then     
+            x_cnt <= x_cnt + 1;
+        else
+            null;
+        end if;
+    end if;
+    end process;
+
+    
+
+    -- 25 MHz clock (one system clock pulse width)
+    Clk25 <= '1' when (ClkDiv = 3) else '0';
+
+
+	
+    -- Horizontal pixel counter
+
+    -- ***********************************
+    -- *                                 *
+    -- *  VHDL for :                     *
+    -- *  Xpixel                         *
+    -- *                                 *
+    -- ***********************************
+    process(clk)
+    begin
+    if rising_edge(clk) then
+	    if rst = '1' then
+            Xpixel <= (others => '0');
+        elsif Clk25 = '1' then
+		    if Xpixel = 799 then	-- vi har nått slutet av pixelantalet
+			    Xpixel <= (others => '0');
+		    else
+			    Xpixel <= Xpixel + 1;
+		    end if;
+	    end if;
+    end if;
+    end process;
+	
+
+
+
+    -- Horizontal sync
+
+    -- ***********************************
+    -- *                                 *
+    -- *  VHDL for :                     *
+    -- *  Hsync                          *
+    -- *                                 *
+    -- ***********************************
+
+    Hsync <=  '0' when ((Xpixel > 655) and (Xpixel <= 751)) else '1'; 
+
+    -- Vertical pixel counter
+
+    -- ***********************************
+    -- *                                 *
+    -- *  VHDL for :                     *
+    -- *  Ypixel                         *
+    -- *                                 *
+    -- ***********************************
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if rst = '1' then
+	        Ypixel <= (others => '0');
+        elsif Clk25 = '1' and Xpixel = 799 then
+            if Ypixel = 520 then	-- vi har nått slutet av pixelantalet
+	            Ypixel <= (others => '0');
+            else 
+	            Ypixel <= Ypixel + 1;
+            end if;
+        end if;
+    end if;
+    end process;
+
+
+    -- Vertical sync
+
+    -- ***********************************
+    -- *                                 *
+    -- *  VHDL for :                     *
+    -- *  Vsync                          *
+    -- *                                 *
+    -- ***********************************
+
+    Vsync <= '0' when ((Ypixel > 489) and (Ypixel <= 491)) else '1';
+
+    -- Video blanking signal
+
+    -- ***********************************
+    -- *                                 *
+    -- *  VHDL for :                     *
+    -- *  Blank                          *
+    -- *                                 *
+    -- ***********************************
+
+    blank <= '1' when ((Xpixel > 639 and Xpixel <= 799) or (Ypixel > 479 and Ypixel <= 520)) else '0';
+
+    isRbSprite <= '1' when ((Xpixel > 64 and Xpixel < x_cnt) and (Ypixel > 200 and Ypixel < 456) and not (spriteMemRb(to_integer(spriteAddrRb)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
+
+    
+    isGoalSprite <= '1' when ((Xpixel > sprite_xstart_g and Xpixel < sprite_xend_g) and (Ypixel > sprite_ystart_g and Ypixel < sprite_yend_g) and not (spriteMemGoal(to_integer(spriteAddrG)) = x"FE")) else '0';
+
+    -- Tile memory
+    process(clk)
+    begin
+    if rising_edge(clk) then
+        if (rst = '1') then
+            pixel <= (others => '0');
+        elsif (isRbSprite = '1' and goal_reached = '1') then
+            pixel <= spriteMemRb(to_integer(spriteAddrRb));    
+        elsif (isGoalSprite ='1' and disp_goal_pos = '1') then 
+            pixel <= spriteMemGoal(to_integer(spriteAddrG));
+        elsif (blank = '0') then
+            if (isTransparent = '1') then -- If current tile is transparent, we should display bg
+                pixel <= tileMem(to_integer(bgTileAddr));
+            else
+                pixel <= tileMem(to_integer(tileAddr));
+            end if;
+        else
+            pixel <= (others => '0');
+        end if;
+    end if;
+    end process;
+
+    -- Check if current tile represents transparancy
+    isTransparent <= '1' when (tileMem(to_integer(tileAddr)) = x"01") else '0';
+    
+    -- Sets the offset of x and y pixel coords for sprite-drawing. 
+    -- Sprite starts at 300 and 200 
+    sprite_x_offset_rb <= Xpixel - to_unsigned(64,10);
+    sprite_y_offset_rb <= Ypixel - to_unsigned(200,10);
+
+    -- Calculates goal coordinates in pixels
+    sprite_xstart_g <= to_unsigned(16 * to_integer(unsigned(goal_x)), 10); 
+    sprite_xend_g <= to_unsigned(16 * (to_integer(unsigned(goal_x)) + 1), 10);
+    sprite_ystart_g <= to_unsigned(16 * to_integer(unsigned(goal_y)), 10); 
+    sprite_yend_g <= to_unsigned(16 * (to_integer(unsigned(goal_y)) + 1),10);
+
+    -- Tile memory address composite
+    bgTileAddr <= "000" & sel_track & Ypixel(3 downto 0) & Xpixel(3 downto 0); -- Sel_track determines background tile.
+    tileAddr <= unsigned(data(4 downto 0)) & Ypixel(3 downto 0) & Xpixel(3 downto 0); -- Data determines tile.
+    spriteAddrRb <= sprite_y_offset_rb(7 downto 3) & sprite_x_offset_rb(8 downto 3); -- Changes when we change spriteMem
+ 
+    spriteAddrG <= Ypixel(3 downto 0) & Xpixel(3 downto 0);
+
+    -- Picture memory address composite
+    addr <= to_unsigned(40, 6) * Ypixel(8 downto 4) + Xpixel(9 downto 4);
+
+    -- VGA generation
+    vgaRed(2) <= pixel(7);
+    vgaRed(1) <= pixel(6);
+    vgaRed(0) <= pixel(5);
+    vgaGreen(2) <= pixel(4);
+    vgaGreen(1) <= pixel(3);
+    vgaGreen(0) <= pixel(2);
+    vgaBlue(2) <= pixel(1);
+    vgaBlue(1) <= pixel(0);
+
+
+end Behavioral;
+
+    
+    --x"BE",x"BE",x"94",x"BE",x"94",x"DA",x"90",x"BE",x"BE",x"DA",x"90",x"DA",x"DA",x"DA",x"90",x"90",    -- x"00" GRASS (OK)
+    --x"90",x"DA",x"DA",x"94",x"90",x"DA",x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"BE",x"BE",x"DA",x"94",    -- MINDRE VILD
+    --x"94",x"BE",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"90",x"BE",x"90",x"94",x"BE",x"DA",x"BE",x"94",
+    --x"94",x"94",x"BE",x"90",x"BE",x"BE",x"90",x"DA",x"94",x"BE",x"90",x"90",x"BE",x"94",x"DA",x"DA",    
+    --x"DA",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"DA",x"94",x"DA",x"90",
+    --x"94",x"DA",x"94",x"94",x"94",x"DA",x"90",x"DA",x"94",x"DA",x"DA",x"94",x"DA",x"DA",x"94",x"DA",
+    --x"DA",x"90",x"90",x"DA",x"90",x"DA",x"90",x"BE",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"94",x"DA",    
+    --x"BE",x"94",x"90",x"DA",x"94",x"90",x"BE",x"BE",x"DA",x"90",x"90",x"94",x"BE",x"BE",x"DA",x"94",
+    --x"BE",x"DA",x"DA",x"90",x"94",x"90",x"94",x"DA",x"BE",x"94",x"94",x"94",x"94",x"DA",x"DA",x"94",
+    --x"DA",x"DA",x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"90",x"DA",x"DA",x"94",x"94",x"90",x"DA",    
+    --x"90",x"94",x"DA",x"94",x"DA",x"BE",x"BE",x"94",x"90",x"90",x"94",x"DA",x"94",x"DA",x"90",x"DA",
+    --x"DA",x"90",x"DA",x"90",x"90",x"94",x"BE",x"DA",x"90",x"94",x"94",x"BE",x"DA",x"DA",x"94",x"94",
+    --x"DA",x"94",x"90",x"94",x"90",x"94",x"BE",x"DA",x"DA",x"DA",x"94",x"BE",x"DA",x"90",x"DA",x"DA",
+    --x"DA",x"90",x"90",x"94",x"94",x"90",x"DA",x"94",x"DA",x"DA",x"BE",x"90",x"90",x"94",x"DA",x"94",
+    --x"90",x"DA",x"DA",x"BE",x"DA",x"94",x"DA",x"94",x"94",x"DA",x"90",x"94",x"90",x"DA",x"DA",x"DA",
+    --x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"DA",x"BE",x"BE",x"90",x"DA",x"DA",x"BE",x"BE",x"90",
+    
+    --x"BE",x"BE",x"94",x"94",x"94",x"DA",x"90",x"BE",x"BE",x"DA",x"90",x"DA",x"DA",x"DA",x"90",x"90",    -- x"00" GRASS (OK)
+    --x"90",x"DA",x"DA",x"94",x"90",x"DA",x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"BE",x"BE",x"DA",x"94",    -- VILD
+    --x"94",x"BE",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"90",x"BE",x"90",x"94",x"BE",x"DA",x"BE",x"94",
+    --x"94",x"94",x"BE",x"90",x"BE",x"BE",x"90",x"DA",x"94",x"BE",x"90",x"90",x"BE",x"94",x"DA",x"DA",    
+    --x"DA",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"DA",x"94",x"DA",x"90",
+    --x"94",x"DA",x"94",x"94",x"94",x"DA",x"90",x"DA",x"94",x"DA",x"DA",x"94",x"DA",x"DA",x"94",x"DA",
+    --x"DA",x"90",x"90",x"DA",x"90",x"DA",x"90",x"BE",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"94",x"DA",    
+    --x"BE",x"DA",x"90",x"DA",x"94",x"90",x"94",x"BE",x"DA",x"90",x"90",x"94",x"DA",x"BE",x"DA",x"DA",
+    --x"BE",x"DA",x"DA",x"DA",x"94",x"90",x"94",x"DA",x"BE",x"94",x"DA",x"94",x"94",x"DA",x"DA",x"94",
+    --x"DA",x"DA",x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"DA",x"DA",x"DA",x"DA",x"94",x"90",x"DA",    
+    --x"90",x"DA",x"DA",x"DA",x"DA",x"BE",x"BE",x"94",x"90",x"94",x"DA",x"DA",x"94",x"DA",x"90",x"DA",
+    --x"DA",x"90",x"DA",x"DA",x"90",x"DA",x"BE",x"DA",x"90",x"DA",x"94",x"BE",x"DA",x"DA",x"DA",x"94",
+    --x"DA",x"DA",x"90",x"DA",x"90",x"DA",x"BE",x"DA",x"DA",x"DA",x"94",x"BE",x"DA",x"90",x"DA",x"94",
+    --x"DA",x"90",x"90",x"DA",x"DA",x"90",x"DA",x"94",x"DA",x"DA",x"BE",x"90",x"90",x"94",x"DA",x"94",
+    --x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"DA",x"94",x"94",x"DA",x"DA",x"94",x"94",x"DA",x"DA",x"DA",
+    --x"90",x"90",x"DA",x"BE",x"DA",x"DA",x"90",x"DA",x"BE",x"BE",x"DA",x"DA",x"DA",x"BE",x"BE",x"BE",
+    
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"02",    -- x"01" BLUINICORN
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"02",x"FF",x"FF",x"FF",x"02",x"FF",    -- W/O GRASS
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"02",x"02",x"FF",x"02",x"02",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"02",x"02",x"9B",x"9B",x"9B",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"02",x"FF",x"FF",x"FF",x"FF",x"02",x"02",x"02",x"9B",x"02",x"9B",x"9B",x"9B",x"FF",
+    --x"FF",x"02",x"02",x"02",x"FF",x"FF",x"02",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"02",x"02",x"FF",
+    --x"FF",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FF",x"FF",
+    --x"FF",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FF",x"FF",x"FF",
+    --x"02",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",    
+    --x"02",x"02",x"FF",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",x"FF",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",x"FF",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",x"FF",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"02",x"02",x"FF",x"FF",x"FF",x"FF",x"FF",x"02",x"02",x"FF",x"FF",x"FF",x"FF",
+
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"96",x"96",x"FF",x"FF",x"FF",x"96",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"02" TREE 1
+    --x"FF",x"FF",x"FF",x"96",x"96",x"1A",x"1A",x"96",x"96",x"96",x"1A",x"12",x"12",x"FF",x"FF",x"FF",    -- W/O GRASS
+    --x"FF",x"FF",x"FF",x"10",x"10",x"96",x"96",x"1A",x"10",x"1A",x"96",x"1A",x"18",x"12",x"FF",x"FF",
+    --x"FF",x"FF",x"96",x"10",x"96",x"18",x"96",x"10",x"1A",x"96",x"10",x"18",x"1A",x"D6",x"12",x"FF",    
+    --x"FF",x"96",x"10",x"1A",x"1A",x"96",x"10",x"18",x"96",x"D6",x"18",x"1A",x"18",x"12",x"FF",x"FF",
+    --x"FF",x"10",x"10",x"96",x"96",x"D6",x"10",x"18",x"10",x"10",x"D6",x"18",x"1A",x"D6",x"12",x"FF",
+    --x"FF",x"96",x"10",x"10",x"10",x"10",x"D6",x"10",x"18",x"18",x"10",x"1A",x"18",x"18",x"18",x"12",
+    --x"FF",x"10",x"96",x"10",x"D6",x"10",x"10",x"1A",x"1A",x"10",x"1A",x"18",x"1A",x"1A",x"18",x"12",
+    --x"10",x"96",x"1A",x"1A",x"10",x"10",x"1A",x"18",x"1A",x"18",x"18",x"1A",x"10",x"18",x"12",x"FF",	
+    --x"FF",x"10",x"10",x"10",x"D0",x"D6",x"18",x"18",x"18",x"18",x"1A",x"10",x"18",x"18",x"1A",x"12",
+	--x"FF",x"FF",x"10",x"10",x"FF",x"D0",x"D0",x"18",x"1A",x"D0",x"1A",x"18",x"18",x"12",x"12",x"FF",	
+    --x"FF",x"FF",x"10",x"FF",x"FF",x"D0",x"D0",x"18",x"D0",x"12",x"18",x"12",x"12",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"12",x"FF",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+    
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"96",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  -- x"03" TREE 2
+    --x"FF",x"FF",x"FF",x"FF",x"96",x"96",x"12",x"96",x"1A",x"96",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  -- W/O GRASS
+    --x"FF",x"FF",x"96",x"12",x"18",x"12",x"D6",x"12",x"96",x"12",x"1A",x"12",x"FF",x"1A",x"FF",x"FF",
+    --x"FF",x"96",x"96",x"12",x"18",x"18",x"96",x"12",x"18",x"18",x"12",x"1A",x"12",x"1A",x"FF",x"FF",
+    --x"FF",x"96",x"12",x"18",x"96",x"18",x"12",x"18",x"1A",x"12",x"18",x"D6",x"1A",x"18",x"FF",x"FF",
+    --x"96",x"12",x"96",x"18",x"D6",x"12",x"1A",x"1A",x"12",x"18",x"D6",x"1A",x"19",x"FF",x"FF",x"FF",
+    --x"12",x"18",x"18",x"D6",x"96",x"96",x"18",x"12",x"12",x"1A",x"12",x"18",x"18",x"1A",x"FF",x"FF",
+    --x"96",x"96",x"12",x"96",x"18",x"18",x"1A",x"D6",x"1A",x"12",x"18",x"18",x"1A",x"12",x"1A",x"FF",
+    --x"FF",x"96",x"12",x"12",x"1A",x"1A",x"18",x"1A",x"1A",x"18",x"1A",x"1A",x"12",x"1A",x"FF",x"FF",
+    --x"FF",x"FF",x"96",x"12",x"18",x"18",x"18",x"1A",x"18",x"1A",x"18",x"1A",x"12",x"1A",x"FF",x"FF",
+    --x"FF",x"FF",x"12",x"FF",x"1A",x"1A",x"1A",x"D0",x"1A",x"D0",x"D0",x"1A",x"18",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"1A",x"FF",x"D0",x"D0",x"D0",x"1A",x"18",x"1A",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"D0",x"FF",x"FF",x"1A",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
+    
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"92",x"B6",x"B6",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  -- x"04" ROCK
+    --x"FF",x"FF",x"FF",x"FF",x"FF",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"FF",x"FF",x"FF",x"FF",x"FF",  -- W/O GRASS
+    --x"FF",x"FF",x"92",x"B6",x"FF",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"FF",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"FF",x"FF",x"FF",
+    --x"FF",x"92",x"B6",x"B6",x"92",x"B6",x"92",x"92",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"FF",x"FF",
+    --x"FF",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"FF",
+    --x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"92",x"B6",x"B6",x"B6",x"FF",
+    --x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"B6",x"B6",x"92",x"B6",
+    --x"B6",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",
+    --x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",x"92",x"B6",x"92",x"B6",x"B6",
+    --x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",
+    --x"92",x"92",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"FF",
+    --x"FF",x"92",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"92",x"B6",x"92",x"92",x"B6",x"FF",
+    --x"FF",x"92",x"92",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"FF",x"FF",
+    --x"FF",x"FF",x"92",x"92",x"92",x"B6",x"92",x"92",x"B6",x"B6",x"92",x"92",x"B6",x"FF",x"FF",x"FF",
+    --x"FF",x"FF",x"FF",x"92",x"92",x"92",x"92",x"B6",x"B6",x"92",x"92",x"B6",x"FF",x"FF",x"FF",x"FF",
+    
+     --BACKUP OM TRANSPARENT INTE FUNKAR
         --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"92",x"B6",x"B6",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  -- x"04" ROCK
         --x"FF",x"FF",x"FF",x"FF",x"FF",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"FF",x"FF",x"FF",x"FF",x"FF",  -- W/O GRASS
         --x"FF",x"FF",x"92",x"B6",x"FF",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"FF",x"FF",x"FF",x"FF",
@@ -630,312 +978,3 @@ x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"FE",x"
         --x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",x"00",x"FF",x"FF",x"00",
         --x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00",x"00"
 
-        );
-  
-begin
-    showing_goal_msg_out <= '1';
-
-    -- Clock divisor
-    -- Divide system clock (100 MHz) by 4
-    process(clk)
-    begin
-    if rising_edge(clk) then
-        if rst = '1' then
-            ClkDiv <= (others => '0');
-        else
-            ClkDiv <= ClkDiv + 1;
-        end if;
-    end if;
-    end process;
-
-    -- 25 MHz clock (one system clock pulse width)
-    Clk25 <= '1' when (ClkDiv = 3) else '0';
-
-
-
-    --- testing animation thing
-    --- slows the speed of time_cnt
-    process(clk)
-    begin
-    if rising_edge(clk) then
-        if (rst = '1') then -- or goal_reached = '0'
-            time_cnt <= (others => '0');
-        else --if (goal_reached = '1') then
-            time_cnt <= time_cnt + 1;
-        --else
-        --    null;
-        end if;
-    end if;
-    end process;
-    
-    
-    
-    --- testing animation thing
-    --- 
-    process(clk)
-    begin
-    if rising_edge(clk) then
-        if (rst = '1') then -- or goal_reached = '0'
-            x_cnt <= "0001000000";
-        elsif x_cnt = "1001100100" then
-            null;
-        elsif time_cnt = "1111111111111111111" then     
-            x_cnt <= x_cnt + 1;
-        else
-            null;
-        end if;
-    end if;
-    end process;
-
-    
-
-    -- 25 MHz clock (one system clock pulse width)
-    Clk25 <= '1' when (ClkDiv = 3) else '0';
-
-
-	
-    -- Horizontal pixel counter
-
-    -- ***********************************
-    -- *                                 *
-    -- *  VHDL for :                     *
-    -- *  Xpixel                         *
-    -- *                                 *
-    -- ***********************************
-    process(clk)
-    begin
-    if rising_edge(clk) then
-	    if rst = '1' then
-            Xpixel <= (others => '0');
-        elsif Clk25 = '1' then
-		    if Xpixel = 799 then	-- vi har nått slutet av pixelantalet
-			    Xpixel <= (others => '0');
-		    else
-			    Xpixel <= Xpixel + 1;
-		    end if;
-	    end if;
-    end if;
-    end process;
-	
-
-
-
-    -- Horizontal sync
-
-    -- ***********************************
-    -- *                                 *
-    -- *  VHDL for :                     *
-    -- *  Hsync                          *
-    -- *                                 *
-    -- ***********************************
-
-    Hsync <=  '0' when ((Xpixel > 655) and (Xpixel <= 751)) else '1'; 
-
-    -- Vertical pixel counter
-
-    -- ***********************************
-    -- *                                 *
-    -- *  VHDL for :                     *
-    -- *  Ypixel                         *
-    -- *                                 *
-    -- ***********************************
-    process(clk)
-    begin
-    if rising_edge(clk) then
-        if rst = '1' then
-	        Ypixel <= (others => '0');
-        elsif Clk25 = '1' and Xpixel = 799 then
-            if Ypixel = 520 then	-- vi har nått slutet av pixelantalet
-	            Ypixel <= (others => '0');
-            else 
-	            Ypixel <= Ypixel + 1;
-            end if;
-        end if;
-    end if;
-    end process;
-
-
-    -- Vertical sync
-
-    -- ***********************************
-    -- *                                 *
-    -- *  VHDL for :                     *
-    -- *  Vsync                          *
-    -- *                                 *
-    -- ***********************************
-
-    Vsync <= '0' when ((Ypixel > 489) and (Ypixel <= 491)) else '1';
-
-    -- Video blanking signal
-
-    -- ***********************************
-    -- *                                 *
-    -- *  VHDL for :                     *
-    -- *  Blank                          *
-    -- *                                 *
-    -- ***********************************
-
-    blank <= '1' when ((Xpixel > 639 and Xpixel <= 799) or (Ypixel > 479 and Ypixel <= 520)) else '0';
-
-    isRbSprite <= '1' when ((Xpixel > 64 and Xpixel < x_cnt) and (Ypixel > 200 and Ypixel < 456) and not (spriteMemRb(to_integer(spriteAddrRb)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
-
-    
-    isGoalSprite <= '1' when ((Xpixel > sprite_xstart_g and Xpixel < sprite_xend_g) and (Ypixel > sprite_ystart_g and Ypixel < sprite_yend_g) and not (spriteMemGoal(to_integer(spriteAddrG)) = x"FE")) else '0';
-
-    -- Tile memory
-    process(clk)
-    begin
-    if rising_edge(clk) then
-        if (rst = '1') then
-            pixel <= (others => '0');
-        elsif (isRbSprite = '1' and goal_reached = '1') then
-            pixel <= spriteMemRb(to_integer(spriteAddrRb));    
-        elsif (isGoalSprite ='1' and disp_goal_pos = '1') then 
-            pixel <= spriteMemGoal(to_integer(spriteAddrG));
-        elsif (blank = '0') then
-            if (tileMem(to_integer(tileAddr)) = x"FD") then -- If we got this colorcode, it means that we should display bg
-                pixel <= tileMem(to_integer(bgTileAddr));
-            else
-                pixel <= tileMem(to_integer(tileAddr));
-        else
-            pixel <= (others => '0');
-        end if;
-    end if;
-    end process;
-
-    -- Sets the offset of x and y pixel coords for sprite-drawing. 
-    -- Sprite starts at 300 and 200 
-    sprite_x_offset_rb <= Xpixel - to_unsigned(64,10);
-    sprite_y_offset_rb <= Ypixel - to_unsigned(200,10);
-
-    -- Calculates goal coordinates in pixels
-    sprite_xstart_g <= to_unsigned(16 * to_integer(unsigned(goal_x)), 10); 
-    sprite_xend_g <= to_unsigned(16 * (to_integer(unsigned(goal_x)) + 1), 10);
-    sprite_ystart_g <= to_unsigned(16 * to_integer(unsigned(goal_y)), 10); 
-    sprite_yend_g <= to_unsigned(16 * (to_integer(unsigned(goal_y)) + 1),10);
-
-    -- Tile memory address composite
-    bgTileAddr <= unsigned("000" & sel_track & Ypixel(3 downto 0) & Xpixel(3 downto 0); -- Sel_track determines background tile.
-    tileAddr <= unsigned(data(4 downto 0)) & Ypixel(3 downto 0) & Xpixel(3 downto 0); -- Data determines tile.
-    spriteAddrRb <= sprite_y_offset_rb(7 downto 3) & sprite_x_offset_rb(8 downto 3); -- Changes when we change spriteMem
- 
-    spriteAddrG <= Ypixel(3 downto 0) & Xpixel(3 downto 0);
-
-    -- Picture memory address composite
-    addr <= to_unsigned(40, 6) * Ypixel(8 downto 4) + Xpixel(9 downto 4);
-
-    -- VGA generation
-    vgaRed(2) <= pixel(7);
-    vgaRed(1) <= pixel(6);
-    vgaRed(0) <= pixel(5);
-    vgaGreen(2) <= pixel(4);
-    vgaGreen(1) <= pixel(3);
-    vgaGreen(0) <= pixel(2);
-    vgaBlue(2) <= pixel(1);
-    vgaBlue(1) <= pixel(0);
-
-
-end Behavioral;
-
-    
-    --x"BE",x"BE",x"94",x"BE",x"94",x"DA",x"90",x"BE",x"BE",x"DA",x"90",x"DA",x"DA",x"DA",x"90",x"90",    -- x"00" GRASS (OK)
-    --x"90",x"DA",x"DA",x"94",x"90",x"DA",x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"BE",x"BE",x"DA",x"94",    -- MINDRE VILD
-    --x"94",x"BE",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"90",x"BE",x"90",x"94",x"BE",x"DA",x"BE",x"94",
-    --x"94",x"94",x"BE",x"90",x"BE",x"BE",x"90",x"DA",x"94",x"BE",x"90",x"90",x"BE",x"94",x"DA",x"DA",    
-    --x"DA",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"DA",x"94",x"DA",x"90",
-    --x"94",x"DA",x"94",x"94",x"94",x"DA",x"90",x"DA",x"94",x"DA",x"DA",x"94",x"DA",x"DA",x"94",x"DA",
-    --x"DA",x"90",x"90",x"DA",x"90",x"DA",x"90",x"BE",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"94",x"DA",    
-    --x"BE",x"94",x"90",x"DA",x"94",x"90",x"BE",x"BE",x"DA",x"90",x"90",x"94",x"BE",x"BE",x"DA",x"94",
-    --x"BE",x"DA",x"DA",x"90",x"94",x"90",x"94",x"DA",x"BE",x"94",x"94",x"94",x"94",x"DA",x"DA",x"94",
-    --x"DA",x"DA",x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"90",x"DA",x"DA",x"94",x"94",x"90",x"DA",    
-    --x"90",x"94",x"DA",x"94",x"DA",x"BE",x"BE",x"94",x"90",x"90",x"94",x"DA",x"94",x"DA",x"90",x"DA",
-    --x"DA",x"90",x"DA",x"90",x"90",x"94",x"BE",x"DA",x"90",x"94",x"94",x"BE",x"DA",x"DA",x"94",x"94",
-    --x"DA",x"94",x"90",x"94",x"90",x"94",x"BE",x"DA",x"DA",x"DA",x"94",x"BE",x"DA",x"90",x"DA",x"DA",
-    --x"DA",x"90",x"90",x"94",x"94",x"90",x"DA",x"94",x"DA",x"DA",x"BE",x"90",x"90",x"94",x"DA",x"94",
-    --x"90",x"DA",x"DA",x"BE",x"DA",x"94",x"DA",x"94",x"94",x"DA",x"90",x"94",x"90",x"DA",x"DA",x"DA",
-    --x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"DA",x"BE",x"BE",x"90",x"DA",x"DA",x"BE",x"BE",x"90",
-    
-    --x"BE",x"BE",x"94",x"94",x"94",x"DA",x"90",x"BE",x"BE",x"DA",x"90",x"DA",x"DA",x"DA",x"90",x"90",    -- x"00" GRASS (OK)
-    --x"90",x"DA",x"DA",x"94",x"90",x"DA",x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"BE",x"BE",x"DA",x"94",    -- VILD
-    --x"94",x"BE",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"90",x"BE",x"90",x"94",x"BE",x"DA",x"BE",x"94",
-    --x"94",x"94",x"BE",x"90",x"BE",x"BE",x"90",x"DA",x"94",x"BE",x"90",x"90",x"BE",x"94",x"DA",x"DA",    
-    --x"DA",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"DA",x"BE",x"94",x"94",x"DA",x"DA",x"94",x"DA",x"90",
-    --x"94",x"DA",x"94",x"94",x"94",x"DA",x"90",x"DA",x"94",x"DA",x"DA",x"94",x"DA",x"DA",x"94",x"DA",
-    --x"DA",x"90",x"90",x"DA",x"90",x"DA",x"90",x"BE",x"DA",x"94",x"90",x"DA",x"DA",x"BE",x"94",x"DA",    
-    --x"BE",x"DA",x"90",x"DA",x"94",x"90",x"94",x"BE",x"DA",x"90",x"90",x"94",x"DA",x"BE",x"DA",x"DA",
-    --x"BE",x"DA",x"DA",x"DA",x"94",x"90",x"94",x"DA",x"BE",x"94",x"DA",x"94",x"94",x"DA",x"DA",x"94",
-    --x"DA",x"DA",x"90",x"90",x"DA",x"BE",x"DA",x"94",x"90",x"DA",x"DA",x"DA",x"DA",x"94",x"90",x"DA",    
-    --x"90",x"DA",x"DA",x"DA",x"DA",x"BE",x"BE",x"94",x"90",x"94",x"DA",x"DA",x"94",x"DA",x"90",x"DA",
-    --x"DA",x"90",x"DA",x"DA",x"90",x"DA",x"BE",x"DA",x"90",x"DA",x"94",x"BE",x"DA",x"DA",x"DA",x"94",
-    --x"DA",x"DA",x"90",x"DA",x"90",x"DA",x"BE",x"DA",x"DA",x"DA",x"94",x"BE",x"DA",x"90",x"DA",x"94",
-    --x"DA",x"90",x"90",x"DA",x"DA",x"90",x"DA",x"94",x"DA",x"DA",x"BE",x"90",x"90",x"94",x"DA",x"94",
-    --x"90",x"DA",x"DA",x"BE",x"DA",x"DA",x"DA",x"94",x"94",x"DA",x"DA",x"94",x"94",x"DA",x"DA",x"DA",
-    --x"90",x"90",x"DA",x"BE",x"DA",x"DA",x"90",x"DA",x"BE",x"BE",x"DA",x"DA",x"DA",x"BE",x"BE",x"BE",
-    
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"02",    -- x"01" BLUINICORN
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"02",x"FF",x"FF",x"FF",x"02",x"FF",    -- W/O GRASS
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"02",x"02",x"FF",x"02",x"02",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"02",x"02",x"9B",x"9B",x"9B",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"02",x"FF",x"FF",x"FF",x"FF",x"02",x"02",x"02",x"9B",x"02",x"9B",x"9B",x"9B",x"FF",
-    --x"FF",x"02",x"02",x"02",x"FF",x"FF",x"02",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"02",x"02",x"FF",
-    --x"FF",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FF",x"FF",
-    --x"FF",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FF",x"FF",x"FF",
-    --x"02",x"02",x"02",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",    
-    --x"02",x"02",x"FF",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",x"FF",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",x"FF",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",x"FF",x"9B",x"9B",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"02",x"02",x"FF",x"FF",x"FF",x"FF",x"FF",x"02",x"02",x"FF",x"FF",x"FF",x"FF",
-
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"96",x"96",x"FF",x"FF",x"FF",x"96",x"FF",x"FF",x"FF",x"FF",x"FF",    -- x"02" TREE 1
-    --x"FF",x"FF",x"FF",x"96",x"96",x"1A",x"1A",x"96",x"96",x"96",x"1A",x"12",x"12",x"FF",x"FF",x"FF",    -- W/O GRASS
-    --x"FF",x"FF",x"FF",x"10",x"10",x"96",x"96",x"1A",x"10",x"1A",x"96",x"1A",x"18",x"12",x"FF",x"FF",
-    --x"FF",x"FF",x"96",x"10",x"96",x"18",x"96",x"10",x"1A",x"96",x"10",x"18",x"1A",x"D6",x"12",x"FF",    
-    --x"FF",x"96",x"10",x"1A",x"1A",x"96",x"10",x"18",x"96",x"D6",x"18",x"1A",x"18",x"12",x"FF",x"FF",
-    --x"FF",x"10",x"10",x"96",x"96",x"D6",x"10",x"18",x"10",x"10",x"D6",x"18",x"1A",x"D6",x"12",x"FF",
-    --x"FF",x"96",x"10",x"10",x"10",x"10",x"D6",x"10",x"18",x"18",x"10",x"1A",x"18",x"18",x"18",x"12",
-    --x"FF",x"10",x"96",x"10",x"D6",x"10",x"10",x"1A",x"1A",x"10",x"1A",x"18",x"1A",x"1A",x"18",x"12",
-    --x"10",x"96",x"1A",x"1A",x"10",x"10",x"1A",x"18",x"1A",x"18",x"18",x"1A",x"10",x"18",x"12",x"FF",	
-    --x"FF",x"10",x"10",x"10",x"D0",x"D6",x"18",x"18",x"18",x"18",x"1A",x"10",x"18",x"18",x"1A",x"12",
-	--x"FF",x"FF",x"10",x"10",x"FF",x"D0",x"D0",x"18",x"1A",x"D0",x"1A",x"18",x"18",x"12",x"12",x"FF",	
-    --x"FF",x"FF",x"10",x"FF",x"FF",x"D0",x"D0",x"18",x"D0",x"12",x"18",x"12",x"12",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"12",x"FF",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-    
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"96",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  -- x"03" TREE 2
-    --x"FF",x"FF",x"FF",x"FF",x"96",x"96",x"12",x"96",x"1A",x"96",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  -- W/O GRASS
-    --x"FF",x"FF",x"96",x"12",x"18",x"12",x"D6",x"12",x"96",x"12",x"1A",x"12",x"FF",x"1A",x"FF",x"FF",
-    --x"FF",x"96",x"96",x"12",x"18",x"18",x"96",x"12",x"18",x"18",x"12",x"1A",x"12",x"1A",x"FF",x"FF",
-    --x"FF",x"96",x"12",x"18",x"96",x"18",x"12",x"18",x"1A",x"12",x"18",x"D6",x"1A",x"18",x"FF",x"FF",
-    --x"96",x"12",x"96",x"18",x"D6",x"12",x"1A",x"1A",x"12",x"18",x"D6",x"1A",x"19",x"FF",x"FF",x"FF",
-    --x"12",x"18",x"18",x"D6",x"96",x"96",x"18",x"12",x"12",x"1A",x"12",x"18",x"18",x"1A",x"FF",x"FF",
-    --x"96",x"96",x"12",x"96",x"18",x"18",x"1A",x"D6",x"1A",x"12",x"18",x"18",x"1A",x"12",x"1A",x"FF",
-    --x"FF",x"96",x"12",x"12",x"1A",x"1A",x"18",x"1A",x"1A",x"18",x"1A",x"1A",x"12",x"1A",x"FF",x"FF",
-    --x"FF",x"FF",x"96",x"12",x"18",x"18",x"18",x"1A",x"18",x"1A",x"18",x"1A",x"12",x"1A",x"FF",x"FF",
-    --x"FF",x"FF",x"12",x"FF",x"1A",x"1A",x"1A",x"D0",x"1A",x"D0",x"D0",x"1A",x"18",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"1A",x"FF",x"D0",x"D0",x"D0",x"1A",x"18",x"1A",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"D0",x"FF",x"FF",x"1A",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"D0",x"D0",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",
-    
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"92",x"B6",x"B6",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",  -- x"04" ROCK
-    --x"FF",x"FF",x"FF",x"FF",x"FF",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"FF",x"FF",x"FF",x"FF",x"FF",  -- W/O GRASS
-    --x"FF",x"FF",x"92",x"B6",x"FF",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"FF",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"FF",x"FF",x"FF",
-    --x"FF",x"92",x"B6",x"B6",x"92",x"B6",x"92",x"92",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"FF",x"FF",
-    --x"FF",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"FF",
-    --x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"92",x"B6",x"B6",x"B6",x"FF",
-    --x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"B6",x"B6",x"92",x"B6",
-    --x"B6",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",
-    --x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",x"92",x"B6",x"92",x"B6",x"B6",
-    --x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",
-    --x"92",x"92",x"B6",x"92",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"FF",
-    --x"FF",x"92",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"B6",x"B6",x"92",x"B6",x"92",x"92",x"B6",x"FF",
-    --x"FF",x"92",x"92",x"92",x"B6",x"B6",x"92",x"B6",x"B6",x"B6",x"B6",x"92",x"92",x"B6",x"FF",x"FF",
-    --x"FF",x"FF",x"92",x"92",x"92",x"B6",x"92",x"92",x"B6",x"B6",x"92",x"92",x"B6",x"FF",x"FF",x"FF",
-    --x"FF",x"FF",x"FF",x"92",x"92",x"92",x"92",x"B6",x"B6",x"92",x"92",x"B6",x"FF",x"FF",x"FF",x"FF",

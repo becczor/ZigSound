@@ -21,7 +21,7 @@ entity GPU is
         -- TO/FROM CPU
         sel_track           : in unsigned(1 downto 0);
         move_req            : in std_logic;         -- move request
-        tog_sound_icon      : in std_logic;
+        upd_sound_icon      : in std_logic;
         move_resp			: out std_logic := '0';		-- response to move request
         curr_pos            : in signed(17 downto 0); -- current position
         next_pos            : in signed(17 downto 0); -- next position 
@@ -37,6 +37,7 @@ end GPU;
 -- architecture
 architecture behavioral of GPU is
 
+    signal nextpos_free     : std_logic := '0';
     signal move             : std_logic := '0';
     signal ypos             : unsigned(4 downto 0);  -- curr y position
     signal xpos             : unsigned(5 downto 0);  -- curr x position
@@ -63,7 +64,7 @@ begin
     --*************************************************************
     --* Check if we have a move request and if it can be approved *
     --*************************************************************
-    nextpos_free <= '1' when (data_next = x"00" or data_next = x"01" or data_next = x"01") else '0'
+    nextpos_free <= '1' when (data_nextpos = x"00" or data_nextpos = x"01" or data_nextpos = x"02") else '0';
     move <= '1' when move_req = '1' and nextpos_free = '1' else '0';
     
     --*******************************************************************
@@ -87,7 +88,7 @@ begin
                         move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
                         we_picmem <= '1';   -- PIC_MEM can now use address and data to clear curr_pos.
                         WRstate <= DRAW;    -- Set state to DRAW so we get addr and data from next_pos.
-                    elsif (tog_sound_icon = '1') then  -- Toggle what sound icon is shown
+                    elsif (upd_sound_icon = '1') then  -- Toggle what sound icon is shown
                         addr_change <= to_unsigned(1199,11);  -- Select position (38,28) bottom-right
                         data_change <= sound_icon;  -- Set it to correct sound_icon
                         we_picmem <= '1';
@@ -116,20 +117,6 @@ begin
     x"01" when "01", -- Track 2
     x"02" when "10", -- Track 3
     x"00" when others;
-    -- Set correct curr pos sound icon depending on track theme
-    with sel_track select
-    unicorn <=
-    x"04" when "00", -- Track 1
-    x"05" when "01", -- Track 2
-    x"06" when "10", -- Track 3
-    x"00" when others;
-    -- Set correct curr pos sound icon depending on track theme
-    with sel_track select
-    curr_sound_icon <=
-    x"10" when "00", -- Track 1
-    x"11" when "01", -- Track 2
-    x"12" when "10", -- Track 3
-    x"00" when others;
     
     addr_change_calc <= xpos + (to_unsigned(40, 6) * ypos); -- Translates x- and y-pos into PIC_MEM-address.
     
@@ -137,8 +124,8 @@ begin
     -- Takes x- and y-pos from curr_pos if we're in IDLE, else from next_pos.
     xpos <= unsigned(CURR_XPOS) when (WRstate = IDLE) else unsigned(NEXT_XPOS);
     ypos <= unsigned(CURR_YPOS) when (WRstate = IDLE) else unsigned(NEXT_YPOS);
-    tile <= bg_tile when (WRstate = IDLE) else unicorn;
-    sound_icon <= curr_sound_icon when (sound_channel = '0') else x"13"; -- else x"13" means toggle icon for goal sound
+    tile <= bg_tile when (WRstate = IDLE) else x"03"; -- Background tile depends on sel_track and x"03" means unicorn tile
+    sound_icon <= x"0C" when (sound_channel = '0') else x"0D"; -- x"0C" = curr sound, x"13" = goal sound
     
   
     end behavioral;

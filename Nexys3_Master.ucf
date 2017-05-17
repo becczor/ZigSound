@@ -31,8 +31,8 @@ NET "Hsync" LOC = N6 | IOSTANDARD = LVCMOS33; # Bank = 2, pin name = IO_L47P, Sc
 NET "Vsync" LOC = P7 | IOSTANDARD = LVCMOS33; # Bank = 2, pin name = IO_L47N, Sch name = VSYNC
 
 ## Leds
-NET "test_diod1" LOC = U16 | IOSTANDARD = LVCMOS33; ##Bank = 2, pin name = IO_L2P_CMPCLK, Sch name = LD0
-Net "test_diod2" LOC = V16 |  IOSTANDARD = LVCMOS33; #Bank = 2, pin name = IO_L2N_CMPMOSI, Sch name = LD1
+#NET "test_diod1" LOC = U16 | IOSTANDARD = LVCMOS33; ##Bank = 2, pin name = IO_L2P_CMPCLK, Sch name = LD0
+#Net "test_diod2" LOC = V16 |  IOSTANDARD = LVCMOS33; #Bank = 2, pin name = IO_L2N_CMPMOSI, Sch name = LD1
 
 ## Switches
 #NET "switch" LOC = T10 | IOSTANDARD = LVCMOS33; ##Bank = 2, pin name = IO_L29N_GCLK2, Sch name = SW0
