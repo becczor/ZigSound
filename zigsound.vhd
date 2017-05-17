@@ -126,6 +126,7 @@ architecture Behavioral of zigsound is
         goal_reached            : in std_logic;
         showing_goal_msg_out    : out std_logic;
         disp_goal_pos           : in std_logic;
+        score                   : in unsigned(5 downto 0);
 		addr	    		    : out unsigned(10 downto 0);
 		vgaRed	       		    : out std_logic_vector(2 downto 0);
 		vgaGreen	    	    : out std_logic_vector(2 downto 0);
@@ -291,6 +292,7 @@ begin
 	            goal_reached => goal_reached_con,
 	            showing_goal_msg_out => showing_goal_msg_con,
 	            disp_goal_pos => disp_goal_pos_con, 
+	            score => score_con,
 	            addr => addr_vga_con,
 	            vgaRed => vgaRed,
 	            vgaGreen => vgaGreen,
