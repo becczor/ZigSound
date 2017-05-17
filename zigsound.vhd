@@ -128,6 +128,7 @@ architecture Behavioral of zigsound is
 		clk			            : in std_logic;
 		rst	        	        : in std_logic; 
 		data	    		    : in unsigned(7 downto 0);
+        sel_track               : in unsigned(1 downto 0);
 		goal_pos                : in signed(17 downto 0);
         goal_reached            : in std_logic;
         showing_goal_msg_out    : out std_logic;
@@ -295,6 +296,7 @@ begin
 	            clk => clk,
 	            rst => rst,
 	            data => data_vga_con,
+                sel_track => sel_track_con,
 	            goal_pos => goal_pos_con,
 	            goal_reached => goal_reached_con,
 	            showing_goal_msg_out => showing_goal_msg_con,
