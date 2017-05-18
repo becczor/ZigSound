@@ -54,7 +54,7 @@ architecture Behavioral of VGA_MOTOR is
     signal bgPixel              : std_logic_vector(7 downto 0);  -- Background tile
     signal dataPixel            : std_logic_vector(7 downto 0);  -- Regular tile data
     signal isTransparent        : std_logic := '0';         -- Signal for checking if current tile represents transparancy
-    signal bgTile               : unsigned(7 downto 0);     -- Which bg tile we should take from when color is transparent
+    signal bgTile               : unsigned(4 downto 0);     -- Which bg tile we should take from when color is transparent
     signal bgTileAddr           : unsigned(12 downto 0);	-- Background tile address
     signal tileAddr             : unsigned(12 downto 0);	-- Tile address
     signal blank                : std_logic;                -- blanking signal
@@ -691,11 +691,11 @@ begin
     -- Tile memory address composite
     with sel_track select
     bgTile <= 
-        x"00" when "00",
-        x"01" when "01",
-        x"02" when "10",
-        x"00" when "11",
-        x"00" when others;
+        "00000" when "00",
+        "00001" when "01",
+        "00010" when "10",
+        "00000" when "11",
+        (others =>'0') when others;
         
     bgTileAddr <= bgTile & Ypixel_next(3 downto 0) & Xpixel_next(3 downto 0); -- Sel_track determines background tile.
     tileAddr <= tileIndex & Ypixel_next(3 downto 0) & Xpixel_next(3 downto 0);
