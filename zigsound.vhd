@@ -1,3 +1,8 @@
+--------------------------------------------------------------------------------
+-- ZigSound
+-- 04-apr-2017
+-- Version 0.1
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
@@ -20,8 +25,7 @@ entity zigsound is
         PS2KeyboardData         : in std_logic;  -- USB keyboard PS2 data
         -- Sound
         JB1                     : out std_logic   -- the pmod is plugged in to the upper row of second slot
-        );
-        
+        );     
 end zigsound;
 
 architecture Behavioral of zigsound is

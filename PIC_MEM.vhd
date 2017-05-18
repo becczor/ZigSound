@@ -4,7 +4,6 @@
 -- 04-apr-2017
 -- Version 0.1
 
-
 -- library declaration
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;            -- basic IEEE library
@@ -33,7 +32,6 @@ end PIC_MEM;
 	
 -- Architecture
 architecture Behavioral of PIC_MEM is
-
 
     -- Track memory type
     type ram_t is array (0 to 4799) of unsigned(7 downto 0);

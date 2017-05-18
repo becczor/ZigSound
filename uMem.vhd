@@ -1,3 +1,9 @@
+--------------------------------------------------------------------------------
+-- uMem
+-- ZigSound
+-- 04-apr-2017
+-- Version 0.1
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use IEEE.NUMERIC_STD.all;
@@ -10,7 +16,6 @@ entity uMem is
     clk   : in std_logic;
     uAddr : in unsigned(6 downto 0);
     uData : out unsigned(24 downto 0));
-
 end uMem;
 
 architecture Behavioral of uMem is
@@ -111,8 +116,8 @@ constant u_mem_c : u_mem_t := (
         --om G = 0, annars PC++
 		b"0000_000_000_0_0_00_1101_0000000",	--0000680	µPC := 0 om G = 1
 		b"0000_000_000_0_0_00_0101_0011011",	--000029B	Hopp till BRA
-        --SETRNDGOALPOS 31
-        --GOAL_POS := RND_GOAL_POS if GRX = "100"
+        --SETRNDGOALPOS 31, GRX has to be "100"!
+        --GOAL_POS := RND_GOAL_POS
         b"0000_110_110_0_0_00_0011_0000000", 	--01B0000	REG := RND_REG
         --SHOWGOALMSG 32
         --WON := '1'
@@ -143,7 +148,7 @@ constant u_mem_c : u_mem_t := (
         --PC := PC + 1 + ADR
         --om G = 0, annars PC++
 		b"0000_000_000_0_0_00_0110_0000000",	--HEX	    µPC := 0 om S = 0
-		b"0000_000_000_0_0_00_0101_0011011",	    --HEX	    Hopp till BRA
+		b"0000_000_000_0_0_00_0101_0011011",	--HEX	    Hopp till BRA
 		--INCRTRACK 43, GRX has to be "101"!
 		-- NEXT_TRACK <= NEXT_TRACK + 1
         b"1000_000_000_0_0_00_0000_0000000",    --HEX       AR := '1'

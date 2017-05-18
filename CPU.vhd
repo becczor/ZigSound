@@ -1214,10 +1214,10 @@ begin
     --* Random number generation *
     --****************************
     free_pos_lmt <= 
-    to_signed(913,11)   when (sel_track = "00") else
-    to_signed(886,11)  when (sel_track = "01") else
-    to_signed(932,11)   when (sel_track = "10") else
-    to_signed(660,11)   when (sel_track = "11") else
+    to_signed(913,11)   when (NEXT_TRACK(1 downto 0) = "00") else
+    to_signed(886,11)   when (NEXT_TRACK(1 downto 0) = "01") else
+    to_signed(932,11)   when (NEXT_TRACK(1 downto 0) = "10") else
+    to_signed(660,11)   when (NEXT_TRACK(1 downto 0) = "11") else
     (others => '0');
     
     -- Counter to take bits from
@@ -1251,9 +1251,9 @@ begin
                     when "10" =>
                         RND_GOAL_POS <= track_3_free_pos_mem(to_integer(free_pos_cnt));
                     when "11" =>
-                        RND_GOAL_POS <= track_4_free_pos_mem(0);
+                        RND_GOAL_POS <= track_4_free_pos_mem(to_integer(free_pos_cnt));
                     when others =>
-                        RND_GOAL_POS <= track_4_free_pos_mem(0);
+                        RND_GOAL_POS <= track_4_free_pos_mem(to_integer(free_pos_cnt));
                         --null;
                 end case;
             end if;

@@ -4,7 +4,6 @@
 -- 04-apr-2017
 -- Version 0.1
 
-
 -- library declaration
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;            -- basic IEEE library
@@ -38,10 +37,8 @@ end GPU;
 architecture behavioral of GPU is
 
     signal nextpos_free     : std_logic := '0';
-    signal move             : std_logic := '0';
     signal ypos             : unsigned(4 downto 0);  -- curr y position
     signal xpos             : unsigned(5 downto 0);  -- curr x position
-    signal unicorn	        : unsigned(7 downto 0);	-- unicorn tile index
     signal bg_tile	        : unsigned(7 downto 0);	-- background tile index
     signal tile		        : unsigned(7 downto 0);	-- tile index
     signal addr_change_calc : unsigned(10 downto 0);
@@ -65,7 +62,6 @@ begin
     --* Check if we have a move request and if it can be approved *
     --*************************************************************
     nextpos_free <= '1' when (data_nextpos = x"00" or data_nextpos = x"01" or data_nextpos = x"02") else '0';
-    --move <= '1' when move_req = '1' and nextpos_free = '1' else '0';
     
     --****************************************************************************
     --* Move graphics handler : Sets address, data and enable-signal for PIC_MEM *
@@ -115,42 +111,6 @@ begin
         end if;
     end if;
     end process;
-    --process(clk)
-    --begin
-    --if rising_edge(clk) then
-    --    if rst = '1' then
-    --        WRstate <= IDLE;
-    --        addr_change <= (others => '0');
-    --        data_change <= (others => '0');
-    --        move_resp <= '0';    
-    --        we_picmem <= '0';
-    --    else
-    --        case WRstate is
-    --            when IDLE =>
-    --                if (move = '1') then  -- We should move.
-    --                    addr_change <= addr_change_calc; 
-    --                    data_change <= tile;    -- Sets data to BG-tile.
-    --                    move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
-    --                    we_picmem <= '1';   -- PIC_MEM can now use address and data to clear curr_pos.
-    --                    WRstate <= DRAW;    -- Set state to DRAW so we get addr and data from next_pos.
-    --                elsif (upd_sound_icon = '1') then  -- Toggle what sound icon is shown
-    --                    addr_change <= to_unsigned(1199,11);  -- Select position (38,28) bottom-right
-    --                    data_change <= sound_icon;  -- Set it to correct sound_icon
-    --                    we_picmem <= '1';
-    --                else   
-    --                    we_picmem <= '0';
-    --                end if;
-    --            when DRAW =>
-    --                addr_change <= addr_change_calc; 
-    --                data_change <= tile;  -- Sets data to character tile.
-    --                move_resp <= '0'; 
-    --                WRstate <= IDLE;
-    --            when others =>
-    --                null;
-    --        end case;
-    --    end if;
-    --end if;
-    --end process;
     
     --*********************
     --* Signal assignment *
@@ -173,6 +133,5 @@ begin
     tile <= bg_tile when (WRstate = COLLISIONHANDLING) else x"03"; -- Background tile depends on sel_track and x"03" means unicorn tile
     sound_icon <= x"0C" when (sound_channel = '0') else x"0D"; -- x"0C" = curr sound, x"13" = goal sound
     
-  
-    end behavioral;
+end behavioral;
 

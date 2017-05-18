@@ -1,8 +1,8 @@
 --------------------------------------------------------------------------------
 -- SOUND
--- Rebecca Lindblom
--- 31-mars-2017
-
+-- ZigSound
+-- 04-apr-2017
+-- Version 0.1
 
 -- library declaration
 library IEEE;
@@ -37,17 +37,17 @@ architecture behavioral of SOUND is
     signal beat         : signed(26 downto 0);        -- Divided value for desired frequency for beat at position
     signal freq         : signed(16 downto 0);        -- Divided value for desired frequency for freq at position
 
-    signal clk_div_beat : unsigned(26 downto 0);        -- Dividing clock for beat
-    signal clk_div_freq : unsigned(16 downto 0);        -- Dividing clock for freq
+    signal clk_div_beat : unsigned(26 downto 0);      -- Dividing clock for beat
+    signal clk_div_freq : unsigned(16 downto 0);      -- Dividing clock for freq
 
-    signal clk_beat     : std_logic := '0';                            -- Clock signal for beat
-    signal clk_freq     : std_logic := '0';                            -- Clock signal for freq
+    signal clk_beat     : std_logic := '0';           -- Clock signal for beat
+    signal clk_freq     : std_logic := '0';           -- Clock signal for freq
 
     -- Flip flops
-    signal q_beat       : std_logic := '0';                       -- Beat flip flop
+    signal q_beat       : std_logic := '0';            -- Beat flip flop
     signal q_beat_plus  : std_logic := '0';    
     
-    signal q_freq       : std_logic := '0';                       -- Freq flip flop
+    signal q_freq       : std_logic := '0';            -- Freq flip flop
     signal q_freq_plus  : std_logic := '0';
 
 begin
