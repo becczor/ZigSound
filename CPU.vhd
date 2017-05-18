@@ -1247,14 +1247,16 @@ begin
                 dly_cnt <= to_unsigned(1,3);
             elsif (dly_cnt = "001") then
                 dly_cnt <= to_unsigned(2,3);
-            -- Changing track and requesting updated sound icon (in key pressed section).
             elsif (dly_cnt = "010") then
                 dly_cnt <= to_unsigned(3,3);
-                SEL_TRACK <= NEXT_TRACK(1 downto 0);
+            -- Changing track and requesting updated sound icon (in key pressed section).
             elsif (dly_cnt = "011") then
                 dly_cnt <= to_unsigned(4,3);
+                SEL_TRACK <= NEXT_TRACK(1 downto 0);
             elsif (dly_cnt = "100") then
-                dly_cnt <= to_unsigned(0,3);
+                dly_cnt <= to_unsigned(5,3);
+            elsif (dly_cnt = "101") then
+                dly_cnt <= to_unsigned(0,3);            
             else
                 null;
             end if;
@@ -1536,8 +1538,8 @@ begin
                             null;
                     end case;
                 -- In locked mode, don't check for key pressed.
-                -- Time to set sound icon
-                elsif (dly_cnt = 2) then
+                -- Time to update sound icon
+                elsif (dly_cnt = 3) then
                     UPD_SOUND_ICON <= '1';
                 -- Do nothing, GPU busy
                 else    
