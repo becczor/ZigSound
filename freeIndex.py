@@ -1,8 +1,8 @@
 from sys import argv
 
-def calc_coord(pos_cnt):
-    x_coord = bin(pos_cnt%40)[2:].zfill(9) # returns binary representation of x-pos
-    y_coord = bin(pos_cnt//40)[2:].zfill(9) # returns binary representation of x-pos
+def calc_coord(col_cnt, row_cnt):
+    x_coord = bin(col_cnt)[2:].zfill(9) # returns binary representation of x-pos
+    y_coord = bin(row_cnt)[2:].zfill(9) # returns binary representation of x-pos
     position = x_coord + y_coord
     return position
     
@@ -31,20 +31,21 @@ for lines in all_lines:
             elems_on_row_cnt = 0
             track_pos.write("\n-- Row: " + str(row_cnt) + "\n")
         for tile in tiles:   
-            if pos_cnt != 41 and isBgTile(tile): # Checks not start pos and if background 
-                coord_str = calc_coord(pos_cnt)
-                track_pos.write("b\"" + coord_str + "\"" + ",")   # Adds the free pos to track_free_pos       
+            if not (col_cnt == 0 and row_cnt == 1) and isBgTile(tile): # Checks not start pos and if background 
+                coord_str = calc_coord(col_cnt, row_cnt)
+                track_pos.write("b\"" + coord_str + '\",')   # Adds the free pos to track_free_pos       
                 elems_on_row_cnt += 1
                 free_pos_cnt += 1    
                 if elems_on_row_cnt % 4 == 0:
                     elems_on_row_cnt = 0
                     track_pos.write("\n")       
             if not "--" in tile:
-                pos_cnt += 1
+                col_cnt += 1
         row_cnt += 1
+        col_cnt = 0
     
 
-track_pos.write("\n" + "Number of elements: " + str(free_pos_cnt))        
+track_pos.write("\n" + "--- Number of elements: " + str(free_pos_cnt))        
 
 for i in range(0,3):
     track_pos.write("\n")
