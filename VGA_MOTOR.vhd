@@ -81,9 +81,9 @@ architecture Behavioral of VGA_MOTOR is
     signal tileIndex    : unsigned(4 downto 0);
 
     -- Animation and goal message showing
-    signal rb_time_cnt             : unsigned(18 downto 0);
-    signal rb_x_cnt                : unsigned(9 downto 0);
-    signal rb_Xpixel_limit    : unsigned(9 downto 0);
+    signal rb_time_cnt             : unsigned(18 downto 0);     -- Counter with purpose to slows down the animation of rainbow sprite
+    signal rb_x_cnt                : unsigned(9 downto 0);      -- Sets the end coord for RB-sprite and the delay after animation 
+    signal rb_Xpixel_limit    : unsigned(9 downto 0);           -- Sets the actuall end coord of RB-sprite (not bigger than (xpixel 448)
     signal showing_goal_msg      : std_logic;              
     
     -- Sprite memory type Rainbow
@@ -655,12 +655,12 @@ begin
     -- 25 MHz clock (one system clock pulse width)
     Clk25 <= '1' when (ClkDiv = 3) else '0';
 
-    --- Counter for slowing down rb_x_cnt
+    --- Counter for slowing down rb_x_cnt / the animation
     process(clk)
     begin
     if rising_edge(clk) then
         if (rst = '1') then
-            rb_time_cnt <= (others => '0');
+            rb_time_cnt <= (others => '0');     
         else
             rb_time_cnt <= rb_time_cnt + 1;
         end if;
@@ -672,21 +672,22 @@ begin
     begin
     if rising_edge(clk) then
         if rst = '1'  then
-            rb_x_cnt <= to_unsigned(192,10); -- Start x-cord
+            rb_x_cnt <= to_unsigned(192,10);            -- Start x-cord
         elsif goal_reached = '1' then
-            showing_goal_msg <= '1';
-            rb_x_cnt <= to_unsigned(192,10);
-        elsif rb_x_cnt = to_unsigned(600, 10) then 
-            showing_goal_msg <= '0';
-        elsif (rb_time_cnt = to_unsigned(131071,17) and showing_goal_msg = '1') then -- Stop counter     
+            showing_goal_msg <= '1';                    -- sets the signal that indicates that Goal-message is being shown to 1. 
+            rb_x_cnt <= to_unsigned(192,10);            -- sets start x-coord to pixel = 192
+        elsif rb_x_cnt = to_unsigned(600, 10) then      -- checks if reached en of rainbowanimation, x-coord/pixel = 600
+            showing_goal_msg <= '0';                    -- sets the signal that indicates that Goal-message is being shown to 0. 
+        elsif (rb_time_cnt = to_unsigned(131071,17) and showing_goal_msg = '1') then -- Everytim the rb_time_cnt reaches 121071 we increace the rb-x-count, making the animation slow enough to see
             rb_x_cnt <= rb_x_cnt + 1;
         else
             null;
         end if;
     end if;
     end process;
-    showing_goal_msg_out <= showing_goal_msg;
-    rb_Xpixel_limit <= rb_x_cnt when (rb_x_cnt < 449) else to_unsigned(448,10);  
+    showing_goal_msg_out <= showing_goal_msg;           -- out signal that is 1 if we're showing a message, 0 if not.
+    rb_Xpixel_limit <= rb_x_cnt when (rb_x_cnt < 449) else to_unsigned(448,10);  -- sets the rainbow sprite x-coord limit. 
+                                                                                 --(exists because of the delay of the message, it waits a little bit before message disapere))
 
     -- 25 MHz clock (one system clock pulse width)
     Clk25 <= '1' when (ClkDiv = 3) else '0';
@@ -858,11 +859,11 @@ begin
     end if;
     end process;
     
-    -- Check if we're on the rainbow
+    -- Check if we're on the rainbow and that the pixel is not transparent
     isRbSprite <= '1' when ((Xpixel > 192 and Xpixel < rb_Xpixel_limit) and (Ypixel > 100 and Ypixel < 228) and not (goalRbPixel = x"01")) else '0';
-    -- Check if we're on "Yay, carrot ++"
+    -- Check if we're on "Yay, carrot ++" and that the pixel is not transparent
     isCSprite <= '1' when ((Xpixel > 192 and Xpixel < 448 and rb_Xpixel_limit = to_unsigned(448,10)) and (Ypixel > 240 and Ypixel < 368) and not (goalCarrotPixel = x"01")) else '0';
-    -- Check if we're on the 'G' for goal pos
+    -- Check if we're on the 'G' for goal pos and that the pixel is not transparent
     isGoalSprite <= '1' when ((Xpixel > sprite_xstart_g and Xpixel < sprite_xend_g) and (Ypixel > sprite_ystart_g and Ypixel < sprite_yend_g) and not (dispGoalPosPixel = x"01")) else '0';
     -- Check if current tile represents transparancy
     isTransparent <= '1' when (dataPixel = x"01") else '0';
