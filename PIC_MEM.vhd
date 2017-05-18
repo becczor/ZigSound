@@ -153,15 +153,11 @@ begin
         else
             null;
         end if;
+        -- Uses sel_track to get correct track index to then set data out to correct tile
         data_vga <= track(to_integer(sel_track*to_unsigned(1200,11) + addr_vga));
+        data_nextpos <= track(to_integer(sel_track*to_unsigned(1200,11) + addr_nextpos));
     end if;
     end process;
-    
-    -- Uses sel_track to get correct track index to then set data out to correct tile
-    data_nextpos <= track(to_integer(sel_track*to_unsigned(1200,11) + addr_nextpos));
-    --data_vga <= track(to_integer(sel_track*to_unsigned(1200,11) + addr_vga));
-
-
 
 end Behavioral;
 

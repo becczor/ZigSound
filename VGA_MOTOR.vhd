@@ -602,13 +602,13 @@ begin
     -- *                                 *
     -- ***********************************
 
-    blank <= '1' when ((Xpixel > 639 and Xpixel <= 799) or (Ypixel > 479 and Ypixel <= 520)) else '0';
+    blank <= '1' when ((Xpixel_next > 639 and Xpixel_next <= 799) or (Ypixel_next > 479 and Ypixel_next <= 520)) else '0';
 
-    isRbSprite <= '1' when ((Xpixel > 192 and Xpixel < showing_Xpixel_cnt) and (Ypixel > 100 and Ypixel < 228) and not (spriteMemRb(to_integer(spriteAddrRb)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
+    isRbSprite <= '1' when ((Xpixel_next > 192 and Xpixel_next < showing_Xpixel_cnt) and (Ypixel_next > 100 and Ypixel_next < 228) and not (spriteMemRb(to_integer(spriteAddrRb)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
     
-    isCSprite <= '1' when ((Xpixel > 192 and Xpixel < 448 and showing_Xpixel_cnt = to_unsigned(448,10)) and (Ypixel > 240 and Ypixel < 368) and not (spriteMemC(to_integer(spriteAddrC)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
+    isCSprite <= '1' when ((Xpixel_next > 192 and Xpixel_next < 448 and showing_Xpixel_cnt = to_unsigned(448,10)) and (Ypixel_next > 240 and Ypixel_next < 368) and not (spriteMemC(to_integer(spriteAddrC)) = x"FE")) else '0';  -- ÄNDRA EFTER SOTRLEK
 
-    isGoalSprite <= '1' when ((Xpixel > sprite_xstart_g and Xpixel < sprite_xend_g) and (Ypixel > sprite_ystart_g and Ypixel < sprite_yend_g) and not (spriteMemGoal(to_integer(spriteAddrG)) = x"FE")) else '0';
+    isGoalSprite <= '1' when ((Xpixel_next > sprite_xstart_g and Xpixel_next < sprite_xend_g) and (Ypixel_next > sprite_ystart_g and Ypixel_next < sprite_yend_g) and not (spriteMemGoal(to_integer(spriteAddrG)) = x"FE")) else '0';
 
     -- Tile memory access   
     process(clk)
@@ -664,13 +664,13 @@ begin
     
     -- Sets the offset of x and y pixel coords for sprite-drawing. 
     -- Sprite starts at 300 and 200 
-    sprite_x_offset_rb <= Xpixel - to_unsigned(192,10);
-    sprite_y_offset_rb <= Ypixel - to_unsigned(100,10);
-    sprite_y_offset_c <= Ypixel - to_unsigned(240,10);
+    sprite_x_offset_rb <= Xpixel_next - to_unsigned(192,10);
+    sprite_y_offset_rb <= Ypixel_next - to_unsigned(100,10);
+    sprite_y_offset_c <= Ypixel_next - to_unsigned(240,10);
 
     -- chooses the tile index 
     x_s_limit <= to_unsigned(to_integer(score * 16), 10) when score < 40 else to_unsigned(624, 10);
-    tileIndex <= "01110" when ((Xpixel > 0 and Xpixel < x_s_limit) and (Ypixel > 464 and Ypixel < 480)) else unsigned(data(4 downto 0)); -- Carrot tile or data tile
+    tileIndex <= "01110" when ((Xpixel_next > 0 and Xpixel_next < x_s_limit) and (Ypixel_next > 464 and Ypixel_next < 480)) else unsigned(data(4 downto 0)); -- Carrot tile or data tile
 
     -- Calculates goal coordinates in pixels
     sprite_xstart_g <= to_unsigned(16 * to_integer(unsigned(goal_x)), 10); 
@@ -679,14 +679,14 @@ begin
     sprite_yend_g <= to_unsigned(16 * (to_integer(unsigned(goal_y)) + 1),10);
 
     -- Tile memory address composite
-    bgTileAddr <= "000" & sel_track & Ypixel(3 downto 0) & Xpixel(3 downto 0); -- Sel_track determines background tile.
-    tileAddr <= tileIndex & Ypixel(3 downto 0) & Xpixel(3 downto 0);
+    bgTileAddr <= "000" & sel_track & Ypixel_next(3 downto 0) & Xpixel_next(3 downto 0); -- Sel_track determines background tile.
+    tileAddr <= tileIndex & Ypixel_next(3 downto 0) & Xpixel_next(3 downto 0);
     spriteAddrRb <= sprite_y_offset_rb(6 downto 2) & sprite_x_offset_rb(7 downto 2); --Ändras när vi ändrar spriteMem
     spriteAddrC <= sprite_y_offset_c(6 downto 2) & sprite_x_offset_rb(7 downto 2); --Ändras när vi ändrar spriteMem
-    spriteAddrG <= Ypixel(3 downto 0) & Xpixel(3 downto 0);
+    spriteAddrG <= Ypixel_next(3 downto 0) & Xpixel_next(3 downto 0);
 
     -- Picture memory address composite
-    addr <= to_unsigned(40, 6) * Ypixel(8 downto 4) + Xpixel(9 downto 4);
+    addr <= to_unsigned(40, 6) * Ypixel_next(8 downto 4) + Xpixel_next(9 downto 4);
 
     -- VGA generation
     vgaRed(2) <= pixel_out(7);

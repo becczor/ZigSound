@@ -48,7 +48,7 @@ architecture behavioral of GPU is
     signal sound_icon       : unsigned(7 downto 0);	-- sound icon index
     signal curr_sound_icon  : unsigned(7 downto 0); -- curr pos sound icon
 
-    type wr_type is (IDLE, DRAW);  -- declare state types for write cycle
+    type wr_type is (IDLE, COLLISIONHANDLING, DRAW);  -- declare state types for write cycle
     signal WRstate : wr_type;  -- write cycle state
     
     --********************
@@ -65,11 +65,11 @@ begin
     --* Check if we have a move request and if it can be approved *
     --*************************************************************
     nextpos_free <= '1' when (data_nextpos = x"00" or data_nextpos = x"01" or data_nextpos = x"02") else '0';
-    move <= '1' when move_req = '1' and nextpos_free = '1' else '0';
+    --move <= '1' when move_req = '1' and nextpos_free = '1' else '0';
     
-    --*******************************************************************
-    --* Move handler : Sets address, data and enable-signal for PIC_MEM *
-    --*******************************************************************
+    --****************************************************************************
+    --* Move graphics handler : Sets address, data and enable-signal for PIC_MEM *
+    --****************************************************************************
     process(clk)
     begin
     if rising_edge(clk) then
@@ -82,21 +82,30 @@ begin
         else
             case WRstate is
                 when IDLE =>
-                    if (move = '1') then  -- We should move.
-                        addr_change <= addr_change_calc; 
-                        data_change <= tile;    -- Sets data to BG-tile.
-                        move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
-                        we_picmem <= '1';   -- PIC_MEM can now use address and data to clear curr_pos.
-                        WRstate <= DRAW;    -- Set state to DRAW so we get addr and data from next_pos.
+                    we_picmem <= '0';
+                    WRstate <= IDLE;
+                    if (move_req = '1') then
+                        WRstate <= COLLISIONHANDLING; -- Move request, go check if we have a collision
                     elsif (upd_sound_icon = '1') then  -- Toggle what sound icon is shown
                         addr_change <= to_unsigned(1199,11);  -- Select position (38,28) bottom-right
                         data_change <= sound_icon;  -- Set it to correct sound_icon
                         we_picmem <= '1';
+                    else
+                        null;
+                    end if; 
+                when COLLISIONHANDLING =>
+                    if (nextpos_free = '1') then  -- We should move.
+                        addr_change <= addr_change_calc; -- Sets addr to curr pos
+                        data_change <= tile;    -- Sets data to BG-tile.
+                        move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
+                        we_picmem <= '1';   -- PIC_MEM can now use address and data to clear curr_pos.
+                        WRstate <= DRAW;    -- Set state to DRAW so we get addr and data from next_pos.
                     else   
                         we_picmem <= '0';
+                        WRstate <= IDLE;
                     end if;
                 when DRAW =>
-                    addr_change <= addr_change_calc; 
+                    addr_change <= addr_change_calc; -- Sets addr to next pos
                     data_change <= tile;  -- Sets data to character tile.
                     move_resp <= '0'; 
                     WRstate <= IDLE;
@@ -106,6 +115,42 @@ begin
         end if;
     end if;
     end process;
+    --process(clk)
+    --begin
+    --if rising_edge(clk) then
+    --    if rst = '1' then
+    --        WRstate <= IDLE;
+    --        addr_change <= (others => '0');
+    --        data_change <= (others => '0');
+    --        move_resp <= '0';    
+    --        we_picmem <= '0';
+    --    else
+    --        case WRstate is
+    --            when IDLE =>
+    --                if (move = '1') then  -- We should move.
+    --                    addr_change <= addr_change_calc; 
+    --                    data_change <= tile;    -- Sets data to BG-tile.
+    --                    move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
+    --                    we_picmem <= '1';   -- PIC_MEM can now use address and data to clear curr_pos.
+    --                    WRstate <= DRAW;    -- Set state to DRAW so we get addr and data from next_pos.
+    --                elsif (upd_sound_icon = '1') then  -- Toggle what sound icon is shown
+    --                    addr_change <= to_unsigned(1199,11);  -- Select position (38,28) bottom-right
+    --                    data_change <= sound_icon;  -- Set it to correct sound_icon
+    --                    we_picmem <= '1';
+    --                else   
+    --                    we_picmem <= '0';
+    --                end if;
+    --            when DRAW =>
+    --                addr_change <= addr_change_calc; 
+    --                data_change <= tile;  -- Sets data to character tile.
+    --                move_resp <= '0'; 
+    --                WRstate <= IDLE;
+    --            when others =>
+    --                null;
+    --        end case;
+    --    end if;
+    --end if;
+    --end process;
     
     --*********************
     --* Signal assignment *
@@ -122,9 +167,9 @@ begin
     
     addr_nextpos <= unsigned(NEXT_XPOS) + (to_unsigned(40, 6) * unsigned(NEXT_YPOS));
     -- Takes x- and y-pos from curr_pos if we're in IDLE, else from next_pos.
-    xpos <= unsigned(CURR_XPOS) when (WRstate = IDLE) else unsigned(NEXT_XPOS);
-    ypos <= unsigned(CURR_YPOS) when (WRstate = IDLE) else unsigned(NEXT_YPOS);
-    tile <= bg_tile when (WRstate = IDLE) else x"03"; -- Background tile depends on sel_track and x"03" means unicorn tile
+    xpos <= unsigned(CURR_XPOS) when (WRstate = COLLISIONHANDLING) else unsigned(NEXT_XPOS);
+    ypos <= unsigned(CURR_YPOS) when (WRstate = COLLISIONHANDLING) else unsigned(NEXT_YPOS);
+    tile <= bg_tile when (WRstate = COLLISIONHANDLING) else x"03"; -- Background tile depends on sel_track and x"03" means unicorn tile
     sound_icon <= x"0C" when (sound_channel = '0') else x"0D"; -- x"0C" = curr sound, x"13" = goal sound
     
   

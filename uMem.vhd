@@ -18,7 +18,7 @@ architecture Behavioral of uMem is
 --************************
 --* u_mem : Micro Memory *
 --************************
-type u_mem_t is array (0 to 66) of unsigned(24 downto 0);
+type u_mem_t is array (0 to 69) of unsigned(24 downto 0);
 -- Maximum array length is 127, change when adding/deleting from uMem.
 constant u_mem_c : u_mem_t := (
         -- ALU_TB_FB_S_P_LC_SEQ_MICROADDR
@@ -111,9 +111,8 @@ constant u_mem_c : u_mem_t := (
         --om G = 0, annars PC++
 		b"0000_000_000_0_0_00_1101_0000000",	--0000680	µPC := 0 om G = 1
 		b"0000_000_000_0_0_00_0101_0011011",	--000029B	Hopp till BRA
-        --SETNEXT 31
-        --GOAL_POS := RND_GOAL_POS if GRX = "100"    
-        --SEL_TRACK := RND_SEL_TRACK if GRX = "101" 
+        --SETRNDGOALPOS 31
+        --GOAL_POS := RND_GOAL_POS if GRX = "100"
         b"0000_110_110_0_0_00_0011_0000000", 	--01B0000	REG := RND_REG
         --SHOWGOALMSG 32
         --WON := '1'
@@ -144,7 +143,12 @@ constant u_mem_c : u_mem_t := (
         --PC := PC + 1 + ADR
         --om G = 0, annars PC++
 		b"0000_000_000_0_0_00_0110_0000000",	--HEX	    µPC := 0 om S = 0
-		b"0000_000_000_0_0_00_0101_0011011"	    --HEX	    Hopp till BRA
+		b"0000_000_000_0_0_00_0101_0011011",	    --HEX	    Hopp till BRA
+		--INCRTRACK 43, GRX has to be "101"!
+		-- NEXT_TRACK <= NEXT_TRACK + 1
+        b"1000_000_000_0_0_00_0000_0000000",    --HEX       AR := '1'
+        b"0100_110_000_0_0_00_0000_0000000",    --HEX       AR := AR + NEXT_TRACK via buss, GRX has to be "101"!
+        b"0000_100_110_0_0_00_0011_0000000"     --HEX       NEXT_TRACK <= AR
         );
 
 signal u_mem : u_mem_t := u_mem_c;

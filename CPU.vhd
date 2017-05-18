@@ -77,8 +77,6 @@ architecture Behavioral of CPU is
     signal CURR_POS         : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
     signal NEXT_POS         : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
     signal SEL_TRACK        : signed(1 downto 0) := "00";  -- Track select (sel_track_out)
-    signal NEXT_SEL_TRACK   : signed(1 downto 0) := "00"; -- Randomly generated track selector.
-    signal next_track       : signed(1 downto 0) := "00"; -- Temp for saving next track before we can apply it to SEL_TRACK.
     -- To SOUND
     signal SEL_SOUND        : std_logic := '0'; -- Sound select (sel_sound_out)
     signal DISP_GOAL_POS    : std_logic := '0'; -- Display goal pos on screen (disp_goal_pos_out)
@@ -100,6 +98,7 @@ architecture Behavioral of CPU is
     signal GR1              : signed(17 downto 0) := (others => '0');
     signal GR2              : signed(17 downto 0) := (others => '0');
     signal GR3              : signed(17 downto 0) := (others => '0');
+    signal NEXT_TRACK       : signed(17 downto 0) := (others => '1');
     
     --******************
     --* Signal aliases *
@@ -131,39 +130,39 @@ architecture Behavioral of CPU is
 	type uAddr_instr_t is array (0 to 31) of unsigned(6 downto 0);
 	constant uAddr_instr_c : uAddr_instr_t := 
 	-- OP consists of 5 bits, so the maximum amount of instructions is 32.
-    ------ µStartAddr ------- µInstr --------- OP ---
-        ("0001010",--x"0A", -- LOAD         "00000" 0
-         "0001011",--x"0B", -- STORE        "00001" 1
-         "0001100",--x"0C", -- ADD          "00010" 2
-         "0001111",--x"0F", -- SUB          "00011" 3
-         "0010010",--x"12", -- AND          "00100" 4
-         "0010101",--x"15", -- LSR          "00101" 5
-         "0011011",--x"1B", -- BRA          "00110" 6
-         "0011110",--x"1E", -- CMP          "00111" 7
-         "0100000",--x"20", -- BNE          "01000" 8
-         "0100010",--x"22", -- BGT          "01001" 9
-         "0101001",--x"29", -- BGE          "01010" 10
-         "0101110",--x"2E", -- HALT         "01011" 11
-         "0101111",--x"2F", -- BCT          "01100" 12
-         "0110001",--x"31", -- SETRND       "01101" 13
-         "0110010",--x"32", -- SHOWGOALMSG  "01110" 14
-         "0110100",--x"34", -- HIDEGOALMSG  "01111" 15
-         "0110110",--x"36", -- WAIT         "10000" 16
-         "0111010",--x"3A", -- INCRSCORE    "10001" 17
-         "0111101",--x"3D", -- SENDWONSIG   "10010" 18
-         "1000001",--x"41", -- BSW          "10011" 19
-         "0000000",--x"00", -- NULL         "10100" 20
-         "0000000",--x"00", -- NULL         "10101" 21
-         "0000000",--x"00", -- NULL         "10110" 22
-         "0000000",--x"00", -- NULL         "10111" 23
-         "0000000",--x"00", -- NULL         "11000" 24
-         "0000000",--x"00", -- NULL         "11001" 25
-         "0000000",--x"00", -- NULL         "11010" 26
-         "0000000",--x"00", -- NULL         "11011" 27
-         "0000000",--x"00", -- NULL         "11100" 28
-         "0000000",--x"00", -- NULL         "11101" 29
-         "0000000",--x"00", -- NULL         "11110" 30
-         "0000000" --x"00"  -- NULL         "11111" 31
+    -------- µStartAddr ------- µInstr ----------- OP ---
+        ("0001010",--x"0A", -- LOAD             "00000" 0
+         "0001011",--x"0B", -- STORE            "00001" 1
+         "0001100",--x"0C", -- ADD              "00010" 2
+         "0001111",--x"0F", -- SUB              "00011" 3
+         "0010010",--x"12", -- AND              "00100" 4
+         "0010101",--x"15", -- LSR              "00101" 5
+         "0011011",--x"1B", -- BRA              "00110" 6
+         "0011110",--x"1E", -- CMP              "00111" 7
+         "0100000",--x"20", -- BNE              "01000" 8
+         "0100010",--x"22", -- BGT              "01001" 9
+         "0101001",--x"29", -- BGE              "01010" 10
+         "0101110",--x"2E", -- HALT             "01011" 11
+         "0101111",--x"2F", -- BCT              "01100" 12
+         "0110001",--x"31", -- SETRNDGOALPOS    "01101" 13 --GRX MUST BE "100"!
+         "0110010",--x"32", -- SHOWGOALMSG      "01110" 14
+         "0110100",--x"34", -- HIDEGOALMSG      "01111" 15
+         "0110110",--x"36", -- WAIT             "10000" 16
+         "0111010",--x"3A", -- INCRSCORE        "10001" 17
+         "0111101",--x"3D", -- SENDWONSIG       "10010" 18
+         "1000001",--x"41", -- BSW              "10011" 19
+         "1000011",--x"43", -- INCRTRACK        "10100" 20 --GRX MUST BE "101"!
+         "0000000",--x"00", -- NULL             "10101" 21
+         "0000000",--x"00", -- NULL             "10110" 22
+         "0000000",--x"00", -- NULL             "10111" 23
+         "0000000",--x"00", -- NULL             "11000" 24
+         "0000000",--x"00", -- NULL             "11001" 25
+         "0000000",--x"00", -- NULL             "11010" 26
+         "0000000",--x"00", -- NULL             "11011" 27
+         "0000000",--x"00", -- NULL             "11100" 28
+         "0000000",--x"00", -- NULL             "11101" 29
+         "0000000",--x"00", -- NULL             "11110" 30
+         "0000000" --x"00"  -- NULL             "11111" 31
         );
     signal uAddr_instr : uAddr_instr_t := uAddr_instr_c;
     
@@ -1232,63 +1231,41 @@ begin
     end process;
 
 
-    ----****************************************
-    ----* SEL_TRACK : Track-selection Register *
-    ----****************************************
-    --process(clk)
-    --begin
-    --    if rising_edge(clk) then
-    --        if (rst = '1') then
-    --            SEL_TRACK <= "00";
-    --            dly_cnt <= to_unsigned(0,2);
-    --        -- In process of changing track, locking keyboard.
-    --        elsif (dly_cnt = "00" and FB = "110" and GRX = "101") then
-    --            next_track <= DATA_BUS(1 downto 0); 
-    --            dly_cnt <= to_unsigned(1,2);
-    --        elsif (dly_cnt = "01") then
-    --            dly_cnt <= to_unsigned(2,2);
-    --        -- Unlocking keyboard and changing track.
-    --        elsif (dly_cnt = "10") then
-    --            dly_cnt <= to_unsigned(0,2);
-    --            SEL_TRACK <= next_track;
-    --        else
-    --            null;
-    --        end if;
-    --    end if;
-    --end process;    
+    ----*****************************************
+    ----* NEXT_TRACK : Track-selection Register *
+    ----*****************************************  
     process(clk)
     begin
         if rising_edge(clk) then
             if (rst = '1') then
                 SEL_TRACK <= "00";
-                NEXT_SEL_TRACK <= "01";
+                NEXT_TRACK <= (others => '1');
                 dly_cnt <= to_unsigned(0,3);
             -- In process of changing track, locking keyboard.
             elsif (dly_cnt = "000" and FB = "110" and GRX = "101") then
-                next_track <= DATA_BUS(1 downto 0); 
-                if (NEXT_SEL_TRACK + 1 = "11") then
-                    NEXT_SEL_TRACK <= "00";
-                else
-                    NEXT_SEL_TRACK <= NEXT_SEL_TRACK + 1;
-                end if;
+                NEXT_TRACK <= DATA_BUS; 
                 dly_cnt <= to_unsigned(1,3);
             elsif (dly_cnt = "001") then
                 dly_cnt <= to_unsigned(2,3);
-            -- Changing track and requesting updated sound icon (in key pressed section).
             elsif (dly_cnt = "010") then
                 dly_cnt <= to_unsigned(3,3);
-                SEL_TRACK <= next_track;
+            -- Changing track and requesting updated sound icon (in key pressed section).
             elsif (dly_cnt = "011") then
                 dly_cnt <= to_unsigned(4,3);
+                SEL_TRACK <= NEXT_TRACK(1 downto 0);
             elsif (dly_cnt = "100") then
-                dly_cnt <= to_unsigned(0,3);
+                dly_cnt <= to_unsigned(5,3);
+            elsif (dly_cnt = "101") then
+                dly_cnt <= to_unsigned(0,3);            
             else
                 null;
             end if;
         end if;
     end process;    
 
-
+    --FB = "110" & GRX = "110" UNUSED
+    --FB = "110" & GRX = "111" UNUSED
+    
     --*****************************************
     --* ASR : Program Memory Address Register *
     --*****************************************
@@ -1503,8 +1480,9 @@ begin
     GR2                                 when (TB = "110" and GRX = "010") else 
     GR3                                 when (TB = "110" and GRX = "011") else
     RND_GOAL_POS                        when (TB = "110" and GRX = "100") else
-    to_signed(0,16) & NEXT_SEL_TRACK    when (TB = "110" and GRX = "101") else 
-    GOAL_POS                            when (TB = "110" and GRX = "110") else 
+    NEXT_TRACK                          when (TB = "110" and GRX = "101") else 
+    --NULL                                when (TB = "110" and GRX = "110") else 
+    --NULL                                when (TB = "110" and GRX = "111") else 
     to_signed(0,16) & SEL_TRACK         when (TB = "110" and GRX = "111") else
     to_signed(0,10) & ASR               when (TB = "111") else
     DATA_BUS;
@@ -1560,8 +1538,8 @@ begin
                             null;
                     end case;
                 -- In locked mode, don't check for key pressed.
-                -- Time to set sound icon
-                elsif (dly_cnt = 2) then
+                -- Time to update sound icon
+                elsif (dly_cnt = 3) then
                     UPD_SOUND_ICON <= '1';
                 -- Do nothing, GPU busy
                 else    
@@ -1575,7 +1553,7 @@ begin
     --*******************************
     --* Outgoing signals assignment *
     --*******************************
-    pAddr <= ASR when (ASR >= to_signed(0,8) and ASR <= to_signed(15,8)) else to_signed(0,8);
+    pAddr <= ASR when (ASR >= to_signed(0,8) and ASR <= to_signed(13,8)) else to_signed(0,8);
     uAddr <= uPC; 
     curr_pos_out <= CURR_POS;
     next_pos_out <= NEXT_POS;
