@@ -54,6 +54,7 @@ architecture Behavioral of VGA_MOTOR is
     signal bgPixel              : std_logic_vector(7 downto 0);  -- Background tile
     signal dataPixel            : std_logic_vector(7 downto 0);  -- Regular tile data
     signal isTransparent        : std_logic := '0';         -- Signal for checking if current tile represents transparancy
+    signal bgTile               : unsigned(7 downto 0);     -- Which bg tile we should take from when color is transparent
     signal bgTileAddr           : unsigned(12 downto 0);	-- Background tile address
     signal tileAddr             : unsigned(12 downto 0);	-- Tile address
     signal blank                : std_logic;                -- blanking signal
@@ -323,18 +324,27 @@ x"FE",x"FE",x"FE",x"FE",x"A6",x"A6",x"FE",x"FE",x"FE",x"FE",x"A6",x"A6",x"FE",x"
         x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
         x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
 
-        x"01",x"01",x"01",x"01",x"01",x"96",x"96",x"01",x"01",x"01",x"96",x"01",x"01",x"01",x"01",x"01",    -- x"08" TREE 1 AUTUMN (FIX COLORS!!)
-        x"01",x"01",x"01",x"96",x"96",x"1A",x"1A",x"96",x"96",x"96",x"1A",x"12",x"12",x"01",x"01",x"01",    
-        x"01",x"01",x"01",x"10",x"10",x"96",x"96",x"1A",x"10",x"1A",x"96",x"1A",x"18",x"12",x"01",x"01",
-        x"01",x"01",x"96",x"10",x"96",x"18",x"96",x"10",x"1A",x"96",x"10",x"18",x"1A",x"D6",x"12",x"01",    
-        x"01",x"96",x"10",x"1A",x"1A",x"96",x"10",x"18",x"96",x"D6",x"18",x"1A",x"18",x"12",x"01",x"01",
-        x"01",x"10",x"10",x"96",x"96",x"D6",x"10",x"18",x"10",x"10",x"D6",x"18",x"1A",x"D6",x"12",x"01",
-        x"01",x"96",x"10",x"10",x"10",x"10",x"D6",x"10",x"18",x"18",x"10",x"1A",x"18",x"18",x"18",x"12",
-        x"01",x"10",x"96",x"10",x"D6",x"10",x"10",x"1A",x"1A",x"10",x"1A",x"18",x"1A",x"1A",x"18",x"12",
-        x"10",x"96",x"1A",x"1A",x"10",x"10",x"1A",x"18",x"1A",x"18",x"18",x"1A",x"10",x"18",x"12",x"01",
-        x"01",x"10",x"10",x"10",x"D0",x"D6",x"18",x"18",x"18",x"18",x"1A",x"10",x"18",x"18",x"1A",x"12",
-        x"01",x"01",x"10",x"10",x"01",x"D0",x"D0",x"18",x"1A",x"D0",x"1A",x"18",x"18",x"12",x"12",x"01",
-        x"01",x"01",x"10",x"01",x"01",x"D0",x"D0",x"18",x"D0",x"12",x"18",x"12",x"12",x"01",x"01",x"01",
+        --ORANGE
+        --110 001 00 = C4
+        --110 011 00 = CC
+        --110 100 00 = C0
+        --REDISH
+        --100 000 00 = 80
+        --YELLOW
+        --111 100 00 = F0
+
+        x"01",x"01",x"01",x"01",x"01",x"F0",x"F0",x"01",x"01",x"01",x"F0",x"01",x"01",x"01",x"01",x"01",    -- x"08" TREE 1 AUTUMN (FIX COLORS!!)
+        x"01",x"01",x"01",x"F0",x"F0",x"80",x"80",x"F0",x"F0",x"F0",x"80",x"E4",x"E4",x"01",x"01",x"01",    
+        x"01",x"01",x"01",x"EC",x"EC",x"F0",x"F0",x"80",x"EC",x"80",x"F0",x"80",x"C0",x"E4",x"01",x"01",
+        x"01",x"01",x"F0",x"EC",x"F0",x"C0",x"F0",x"EC",x"80",x"F0",x"EC",x"C0",x"80",x"F8",x"E4",x"01",    
+        x"01",x"F0",x"EC",x"80",x"80",x"F0",x"EC",x"C0",x"F0",x"F8",x"C0",x"80",x"C0",x"E4",x"01",x"01",
+        x"01",x"EC",x"EC",x"F0",x"F0",x"F8",x"EC",x"C0",x"EC",x"EC",x"F8",x"C0",x"80",x"F8",x"E4",x"01",
+        x"01",x"F0",x"EC",x"EC",x"EC",x"EC",x"F8",x"EC",x"C0",x"C0",x"EC",x"80",x"C0",x"C0",x"C0",x"E4",
+        x"01",x"EC",x"F0",x"EC",x"F8",x"EC",x"EC",x"80",x"80",x"EC",x"80",x"C0",x"80",x"80",x"C0",x"E4",
+        x"EC",x"F0",x"80",x"80",x"EC",x"EC",x"80",x"C0",x"80",x"C0",x"C0",x"80",x"EC",x"C0",x"E4",x"01",
+        x"01",x"EC",x"EC",x"EC",x"D0",x"F8",x"C0",x"C0",x"C0",x"C0",x"80",x"EC",x"C0",x"C0",x"80",x"E4",
+        x"01",x"01",x"EC",x"EC",x"01",x"D0",x"D0",x"C0",x"80",x"D0",x"80",x"C0",x"C0",x"E4",x"E4",x"01",
+        x"01",x"01",x"EC",x"01",x"01",x"D0",x"D0",x"C0",x"D0",x"E4",x"C0",x"E4",x"E4",x"01",x"01",x"01",
         x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"12",x"01",x"01",x"01",x"01",x"01",
         x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
         x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
@@ -357,39 +367,39 @@ x"FE",x"FE",x"FE",x"FE",x"A6",x"A6",x"FE",x"FE",x"FE",x"FE",x"A6",x"A6",x"FE",x"
         x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
         x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"D0",x"D0",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
 
-        x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",    -- x"0A" TREE 1 WINTER
-        x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",    
-        x"AB",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",x"AB",
-        x"AB",x"AB",x"01",x"FB",x"01",x"AB",x"AB",x"FB",x"01",x"01",x"AB",x"AB",x"01",x"AB",x"AB",x"AB",
-        x"01",x"AB",x"AB",x"01",x"01",x"01",x"AB",x"AB",x"01",x"AB",x"AB",x"01",x"01",x"AB",x"01",x"01",
-        x"01",x"01",x"AB",x"AB",x"01",x"FB",x"AB",x"AB",x"01",x"AB",x"01",x"01",x"AB",x"AB",x"AB",x"01",
-        x"01",x"01",x"AB",x"AB",x"AB",x"01",x"AB",x"AB",x"01",x"AB",x"AB",x"AB",x"AB",x"FB",x"AB",x"AB",
-        x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"AB",x"AB",
-        x"AB",x"AB",x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",
-        x"AB",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"AB",x"01",x"01",x"01",x"01",x"01",
-        x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"FB",x"01",
-        x"01",x"01",x"01",x"FB",x"FB",x"FB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",
-        x"01",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
-        x"FB",x"FB",x"FB",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
-        x"01",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"FB",x"FB",x"FB",x"FB",x"FB",
-        x"01",x"01",x"01",x"01",x"FB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"44",x"44",x"01",x"01",x"01",x"01",x"01",x"01",x"44",x"44",x"01",x"01",x"01",    -- x"0A" TREE 1 WINTER
+        x"01",x"01",x"01",x"44",x"44",x"44",x"01",x"01",x"01",x"01",x"01",x"44",x"44",x"01",x"01",x"01",    
+        x"44",x"01",x"01",x"01",x"44",x"44",x"01",x"01",x"01",x"01",x"44",x"44",x"01",x"01",x"01",x"44",
+        x"44",x"44",x"01",x"FB",x"01",x"44",x"44",x"FB",x"01",x"01",x"44",x"44",x"01",x"44",x"44",x"44",
+        x"01",x"44",x"44",x"01",x"01",x"01",x"44",x"44",x"01",x"44",x"44",x"01",x"01",x"44",x"01",x"01",
+        x"01",x"01",x"44",x"44",x"01",x"FB",x"44",x"44",x"01",x"44",x"01",x"01",x"44",x"44",x"44",x"01",
+        x"01",x"01",x"44",x"44",x"44",x"01",x"44",x"44",x"01",x"44",x"44",x"44",x"44",x"FB",x"44",x"44",
+        x"01",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"01",x"01",x"01",x"01",x"44",x"44",
+        x"44",x"44",x"01",x"44",x"44",x"44",x"44",x"44",x"44",x"01",x"01",x"01",x"01",x"01",x"44",x"44",
+        x"44",x"01",x"01",x"01",x"44",x"44",x"44",x"44",x"44",x"01",x"44",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"44",x"44",x"44",x"44",x"44",x"44",x"01",x"01",x"01",x"FB",x"01",
+        x"01",x"01",x"01",x"FB",x"FB",x"FB",x"44",x"44",x"44",x"44",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"44",x"44",x"44",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"FB",x"FB",x"FB",x"01",x"01",x"01",x"44",x"44",x"44",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"44",x"44",x"44",x"01",x"01",x"FB",x"FB",x"FB",x"FB",x"FB",
+        x"01",x"01",x"01",x"01",x"FB",x"44",x"44",x"44",x"44",x"44",x"44",x"01",x"01",x"01",x"01",x"01",
 
-        x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",    -- x"0B" TREE 2 WINTER (CURRENTLY SAME AS TREE 1)  
-        x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",    
-        x"AB",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",x"01",x"AB",x"AB",x"01",x"01",x"01",x"AB",
-        x"AB",x"AB",x"01",x"FB",x"01",x"AB",x"AB",x"FB",x"01",x"01",x"AB",x"AB",x"01",x"AB",x"AB",x"AB",
-        x"01",x"AB",x"AB",x"01",x"01",x"01",x"AB",x"AB",x"01",x"AB",x"AB",x"01",x"01",x"AB",x"01",x"01",
-        x"01",x"01",x"AB",x"AB",x"01",x"FB",x"AB",x"AB",x"01",x"AB",x"01",x"01",x"AB",x"AB",x"AB",x"01",
-        x"01",x"01",x"AB",x"AB",x"AB",x"01",x"AB",x"AB",x"01",x"AB",x"AB",x"AB",x"AB",x"FB",x"AB",x"AB",
-        x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"AB",x"AB",
-        x"AB",x"AB",x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",
-        x"AB",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"AB",x"01",x"01",x"01",x"01",x"01",
-        x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"FB",x"01",
-        x"01",x"01",x"01",x"FB",x"FB",x"FB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",
-        x"01",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
-        x"FB",x"FB",x"FB",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
-        x"01",x"01",x"01",x"01",x"01",x"01",x"AB",x"AB",x"AB",x"01",x"01",x"FB",x"FB",x"FB",x"FB",x"FB",
-        x"01",x"01",x"01",x"01",x"FB",x"AB",x"AB",x"AB",x"AB",x"AB",x"AB",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"AC",x"AC",x"01",x"01",x"01",x"01",x"01",x"01",x"AC",x"AC",x"01",x"01",x"01",    -- x"0B" TREE 2 WINTER (CURRENTLY SAME AS TREE 1)  
+        x"01",x"01",x"01",x"AC",x"AC",x"AC",x"01",x"01",x"01",x"01",x"01",x"AC",x"AC",x"01",x"01",x"01",    
+        x"AC",x"01",x"01",x"01",x"AC",x"AC",x"01",x"01",x"01",x"01",x"AC",x"AC",x"01",x"01",x"01",x"AC",
+        x"AC",x"AC",x"01",x"FB",x"01",x"AC",x"AC",x"FB",x"01",x"01",x"AC",x"AC",x"01",x"AC",x"AC",x"AC",
+        x"01",x"AC",x"AC",x"01",x"01",x"01",x"AC",x"AC",x"01",x"AC",x"AC",x"01",x"01",x"AC",x"01",x"01",
+        x"01",x"01",x"AC",x"AC",x"01",x"FB",x"AC",x"AC",x"01",x"AC",x"01",x"01",x"AC",x"AC",x"AC",x"01",
+        x"01",x"01",x"AC",x"AC",x"AC",x"01",x"AC",x"AC",x"01",x"AC",x"AC",x"AC",x"AC",x"FB",x"AC",x"AC",
+        x"01",x"AC",x"AC",x"AC",x"AC",x"AC",x"AC",x"AC",x"AC",x"AC",x"01",x"01",x"01",x"01",x"AC",x"AC",
+        x"AC",x"AC",x"01",x"AC",x"AC",x"AC",x"AC",x"AC",x"AC",x"01",x"01",x"01",x"01",x"01",x"AC",x"AC",
+        x"AC",x"01",x"01",x"01",x"AC",x"AC",x"AC",x"AC",x"AC",x"01",x"AC",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"AC",x"AC",x"AC",x"AC",x"AC",x"AC",x"01",x"01",x"01",x"FB",x"01",
+        x"01",x"01",x"01",x"FB",x"FB",x"FB",x"AC",x"AC",x"AC",x"AC",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"AC",x"AC",x"AC",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"FB",x"FB",x"FB",x"01",x"01",x"01",x"AC",x"AC",x"AC",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
+        x"01",x"01",x"01",x"01",x"01",x"01",x"AC",x"AC",x"AC",x"01",x"01",x"FB",x"FB",x"FB",x"FB",x"FB",
+        x"01",x"01",x"01",x"01",x"FB",x"AC",x"AC",x"AC",x"AC",x"AC",x"AC",x"01",x"01",x"01",x"01",x"01",
 
         x"01",x"01",x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",x"01",x"01",    -- x"0C" SOUND ICON CURR
         x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",    
@@ -679,7 +689,15 @@ begin
     sprite_yend_g <= to_unsigned(16 * (to_integer(unsigned(goal_y)) + 1),10);
 
     -- Tile memory address composite
-    bgTileAddr <= "000" & sel_track & Ypixel_next(3 downto 0) & Xpixel_next(3 downto 0); -- Sel_track determines background tile.
+    with sel_track select
+    bgTile <= 
+        x"00" when "00",
+        x"01" when "01",
+        x"02" when "10",
+        x"00" when "11",
+        x"00" when others;
+        
+    bgTileAddr <= bgTile & Ypixel_next(3 downto 0) & Xpixel_next(3 downto 0); -- Sel_track determines background tile.
     tileAddr <= tileIndex & Ypixel_next(3 downto 0) & Xpixel_next(3 downto 0);
     spriteAddrRb <= sprite_y_offset_rb(6 downto 2) & sprite_x_offset_rb(7 downto 2); --Ändras när vi ändrar spriteMem
     spriteAddrC <= sprite_y_offset_c(6 downto 2) & sprite_x_offset_rb(7 downto 2); --Ändras när vi ändrar spriteMem

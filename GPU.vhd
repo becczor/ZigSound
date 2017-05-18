@@ -161,6 +161,7 @@ begin
     x"00" when "00", -- Track 1
     x"01" when "01", -- Track 2
     x"02" when "10", -- Track 3
+    x"00" when "11", -- Track 4
     x"00" when others;
     
     addr_change_calc <= xpos + (to_unsigned(40, 6) * ypos); -- Translates x- and y-pos into PIC_MEM-address.

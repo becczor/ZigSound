@@ -44,44 +44,9 @@ architecture behavioral of KBD_ENC is
     signal PS2state : state_type;  -- PS2 state
 
     signal ScanCode			            : unsigned(7 downto 0);  -- scan code
-    signal key_code			            : unsigned(17 downto 0);  --Which_key_that_has_been_pressed
-    
-    -- TEST                             
-    --signal test_led_counter             : unsigned(50 downto 0);
-    --signal test_signal                  : std_logic;
-    --signal control_signal               : std_logic;
-    --signal working                      : std_logic;
-                                                                   
+    signal key_code			            : unsigned(17 downto 0);  --Which_key_that_has_been_pressed                                        
                                                                     
 begin
-    
-    --*************
-    --* TEST DIOD *
-    --*************
-    
-    --test_diod <= PS2KeyboardData;
-    
-    --process(clk)
-    --begin
-    --if rising_edge(clk) then
-    --    if (rst = '1') then
-    --        test_led_counter <= (others => '0');
-    --        test_diod <= '0';
-    --        working <= '0';
-    --    elsif (test_signal = '1' or working = '1') then
-    --        working <= '1';
-    --        test_diod <= '1';
-    --        test_led_counter <= test_led_counter + 1;
-    --        if (test_led_counter(50) = '1') then
-    --            test_led_counter <= (others => '0');
-    --            test_diod <= '0';
-    --            working <= '0';
-    --        end if;
-    --    end if;
-    --end if;
-    --end process;
-    
-    --test_signal <= '1' when not (PS2cmd = x"00") else '0';
     
     --*******************************
     --* PS2 signals synchronization *
@@ -184,8 +149,6 @@ begin
         end if;
     end if;
     end process;
-    
-    --test_diod <= '1' when (key_code = x"1D" or test_diod = '1') else '0';
     
     --******************************************************************
     --* keyPressed : Translates ScanCode into signal to be sent to CPU *
