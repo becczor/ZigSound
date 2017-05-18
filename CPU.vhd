@@ -1259,19 +1259,6 @@ begin
             end if;
         end if;
     end process;
-
-    -- The chance of getting track 1 is much greater than the others... fix?
-    --RND_SEL_TRACK <= free_pos_cnt(1 downto 0) when (not (free_pos_cnt(1 downto 0) = "11")) else "00"; 
-    --RND_SEL_TRACK <= "01";
-    
-    --RND_GOAL_POS <= "000010100000001111";
-    --RND_GOAL_POS <= "000000001000000001";    
-    --RND_GOAL_POS <= 
-    --track_1_free_pos_mem(to_integer(free_pos_cnt))      when (sel_track = "00") else
-    --track_2_free_pos_mem(to_integer(free_pos_cnt))      when (sel_track = "01") else
-    --track_3_free_pos_mem(to_integer(free_pos_cnt))      when (sel_track = "10") else
-    --(others => '0');
-
     
 	--*****************************
     --* IR : Instruction Register *
@@ -1768,7 +1755,6 @@ begin
             end if;
         end if;
     end process;
-    
  
     --*******************************
     --* Outgoing signals assignment *
@@ -1785,34 +1771,6 @@ begin
     goal_reached_out <= WON;
     disp_goal_pos_out <= DISP_GOAL_POS;
     score_out <= unsigned(SCORE(5 downto 0));
-
-    --*************
-    --* TEST DIOD *
-    --*************
-    
-    --test_diod <= PS2KeyboardData;
-    
-    --process(clk)
-    --begin
-    --if rising_edge(clk) then
-    --    if (rst = '1') then
-    --        test_led_counter <= (others => '0');
-    --        test_diod <= '0';
-    --        working <= '0';
-    --    elsif (test_signal = '1' or working = '1') then
-    --        working <= '1';
-    --        test_diod <= '1';
-    --        test_led_counter <= test_led_counter + 1;
-    --        if (test_led_counter(20) = '1') then
-    --            test_led_counter <= (others => '0');
-    --            test_diod <= '0';
-    --            working <= '0';
-    --        end if;
-    --    end if;
-    --end if;
-    --end process;
-    
-    --test_signal <= switch;
 
 end Behavioral;
 

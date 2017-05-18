@@ -37,43 +37,43 @@ architecture Behavioral of zigsound is
     -- CPU component
 	component CPU
     	port(
-        clk                 : in std_logic;
-        rst                 : in std_logic;
-        uAddr               : out unsigned(6 downto 0);
-        uData               : in unsigned(24 downto 0);
-        pAddr               : out signed(7 downto 0);
-        pData               : in signed(17 downto 0);
-        PS2cmd              : in unsigned(17 downto 0);
-        move_req_out        : out std_logic;
-        upd_sound_icon_out  : out std_logic;  -- signal for chaning the sound icon
-	    move_resp           : in std_logic;
-	    curr_pos_out        : out signed(17 downto 0);
-	    next_pos_out        : out signed(17 downto 0);
-        goal_pos_out        : out signed(17 downto 0);
-	    sel_track_out       : out unsigned(1 downto 0);
-	    sel_sound_out       : out std_logic;
-	    goal_reached_out    : out std_logic;
-	    showing_goal_msg    : in std_logic;
-	    disp_goal_pos_out   : out std_logic;
-        score_out           : out unsigned(5 downto 0)
+        clk                     : in std_logic;
+        rst                     : in std_logic;
+        uAddr                   : out unsigned(6 downto 0);
+        uData                   : in unsigned(24 downto 0);
+        pAddr                   : out signed(7 downto 0);
+        pData                   : in signed(17 downto 0);
+        PS2cmd                  : in unsigned(17 downto 0);
+        move_req_out            : out std_logic;
+        upd_sound_icon_out      : out std_logic;  -- signal for chaning the sound icon
+	    move_resp               : in std_logic;
+	    curr_pos_out            : out signed(17 downto 0);
+	    next_pos_out            : out signed(17 downto 0);
+        goal_pos_out            : out signed(17 downto 0);
+	    sel_track_out           : out unsigned(1 downto 0);
+	    sel_sound_out           : out std_logic;
+	    goal_reached_out        : out std_logic;
+	    showing_goal_msg        : in std_logic;
+	    disp_goal_pos_out       : out std_logic;
+        score_out               : out unsigned(5 downto 0)
 		);
   	end component;
 
     --uMem : Micro Memory Component
     component uMem
         port(
-        clk                    : in std_logic;   
-        uAddr                  : in unsigned(6 downto 0);
-        uData                  : out unsigned(24 downto 0)
+        clk                     : in std_logic;   
+        uAddr                   : in unsigned(6 downto 0);
+        uData                   : out unsigned(24 downto 0)
          );
     end component;
 
     --pMem : Program Memory Component
 	component pMem
         port(
-        pAddr              : in signed(7 downto 0);
-        pData              : out signed(17 downto 0);
-        clk                : in std_logic
+        pAddr                   : in signed(7 downto 0);
+        pData                   : out signed(17 downto 0);
+        clk                     : in std_logic
         );
 	end component;
 	
