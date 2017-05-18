@@ -2,7 +2,7 @@
 -- OP consists of 5 bits, so the maximum amount of instructions is 32.
 ----- µStartAddr ------- µInstr ----------- OP ---
 ("0001010",--x"0A", -- LOAD             "00000" 0
- "0001011",--x"0B", -- STORE            "00001" 1
+ "0001011",--x"0B", -- STORE (UNUSABLE) "00001" 1
  "0001100",--x"0C", -- ADD              "00010" 2
  "0001111",--x"0F", -- SUB              "00011" 3
  "0010010",--x"12", -- AND              "00100" 4
