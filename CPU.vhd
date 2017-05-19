@@ -1243,7 +1243,7 @@ begin
             if (rst = '1') then
                 RND_GOAL_POS <= track_1_free_pos_mem(0);
             else
-                case sel_track is
+                case NEXT_TRACK(1 downto 0) is
                     when "00" =>
                         RND_GOAL_POS <= track_1_free_pos_mem(to_integer(free_pos_cnt));
                     when "01" =>
@@ -1253,8 +1253,7 @@ begin
                     when "11" =>
                         RND_GOAL_POS <= track_4_free_pos_mem(to_integer(free_pos_cnt));
                     when others =>
-                        RND_GOAL_POS <= track_4_free_pos_mem(to_integer(free_pos_cnt));
-                        --null;
+                        RND_GOAL_POS <= track_4_free_pos_mem(0);
                 end case;
             end if;
         end if;
