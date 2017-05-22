@@ -118,7 +118,7 @@ constant u_mem_c : u_mem_t := (
 		b"0000_000_000_0_0_00_0101_0011011",	--000029B	Hopp till BRA
         --SETRNDGOALPOS 31, GRX has to be "100"!
         --GOAL_POS := RND_GOAL_POS
-        b"0000_110_110_0_0_00_0011_0000000", 	--01B0000	REG := RND_REG
+        b"0000_110_110_0_0_00_0011_0000000", 	--HEX       GOAL_POS := RND_GOAL_POS
         --SHOWGOALMSG 32
         --WON := '1'
         b"1000_000_000_0_0_00_0000_0000000",    --HEX       AR := '1'

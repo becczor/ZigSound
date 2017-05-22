@@ -1530,7 +1530,7 @@ begin
                     else 
                         uPC <= uPC + 1;
                     end if; 
-                -- "0111" UNUSED (Subroutine-related)
+                -- when "0111" => ***UNUSED***
                 when "1000" =>
                     if (flag_Z = '1') then
                         uPC <= MICROADDR;
@@ -1543,18 +1543,8 @@ begin
                     else 
                         uPC <= uPC + 1;
                     end if;
-                --when "1010" =>
-                --    if (flag_C = '1') then
-                --        uPC <= MICROADDR;
-                --    else 
-                --        uPC <= uPC + 1;
-                --    end if;
-                when "1011" =>
-                    if (flag_O = '1') then
-                        uPC <= MICROADDR;
-                    else 
-                        uPC <= uPC + 1;
-                    end if;
+                --when "1010" => ***UNUSED***
+                --when "1011" => ***UNUSED***
                 when "1100" =>
                     if (flag_L = '1') then
                         uPC <= MICROADDR;
@@ -1567,14 +1557,8 @@ begin
                     else 
                         uPC <= uPC + 1;
                     end if; 
-                when "1110" =>
-                    if (flag_O = '0') then
-                        uPC <= MICROADDR;
-                    else 
-                        uPC <= uPC + 1;
-                    end if;  
+                --when "1110" => ***UNUSED***
                --when "1111" => ***UNUSED***
-               --     uPC <= (others => '0'); -- SHOULD ALSO HALT EXECUTION   
                when others =>
                     null;
             end case; 
@@ -1600,42 +1584,32 @@ begin
     if rising_edge(clk) then
         if rst = '1' then
             AR <= (others => '0');
-            --flag_C <= '0';
-            --flag_O <= '0';
         else
             case ALU is
-                when "0000" =>  -- NO FUNCTION (No flags) 
+                when "0000" =>  -- NO FUNCTION
                     null;      
-                when "0001" => -- AR := DATA_BUS (No flags)
+                when "0001" => -- AR := DATA_BUS
                     AR <= DATA_BUS;      
-                --when "0010" =>  -- ONES' COMPLEMENT, (No flags) ***UNUSED***
-                when "0011" =>  -- SET TO ZERO (Z/N)            ***UNUSED***
+                --when "0010" => ***UNUSED***
+                when "0011" =>  -- AR := 0
                     AR <= (others => '0');   
-                when "0100" => -- AR := AR + DATA_BUS (Z/N/O/C)
+                when "0100" => -- AR := AR + DATA_BUS 
                     AR <= AR + DATA_BUS;
-                    -- SHOULD SET OVERFLOW AND CARRY AS WELL   
-                when "0101" => -- AR := AR - DATA_BUS (Z/N/O/C)
-                    AR <= AR - DATA_BUS;
-                    -- SHOULD SET OVERFLOW AND CARRY AS WELL       
-                when "0110" => -- AR := AR and DATA_BUS (Z/N)
+                when "0101" => -- AR := AR - DATA_BUS
+                    AR <= AR - DATA_BUS;     
+                when "0110" => -- AR := AR and DATA_BUS
                     AR <= AR and DATA_BUS;        
-                 --when "0111" => -- AR := AR or DATA_BUS (Z/N)       ***UNUSED***
-                 --   AR <= AR or DATA_BUS;     
-                when "1000" => -- AR := 1 (Z/N)
+                 --when "0111" => ***UNUSED***   
+                when "1000" => -- AR := 1 
                     AR <= to_signed(1,18);                      
-                --when "1001" => -- AR LSL, zero is shifted in, bit shifted out to C. (Z/N(C) ***UNUSED***
-                --    AR <= AR(16 downto 0) & '0';
-                --    flag_C <= AR(17);   
-                --when "1010" => -- AR LSL, 32-bit,                   ***UNUSED*** 
-                --when "1011" => -- AR ASR, sign bit is shifted in, bit shifted out to C. (Z/N/C) ***UNUSED***
-                --    AR <= AR(17) & AR(17 downto 1);
-                --    flag_C <= AR(0);
-                --when "1100" => -- ARHR ASR,                         ***UNUSED***
-                when "1101" => -- AR LSR, zero is shifted in, bit shifted out to C. (Z/N/C)
+                --when "1001" => ***UNUSED***
+                --when "1010" => ***UNUSED*** 
+                --when "1011" => ***UNUSED***
+                --when "1100" => ***UNUSED***
+                when "1101" => -- AR LSR, zero is shifted in.
                     AR <= '0' & AR(17 downto 1);
-                    --flag_C <= AR(0);
-                --when "1110" => -- Rotate AR to the left,            ***UNUSED***
-                --when "1111" => -- Rotate ARHR to the left (32-bit), ***UNUSED***
+                --when "1110" => ***UNUSED***
+                --when "1111" => ***UNUSED***
                 when others =>
                     null;
      
@@ -1645,8 +1619,8 @@ begin
     end process;
     flag_Z <= '1' when (AR = to_signed(0,18)) else '0';
     flag_N <= '1' when (AR < to_signed(0,18)) else '0';
-    flag_C <= '0'; -- NOT BEING DETECTED ATM, MIGHT HAVE TO IMPLEMENT INSIDE ALU PROCESS
-    flag_O <= '0'; -- NOT BEING DETECTED ATM, MIGHT HAVE TO IMPLEMENT INSIDE ALU PROCESS
+    --flag_C <= '0'; -- NOT BEING DETECTED ATM, MIGHT HAVE TO IMPLEMENT INSIDE ALU PROCESS
+    --flag_O <= '0'; -- NOT BEING DETECTED ATM, MIGHT HAVE TO IMPLEMENT INSIDE ALU PROCESS
 
     --*********************
     --* LC : Loop Counter *
@@ -1689,7 +1663,6 @@ begin
     NEXT_TRACK                          when (TB = "110" and GRX = "101") else 
     --NULL                                when (TB = "110" and GRX = "110") else 
     --NULL                                when (TB = "110" and GRX = "111") else 
-    to_signed(0,16) & SEL_TRACK         when (TB = "110" and GRX = "111") else
     to_signed(0,10) & ASR               when (TB = "111") else
     DATA_BUS;
     

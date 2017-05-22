@@ -52,44 +52,43 @@ architecture Behavioral of VGA_MOTOR is
     signal Ypixel	            : unsigned(9 downto 0);		-- Vertical pixel counter
     signal ClkDiv	            : unsigned(1 downto 0);		-- Clock divisor, to generate 25 MHz signal
     signal Clk25			    : std_logic;			    -- One pulse width 25 MHz signal
-    signal pixel_out            : std_logic_vector(7 downto 0);	 -- Tile pixel data
-    signal goalCarrotPixel      : std_logic_vector(7 downto 0);  -- Yay! Carrot ++
-    signal goalRbPixel          : std_logic_vector(7 downto 0);  -- Rainbow
-    signal dispGoalPosPixel     : std_logic_vector(7 downto 0);  -- Display goal pos
-    signal bgPixel              : std_logic_vector(7 downto 0);  -- Background tile
-    signal dataPixel            : std_logic_vector(7 downto 0);  -- Regular tile data
+    signal pixel_out            : std_logic_vector(7 downto 0);	 -- Pixel going out to display
+    signal yayPixel             : std_logic_vector(7 downto 0);  -- Yay! Carrot ++ pixel
+    signal rainbowPixel         : std_logic_vector(7 downto 0);
+    signal debugGPixel          : std_logic_vector(7 downto 0);
+    signal bgPixel              : std_logic_vector(7 downto 0);  -- Background tile pixel
+    signal dataPixel            : std_logic_vector(7 downto 0);  -- Regular tile data pixel
     signal isTransparent        : std_logic := '0';         -- Signal for checking if current tile represents transparancy
     signal bgTile               : unsigned(4 downto 0);     -- Which bg tile we should take from when color is transparent
-    signal bgTileAddr           : unsigned(12 downto 0);	-- Background tile address
-    signal tileAddr             : unsigned(12 downto 0);	-- Tile address
+    signal bgTileAddr           : unsigned(12 downto 0);	
+    signal tileAddr             : unsigned(12 downto 0);	-- Tile address, used to find specific pixel in tile
     signal blank                : std_logic;                -- blanking signal
-    signal spriteAddrRb         : unsigned(10 downto 0);     -- The sprite addr
-    signal isRbSprite           : std_logic;                -- '1' if VGA should show sprite '0' if tile
-    signal sprite_x_offset_rb   : unsigned(9 downto 0);     -- xPixel - start of sprite x-position
-    signal sprite_y_offset_rb   : unsigned(9 downto 0);     -- yPixel - start of y-position 
-    signal sprite_xstart_g      : unsigned(9 downto 0);
-    signal sprite_xend_g        : unsigned(9 downto 0);
-    signal sprite_ystart_g      : unsigned(9 downto 0);
-    signal sprite_yend_g        : unsigned(9 downto 0);
-    signal spriteAddrG          : unsigned(7 downto 0);
-    signal isGoalSprite         : std_logic;
-    signal sprite_y_offset_c    : unsigned(9 downto 0);     -- yPixel - start of y-position
-    signal spriteAddrc          : unsigned(10 downto 0);     -- The sprite addr
-    signal isCSprite            : std_logic;                -- '1' if VGA should show sprite '0' if tile
-    -- Signals for score
-    signal x_s_limit    : unsigned(9 downto 0);     -- The limit of shown score in x-pos
-    signal tileIndex    : unsigned(4 downto 0);
+    signal RainbowAddr          : unsigned(10 downto 0);    
+    signal isRainbowSprite      : std_logic;                
+    signal goal_msg_x_offset    : unsigned(9 downto 0);     -- Xpixel where goal message starts
+    signal rainbow_y_offset     : unsigned(9 downto 0);     -- Ypixel where goal message starts
+    signal debug_g_xstart       : unsigned(9 downto 0);     -- Xpixel where debug_g starts
+    signal debug_g_xend         : unsigned(9 downto 0);     -- Xpixel where debug_g ends
+    signal debug_g_ystart       : unsigned(9 downto 0);     -- Ypixel where debug_g starts
+    signal debug_g_yend         : unsigned(9 downto 0);     -- Ypixel where debug_g ends
+    signal debugGAddr           : unsigned(7 downto 0);     
+    signal isDebugGSprite       : std_logic;
+    signal yay_y_offset         : unsigned(9 downto 0);     -- Ypixel where "Yay" starts
+    signal yayAddr              : unsigned(10 downto 0);    
+    signal isYaySprite          : std_logic;                
+    signal score_x_limit        : unsigned(9 downto 0);     -- X-position where we should stop displaying score and start displaying from track
+    signal tileIndex            : unsigned(4 downto 0);     -- Carrot index if in range of score display, else tile from track
 
     -- Animation and goal message showing
-    signal rb_time_cnt             : unsigned(18 downto 0);     -- Counter with purpose to slows down the animation of rainbow sprite
-    signal rb_x_cnt                : unsigned(9 downto 0);      -- Sets the end coord for RB-sprite and the delay after animation 
-    signal rb_Xpixel_limit    : unsigned(9 downto 0);           -- Sets the actuall end coord of RB-sprite (not bigger than (xpixel 448)
-    signal showing_goal_msg      : std_logic;              
+    signal goal_msg_clk         : unsigned(18 downto 0);     -- Counter with purpose to slow down the animation of rainbow sprite
+    signal goal_msg_cnt         : unsigned(9 downto 0);      -- Sets the end coord for RB-sprite and the delay after animation 
+    signal goal_msg_x_limit     : unsigned(9 downto 0);      -- Xpixel up until where goal message is currently shown, counted up to max 448
+    signal showing_goal_msg     : std_logic;                 -- '1' when goal message is being displayed
     
     -- Sprite memory type Rainbow
-    type ram_s_r is array (0 to 2047) of std_logic_vector(7 downto 0);
+    type ram_s_rainbow is array (0 to 2047) of std_logic_vector(7 downto 0);
     -- Sprite memory Rainbow
-    signal spriteMemRb : ram_s_r := 
+    signal spriteMemRainbow : ram_s_rainbow := 
         (
         x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",
         x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"01",x"E0",x"E0",x"E0",
@@ -221,9 +220,9 @@ architecture Behavioral of VGA_MOTOR is
         x"01",x"01",x"01",x"01",x"01",x"EA",x"EA",x"A6",x"62",x"2A",x"5A",x"5A",x"54",x"FC",x"EC",x"E0"       
         );
     -- Sprite memory type Goal position 'G'      
-    type ram_s_goal is array (0 to 255) of std_logic_vector(7 downto 0);        
+    type ram_s_debug_g is array (0 to 255) of std_logic_vector(7 downto 0);        
     -- Sprite memory Goal position 'G'
-    signal spriteMemGoal : ram_s_goal := 
+    signal spriteMemDebugG : ram_s_debug_g := 
         (     
         x"01",x"01",x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",x"01",x"01",
         x"01",x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",x"01",
@@ -243,9 +242,9 @@ architecture Behavioral of VGA_MOTOR is
         x"01",x"01",x"01",x"01",x"01",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"E0",x"01",x"01",x"01",x"01"
         );
     -- Sprite memory type "Yay carrot++"  
-    type ram_s_c is array (0 to 2047) of std_logic_vector(7 downto 0);
+    type ram_s_yay is array (0 to 2047) of std_logic_vector(7 downto 0);
     -- Sprite memory "Yay carrot++"
-    signal spriteMemC : ram_s_c :=
+    signal spriteMemYay : ram_s_yay :=
         (
         x"A6",x"A6",x"01",x"01",x"01",x"01",x"01",x"01",x"A6",x"A6",x"01",x"01",x"01",x"A6",x"A6",x"A6",
         x"A6",x"A6",x"A6",x"01",x"01",x"01",x"A6",x"A6",x"01",x"01",x"01",x"01",x"01",x"01",x"A6",x"A6",
@@ -655,14 +654,14 @@ begin
     -- 25 MHz clock (one system clock pulse width)
     Clk25 <= '1' when (ClkDiv = 3) else '0';
 
-    --- Counter for slowing down rb_x_cnt / the animation
+    --- Counter for slowing down goal_msg_cnt / the animation
     process(clk)
     begin
     if rising_edge(clk) then
         if (rst = '1') then
-            rb_time_cnt <= (others => '0');     
+            goal_msg_clk <= (others => '0');     
         else
-            rb_time_cnt <= rb_time_cnt + 1;
+            goal_msg_clk <= goal_msg_clk + 1;
         end if;
     end if;
     end process;
@@ -672,22 +671,21 @@ begin
     begin
     if rising_edge(clk) then
         if rst = '1'  then
-            rb_x_cnt <= to_unsigned(192,10);            -- Start x-cord
+            goal_msg_cnt <= to_unsigned(192,10);       
         elsif goal_reached = '1' then
-            showing_goal_msg <= '1';                    -- sets the signal that indicates that Goal-message is being shown to 1. 
-            rb_x_cnt <= to_unsigned(192,10);            -- sets start x-coord to pixel = 192
-        elsif rb_x_cnt = to_unsigned(600, 10) then      -- checks if reached en of rainbowanimation, x-coord/pixel = 600
-            showing_goal_msg <= '0';                    -- sets the signal that indicates that Goal-message is being shown to 0. 
-        elsif (rb_time_cnt = to_unsigned(131071,17) and showing_goal_msg = '1') then -- Everytim the rb_time_cnt reaches 121071 we increace the rb-x-count, making the animation slow enough to see
-            rb_x_cnt <= rb_x_cnt + 1;
+            showing_goal_msg <= '1';  -- Send signal to CPU that goal message is being shown. 
+            goal_msg_cnt <= to_unsigned(192,10);  -- Start showing goal message from x = 192
+        elsif goal_msg_cnt = to_unsigned(600, 10) then  -- Checks if end of rainbowanimation has been reached, Xpixel = 600
+            showing_goal_msg <= '0';  -- Send signal to CPU that goal message is hidden. 
+        elsif (goal_msg_clk = to_unsigned(131071,17) and showing_goal_msg = '1') then -- Everytime the goal_msg_clk reaches 131071 we increase the count, making the animation slow enough to see
+            goal_msg_cnt <= goal_msg_cnt + 1;
         else
             null;
         end if;
     end if;
     end process;
-    showing_goal_msg_out <= showing_goal_msg;           -- out signal that is 1 if we're showing a message, 0 if not.
-    rb_Xpixel_limit <= rb_x_cnt when (rb_x_cnt < 449) else to_unsigned(448,10);  -- sets the rainbow sprite x-coord limit. 
-                                                                                 --(exists because of the delay of the message, it waits a little bit before message disapere))
+    showing_goal_msg_out <= showing_goal_msg;
+    goal_msg_x_limit <= goal_msg_cnt when (goal_msg_cnt < 449) else to_unsigned(448,10);  -- How far to display goal message while scrolling, max 448
 
     -- 25 MHz clock (one system clock pulse width)
     Clk25 <= '1' when (ClkDiv = 3) else '0';
@@ -762,7 +760,7 @@ begin
         if rst = '1' then
 	        Ypixel2 <= (others => '0');
         elsif Clk25 = '1' and Xpixel2 = 799 then
-            if Ypixel2 = 520 then	-- vi har nått slutet av pixelantalet
+            if Ypixel2 = 520 then	
 	            Ypixel2 <= (others => '0');
             else 
 	            Ypixel2 <= Ypixel2 + 1;
@@ -820,15 +818,15 @@ begin
     begin
     if rising_edge(clk) then
         if (rst = '1') then
-            goalCarrotPixel <= spriteMemC(0);  -- Yay! Carrot ++
-            goalRbPixel <= spriteMemRb(0);  -- Rainbow
-            dispGoalPosPixel <= spriteMemGoal(0);  -- Display goal pos
+            yayPixel <= spriteMemYay(0);  -- Yay! Carrot ++
+            rainbowPixel <= spriteMemRainbow(0);
+            debugGPixel <= spriteMemDebugG(0);  
             bgPixel <= tileMem(0); -- Background tile
             dataPixel <= tileMem(0);  -- Regular tile data
         else
-            goalCarrotPixel <= spriteMemC(to_integer(spriteAddrC));  -- Yay! Carrot ++
-            goalRbPixel <= spriteMemRb(to_integer(spriteAddrRb));  -- Rainbow
-            dispGoalPosPixel <= spriteMemGoal(to_integer(spriteAddrG));  -- Display goal pos
+            yayPixel <= spriteMemYay(to_integer(yayAddr));  -- Yay! Carrot ++
+            rainbowPixel <= spriteMemRainbow(to_integer(RainbowAddr));  
+            debugGPixel <= spriteMemDebugG(to_integer(debugGAddr));  
             bgPixel <= tileMem(to_integer(bgTileAddr)); -- Background tile
             dataPixel <= tileMem(to_integer(tileAddr));  -- Regular tile data
         end if;
@@ -841,12 +839,12 @@ begin
     if rising_edge(clk) then
         if (rst = '1') then
             pixel_out <= (others => '0');
-        elsif (isCSprite = '1' and showing_goal_msg = '1') then
-            pixel_out <= goalCarrotPixel;
-        elsif (isRbSprite = '1' and showing_goal_msg = '1') then   
-            pixel_out <= goalRbPixel ;
-        elsif (isGoalSprite ='1' and disp_goal_pos = '1') then 
-            pixel_out <= dispGoalPosPixel;
+        elsif (isYaySprite = '1' and showing_goal_msg = '1') then
+            pixel_out <= yayPixel;
+        elsif (isRainbowSprite = '1' and showing_goal_msg = '1') then   
+            pixel_out <= rainbowPixel ;
+        elsif (isDebugGSprite ='1' and disp_goal_pos = '1') then 
+            pixel_out <= debugGPixel;
         elsif (blank = '0') then
             if (isTransparent = '1') then -- If current tile is transparent, we should display bg
                 pixel_out <= bgPixel;
@@ -860,24 +858,24 @@ begin
     end process;
     
     -- Check if we're on the rainbow and that the pixel is not transparent
-    isRbSprite <= '1' when ((Xpixel > 192 and Xpixel < rb_Xpixel_limit) and (Ypixel > 100 and Ypixel < 228) and not (goalRbPixel = x"01")) else '0';
+    isRainbowSprite <= '1' when ((Xpixel > 192 and Xpixel < goal_msg_x_limit) and (Ypixel > 100 and Ypixel < 228) and not (rainbowPixel = x"01")) else '0';
     -- Check if we're on "Yay, carrot ++" and that the pixel is not transparent
-    isCSprite <= '1' when ((Xpixel > 192 and Xpixel < 448 and rb_Xpixel_limit = to_unsigned(448,10)) and (Ypixel > 240 and Ypixel < 368) and not (goalCarrotPixel = x"01")) else '0';
+    isYaySprite <= '1' when ((Xpixel > 192 and Xpixel < 448 and goal_msg_x_limit = to_unsigned(448,10)) and (Ypixel > 240 and Ypixel < 368) and not (yayPixel = x"01")) else '0';
     -- Check if we're on the 'G' for goal pos and that the pixel is not transparent
-    isGoalSprite <= '1' when ((Xpixel > sprite_xstart_g and Xpixel < sprite_xend_g) and (Ypixel > sprite_ystart_g and Ypixel < sprite_yend_g) and not (dispGoalPosPixel = x"01")) else '0';
+    isDebugGSprite <= '1' when ((Xpixel > debug_g_xstart and Xpixel < debug_g_xend) and (Ypixel > debug_g_ystart and Ypixel < debug_g_yend) and not (debugGPixel = x"01")) else '0';
     -- Check if current tile represents transparancy
     isTransparent <= '1' when (dataPixel = x"01") else '0';
     
-    -- Sets the offset of x and y pixel coords for sprite-drawing. Sprite starts at x=300, y=200
-    sprite_x_offset_rb <= Xpixel - to_unsigned(192,10);
-    sprite_y_offset_rb <= Ypixel - to_unsigned(100,10);
-    sprite_y_offset_c <= Ypixel - to_unsigned(240,10);
+    -- Sets the offset in sprite mems of rainbow and "Yay".
+    goal_msg_x_offset <= Xpixel1 - to_unsigned(192,10); -- Rainbow and "Yay" (goal msg) starts at Xpixel = 192
+    rainbow_y_offset <= Ypixel1 - to_unsigned(100,10); -- Rainbow starts at Ypixel = 100
+    yay_y_offset <= Ypixel1 - to_unsigned(240,10); -- "Yay" starts at Ypixel = 240
 
-    -- Calculates goal coordinates in pixels
-    sprite_xstart_g <= to_unsigned(16 * to_integer(unsigned(goal_x)), 10); 
-    sprite_xend_g <= to_unsigned(16 * (to_integer(unsigned(goal_x)) + 1), 10);
-    sprite_ystart_g <= to_unsigned(16 * to_integer(unsigned(goal_y)), 10); 
-    sprite_yend_g <= to_unsigned(16 * (to_integer(unsigned(goal_y)) + 1),10);
+    -- Calculates coordinates of debug g in pixels
+    debug_g_xstart <= to_unsigned(16 * to_integer(unsigned(goal_x)), 10); 
+    debug_g_xend <= to_unsigned(16 * (to_integer(unsigned(goal_x)) + 1), 10);
+    debug_g_ystart <= to_unsigned(16 * to_integer(unsigned(goal_y)), 10); 
+    debug_g_yend <= to_unsigned(16 * (to_integer(unsigned(goal_y)) + 1),10);
 
     -- Tile memory address composite
     with sel_track select
@@ -889,15 +887,15 @@ begin
         (others =>'0') when others;
         
     -- Choose if we should set tileIndex to tile from TRACK or to carrot for displaying score. 
-    x_s_limit <= to_unsigned(to_integer(score * 16), 10) when score < 40 else to_unsigned(624, 10);
-    tileIndex <= "01110" when ((Xpixel1 > 0 and Xpixel1 < x_s_limit) and (Ypixel1 > 464 and Ypixel1 < 480)) else unsigned(data(4 downto 0)); -- Carrot tile or data tile
+    score_x_limit <= to_unsigned(to_integer(score * 16), 10) when score < 40 else to_unsigned(624, 10);
+    tileIndex <= "01110" when ((Xpixel1 > 0 and Xpixel1 < score_x_limit) and (Ypixel1 > 464 and Ypixel1 < 480)) else unsigned(data(4 downto 0)); -- Carrot tile or data tile
     
     -- Set addresses that choose tiles from TileMem    
     bgTileAddr <= bgTile & Ypixel1(3 downto 0) & Xpixel1(3 downto 0); -- Sel_track determines background tile (with select above).
     tileAddr <= tileIndex & Ypixel1(3 downto 0) & Xpixel1(3 downto 0); -- Set what tileAddr to give tileMem (carrot or from track).
-    spriteAddrRb <= sprite_y_offset_rb(6 downto 2) & sprite_x_offset_rb(7 downto 2); --Ändras när vi ändrar spriteMem
-    spriteAddrC <= sprite_y_offset_c(6 downto 2) & sprite_x_offset_rb(7 downto 2); --Ändras när vi ändrar spriteMem
-    spriteAddrG <= Ypixel1(3 downto 0) & Xpixel1(3 downto 0);
+    RainbowAddr <= rainbow_y_offset(6 downto 2) & goal_msg_x_offset(7 downto 2); --Ändras när vi ändrar spriteMem
+    yayAddr <= yay_y_offset(6 downto 2) & goal_msg_x_offset(7 downto 2); --Ändras när vi ändrar spriteMem
+    debugGAddr <= Ypixel1(3 downto 0) & Xpixel1(3 downto 0);
 
     -- Picture memory address composite
     addr <= to_unsigned(40, 6) * Ypixel2(8 downto 4) + Xpixel2(9 downto 4);
