@@ -83,7 +83,7 @@ architecture Behavioral of CPU is
     signal GOAL_POS         : signed(17 downto 0) := (others => '0');  -- Goal position (goal_pos_out)
     signal RND_GOAL_POS     : signed(17 downto 0) := (others => '0');
     signal SCORE            : signed(17 downto 0) := (others => '0');
-    signal WON              : std_logic := '0'; -- LSB signals that goal_pos was found
+    signal GOAL_REACHED     : std_logic := '0'; -- LSB signals that goal_pos was found
 
     --***************
     --* CPU Signals *
@@ -1301,15 +1301,15 @@ begin
     end process;
 
     --*********************************************
-    --* WON : Signal for when goal pos was found. *
+    --* GOAL_REACHED : Signal for when goal pos was found. *
     --*********************************************
     process(clk)
     begin
         if rising_edge(clk) then
             if (rst = '1') then
-                WON <= '0';
+                GOAL_REACHED <= '0';
             elsif (FB = "100") then
-                WON <= DATA_BUS(0);
+                GOAL_REACHED <= DATA_BUS(0);
             else
                 null;
             end if;
@@ -1740,7 +1740,7 @@ begin
     sel_sound_out <= SEL_SOUND;
     move_req_out <= MOVE_REQ;
     upd_sound_icon_out <= UPD_SOUND_ICON;
-    goal_reached_out <= WON;
+    goal_reached_out <= GOAL_REACHED;
     disp_goal_pos_out <= DISP_GOAL_POS;
     score_out <= unsigned(SCORE(5 downto 0));
 

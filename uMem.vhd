@@ -120,13 +120,13 @@ constant u_mem_c : u_mem_t := (
         --GOAL_POS := RND_GOAL_POS
         b"0000_110_110_0_0_00_0011_0000000", 	--HEX       GOAL_POS := RND_GOAL_POS
         --SHOWGOALMSG 32
-        --WON := '1'
+        --GOAL_REACHED := '1'
         b"1000_000_000_0_0_00_0000_0000000",    --HEX       AR := '1'
-        b"0000_100_100_0_0_00_0011_0000000",    --HEX       WON := '1' via buss (AR), µPC := 0
+        b"0000_100_100_0_0_00_0011_0000000",    --HEX       GOAL_REACHED := '1' via buss (AR), µPC := 0
         --HIDEGOALMSG 34
-        --WON := '0'
+        --GOAL_REACHED := '0'
         b"0011_000_000_0_0_00_0000_0000000",    --HEX       AR := '0'
-        b"0000_100_100_0_0_00_0011_0000000",    --HEX       WON := '0' via buss (AR), µPC := 0
+        b"0000_100_100_0_0_00_0011_0000000",    --HEX       GOAL_REACHED := '0' via buss (AR), µPC := 0
 		--WAIT 36
 		--Wait for a while depending on PM(ASR)
 		b"0000_010_000_0_0_10_0000_0000000",	--HEX	    LC_cnt := PM via buss
@@ -137,13 +137,13 @@ constant u_mem_c : u_mem_t := (
         -- SCORE <= SCORE + 1
         b"1000_000_000_0_0_00_0000_0000000",    --HEX       AR := '1'
         b"0100_101_000_0_0_00_0000_0000000",    --HEX       AR := AR + SCORE via buss
-        b"0000_100_101_0_0_00_0011_0000000",     --HEX       SCORE := AR, µPC := 0
+        b"0000_100_101_0_0_00_0011_0000000",    --HEX       SCORE := AR, µPC := 0
         --SENDWONSIG 3D
-        -- WON <= '1', WON <= '0'
+        -- GOAL_REACHED <= '1', GOAL_REACHED <= '0'
         b"1000_000_000_0_0_00_0000_0000000",    --HEX       AR := '1'
-        b"0000_100_100_0_0_00_0000_0000000",    --HEX       WON := '1' via buss (AR)
+        b"0000_100_100_0_0_00_0000_0000000",    --HEX       GOAL_REACHED := '1' via buss (AR)
         b"0011_000_000_0_0_00_0000_0000000",    --HEX       AR := '0'
-        b"0000_100_100_0_0_00_0011_0000000",    --HEX       WON := '0' via buss (AR), µPC := 0
+        b"0000_100_100_0_0_00_0011_0000000",    --HEX       GOAL_REACHED := '0' via buss (AR), µPC := 0
         --BSW 41
         --PC := PC + 1 + ADR
         --om G = 0, annars PC++

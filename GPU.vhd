@@ -24,12 +24,12 @@ entity GPU is
         move_resp			: out std_logic := '0';		-- response to move request
         curr_pos            : in signed(17 downto 0); -- current position
         next_pos            : in signed(17 downto 0); -- next position 
-        -- TO/FROM PIC_MEM
+        -- TO/FROM TRACK_MEM
         data_nextpos        : in unsigned(7 downto 0);  -- tile data at nextpos
         addr_nextpos        : out unsigned(10 downto 0) := (others => '0'); -- tile addr of nextpos
         data_change			: out unsigned(7 downto 0) := (others => '0');	-- tile data for change
         addr_change			: out unsigned(10 downto 0) := (others => '0'); -- tile address for change
-        we_picmem			: out std_logic := '0'		-- write enable for PIC_MEM
+        we_trackmem			: out std_logic := '0'		-- write enable for TRACK_MEM
         );
 end GPU;
 
@@ -43,7 +43,6 @@ architecture behavioral of GPU is
     signal tile		        : unsigned(7 downto 0);	-- tile index
     signal addr_change_calc : unsigned(10 downto 0);
     signal sound_icon       : unsigned(7 downto 0);	-- sound icon index
-    signal curr_sound_icon  : unsigned(7 downto 0); -- curr pos sound icon
 
     type wr_type is (IDLE, COLLISIONHANDLING, DRAW);  -- declare state types for write cycle
     signal WRstate : wr_type;  -- write cycle state
@@ -64,7 +63,7 @@ begin
     nextpos_free <= '1' when (data_nextpos = x"00" or data_nextpos = x"01" or data_nextpos = x"02") else '0';
     
     --****************************************************************************
-    --* Move graphics handler : Sets address, data and enable-signal for PIC_MEM *
+    --* Move graphics handler : Sets address, data and enable-signal for TRACK_MEM *
     --****************************************************************************
     process(clk)
     begin
@@ -74,18 +73,18 @@ begin
             addr_change <= (others => '0');
             data_change <= (others => '0');
             move_resp <= '0';    
-            we_picmem <= '0';
+            we_trackmem <= '0';
         else
             case WRstate is
                 when IDLE =>
-                    we_picmem <= '0';
+                    we_trackmem <= '0';
                     WRstate <= IDLE;
                     if (move_req = '1') then
                         WRstate <= COLLISIONHANDLING; -- Move request, go check if we have a collision
                     elsif (upd_sound_icon = '1') then  -- Toggle what sound icon is shown
                         addr_change <= to_unsigned(1199,11);  -- Select position (38,28) bottom-right
                         data_change <= sound_icon;  -- Set it to correct sound_icon
-                        we_picmem <= '1';
+                        we_trackmem <= '1';
                     else
                         null;
                     end if; 
@@ -94,10 +93,10 @@ begin
                         addr_change <= addr_change_calc; -- Sets addr to curr pos
                         data_change <= tile;    -- Sets data to BG-tile.
                         move_resp <= '1';    -- We're done with curr_pos so CPU can set curr_pos to next_pos.
-                        we_picmem <= '1';   -- PIC_MEM can now use address and data to clear curr_pos.
+                        we_trackmem <= '1';   -- TRACK_MEM can now use address and data to clear curr_pos.
                         WRstate <= DRAW;    -- Set state to DRAW so we get addr and data from next_pos.
                     else   
-                        we_picmem <= '0';
+                        we_trackmem <= '0';
                         WRstate <= IDLE;
                     end if;
                 when DRAW =>
@@ -124,7 +123,7 @@ begin
     x"00" when "11", -- Track 4
     x"00" when others;
     
-    addr_change_calc <= xpos + (to_unsigned(40, 6) * ypos); -- Translates x- and y-pos into PIC_MEM-address.
+    addr_change_calc <= xpos + (to_unsigned(40, 6) * ypos); -- Translates x- and y-pos into TRACK_MEM-address.
     
     addr_nextpos <= unsigned(NEXT_XPOS) + (to_unsigned(40, 6) * unsigned(NEXT_YPOS));
     -- Takes x- and y-pos from curr_pos if we're in IDLE, else from next_pos.

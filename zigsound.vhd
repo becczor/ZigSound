@@ -91,17 +91,17 @@ architecture Behavioral of zigsound is
         curr_pos                : in signed(17 downto 0);  -- current position
         next_pos                : in signed(17 downto 0);  -- next position
         move_resp			    : out std_logic;  -- response to move request
-        -- TO/FROM PIC_MEM
+        -- TO/FROM TRACK_MEM
         data_nextpos            : in unsigned(7 downto 0);  -- tile data at nextpos
         addr_nextpos            : out unsigned(10 downto 0);  -- tile addr of nextpos
         data_change			    : out unsigned(7 downto 0);  -- tile data for change
         addr_change			    : out unsigned(10 downto 0);  -- tile address for change
-        we_picmem			    : out std_logic  -- write enable for PIC_MEM
+        we_trackmem			    : out std_logic  -- write enable for TRACK_MEM
 		);
 	end component;
 
-	-- PIC_MEM : Picture memory component
-	component PIC_MEM
+	-- TRACK_MEM : Track memory component
+	component TRACK_MEM
 		port(
         clk    	                : in std_logic;
         rst	                    : in std_logic;
@@ -192,11 +192,11 @@ architecture Behavioral of zigsound is
     signal addr_nextpos_con     : unsigned(10 downto 0);  -- tile addr of nextpos
     signal data_change_con      : unsigned(7 downto 0);  -- tile data for change
     signal addr_change_con      : unsigned(10 downto 0);  -- tile address for change
-    signal we_picmem_con        : std_logic;  -- write enable for PIC_MEM
+    signal we_trackmem_con        : std_logic;  -- write enable for TRACK_MEM
 	
-	-- PIC_MEM signals
-    signal data_nextpos_con     : unsigned(7 downto 0); -- data PIC_MEM -> GPU
-    signal data_vga_con         : unsigned(7 downto 0); -- data PIC_MEM -> VGA
+	-- TRACK_MEM signals
+    signal data_nextpos_con     : unsigned(7 downto 0); -- data TRACK_MEM -> GPU
+    signal data_vga_con         : unsigned(7 downto 0); -- data TRACK_MEM -> VGA
 	
 	-- VGA MOTOR signals 
     signal addr_vga_con         : unsigned(10 downto 0);
@@ -269,14 +269,14 @@ begin
                 addr_nextpos => addr_nextpos_con,
                 data_change => data_change_con,
                 addr_change => addr_change_con,
-                we_picmem => we_picmem_con
+                we_trackmem => we_trackmem_con
 	            );
 	
-	-- PIC_MEM Component Connection
-	U4 : PIC_MEM port map(
+	-- TRACK_MEM Component Connection
+	U4 : TRACK_MEM port map(
 	            clk => clk,
 	            rst => rst,
-	            we => we_picmem_con,
+	            we => we_trackmem_con,
 	            data_nextpos => data_nextpos_con,
 	            addr_nextpos => addr_nextpos_con,
 	            data_change => data_change_con,
