@@ -10,7 +10,6 @@ use IEEE.STD_LOGIC_1164.ALL;            -- basic IEEE library
 use IEEE.NUMERIC_STD.ALL;               -- IEEE library for the unsigned type
                                         -- and various arithmetic operations
 
--- entity
 entity GPU is
     port (
         clk                 : in std_logic;			-- system clock (100 MHz)
@@ -33,7 +32,6 @@ entity GPU is
         );
 end GPU;
 
--- architecture
 architecture behavioral of GPU is
 
     signal nextpos_free     : std_logic := '0';

@@ -1,3 +1,9 @@
+--------------------------------------------------------------------------------
+-- ZigSound
+-- 04-apr-2017
+-- Version 0.1
+
+-- library declaration
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use IEEE.NUMERIC_STD.all;

@@ -10,7 +10,6 @@ use IEEE.STD_LOGIC_1164.ALL;            -- basic IEEE library
 use IEEE.NUMERIC_STD.ALL;               -- IEEE library for the unsigned type
                                         -- and various arithmetic operations
 
--- entity
 entity KBD_ENC is
     port (
         clk 					        : in std_logic;  -- system clock (100 MHz)
@@ -21,7 +20,6 @@ entity KBD_ENC is
         );		
 end KBD_ENC;
 
--- architecture
 architecture behavioral of KBD_ENC is
     signal PS2Clk					    : std_logic;  -- Synchronized PS2 clock
     signal PS2Data				        : std_logic;  -- Synchronized PS2 data
@@ -138,9 +136,9 @@ begin
     end if;
     end process;
     
-    --******************************************************************
-    --* keyPressed : Translates ScanCode into signal to be sent to CPU *
-    --******************************************************************
+    --****************************************************************************
+    --* key_code : Translates ScanCode into signal to be sent to INPUT_DATA_MNGR *
+    --****************************************************************************
     with ScanCode select
         key_code <= 
             "001" when x"1D",	-- W (UP)
