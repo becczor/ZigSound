@@ -13,18 +13,13 @@ entity CPU is
         uData               : in unsigned(24 downto 0);
         pAddr               : out signed(7 downto 0);
         pData               : in signed(17 downto 0);
-        PS2cmd              : in unsigned(17 downto 0);
-		move_req_out        : out std_logic;
-		upd_sound_icon_out  : out std_logic;
-		move_resp           : in std_logic;
-		curr_pos_out        : out signed(17 downto 0);
-		next_pos_out        : out signed(17 downto 0);
+        dly_cnt_out         : buffer unsigned(2 downto 0);
+        change_track_out    : buffer std_logic;
+		curr_pos            : in signed(17 downto 0);
         goal_pos_out        : out signed(17 downto 0);
 		sel_track_out       : out unsigned(1 downto 0);
-		sel_sound_out       : out std_logic;
 		goal_reached_out    : out std_logic;
 		showing_goal_msg    : in std_logic;
-		disp_goal_pos_out   : out std_logic;
         score_out           : out unsigned(5 downto 0)
         );
 end CPU;
@@ -72,14 +67,13 @@ architecture Behavioral of CPU is
     --* Outgoing signals signals *
     --****************************
     -- To GPU
-    signal MOVE_REQ         : std_logic := '0';  -- Move request (move_req_out)
-    signal UPD_SOUND_ICON   : std_logic := '0';  -- Signal for updating sound icon
-    signal CURR_POS         : signed(17 downto 0) := "000000001000000001"; -- Current Position (curr_pos_out)
-    signal NEXT_POS         : signed(17 downto 0) := "000000001000000001";  -- Next Postition (next_pos_out)
+
+    
+ 
+ 
     signal SEL_TRACK        : signed(1 downto 0) := "00";  -- Track select (sel_track_out)
     -- To SOUND
-    signal SEL_SOUND        : std_logic := '0'; -- Sound select (sel_sound_out)
-    signal DISP_GOAL_POS    : std_logic := '0'; -- Display goal pos on screen (disp_goal_pos_out)
+
     signal GOAL_POS         : signed(17 downto 0) := (others => '0');  -- Goal position (goal_pos_out)
     signal RND_GOAL_POS     : signed(17 downto 0) := (others => '0');
     signal SCORE            : signed(17 downto 0) := (others => '0');
@@ -103,26 +97,17 @@ architecture Behavioral of CPU is
     --******************
     --* Signal aliases *
     --******************
-    alias CURR_XPOS         : signed(5 downto 0) is CURR_POS(14 downto 9);
-    alias CURR_YPOS         : signed(4 downto 0) is CURR_POS(4 downto 0);
-    alias NEXT_XPOS         : signed(5 downto 0) is NEXT_POS(14 downto 9);
-    alias NEXT_YPOS         : signed(4 downto 0) is NEXT_POS(4 downto 0);
+
     alias GOAL_XPOS         : signed(5 downto 0) is GOAL_POS(14 downto 9);
     alias GOAL_YPOS         : signed(4 downto 0) is GOAL_POS(4 downto 0);
-    alias key_code          : unsigned(2 downto 0) is PS2cmd(2 downto 0);
+
 
     --************
     --* Counters *
     --************
     signal free_pos_lmt     : signed(10 downto 0) := (others => '0');
     signal free_pos_cnt     : signed(10 downto 0) := (others => '0');
-    signal dly_cnt          : unsigned(2 downto 0) := (others => '0');
     signal LC_cnt           : signed(16 downto 0) := (others => '0');
-
-     --TEST                             
-    --signal test_led_counter             : unsigned(25 downto 0);
-    --signal test_signal                  : std_logic;
-    --signal working                      : std_logic;
 
     --****************************************************************************
 	--* uAddr_instr : Array of uAddresses where each instruction begins in uMem. *
@@ -1436,6 +1421,7 @@ begin
         end if;
     end process;
 
+    change_track_out <= '1' when (FB = "110" and GRX = "101") else '0';
 
     ----*****************************************
     ----* NEXT_TRACK : Track-selection Register *
@@ -1446,23 +1432,23 @@ begin
             if (rst = '1') then
                 SEL_TRACK <= "00";
                 NEXT_TRACK <= (others => '1');
-                dly_cnt <= to_unsigned(0,3);
+                dly_cnt_out <= to_unsigned(0,3);
             -- In process of changing track, locking keyboard.
-            elsif (dly_cnt = "000" and FB = "110" and GRX = "101") then
+            elsif (dly_cnt_out = "000" and change_track_out = '1') then
                 NEXT_TRACK <= DATA_BUS; 
-                dly_cnt <= to_unsigned(1,3);
-            elsif (dly_cnt = "001") then
-                dly_cnt <= to_unsigned(2,3);
-            elsif (dly_cnt = "010") then
-                dly_cnt <= to_unsigned(3,3);
+                dly_cnt_out <= to_unsigned(1,3);
+            elsif (dly_cnt_out = "001") then
+                dly_cnt_out <= to_unsigned(2,3);
+            elsif (dly_cnt_out = "010") then
+                dly_cnt_out <= to_unsigned(3,3);
             -- Changing track and requesting updated sound icon (in key pressed section).
-            elsif (dly_cnt = "011") then
-                dly_cnt <= to_unsigned(4,3);
+            elsif (dly_cnt_out = "011") then
+                dly_cnt_out <= to_unsigned(4,3);
                 SEL_TRACK <= NEXT_TRACK(1 downto 0);
-            elsif (dly_cnt = "100") then
-                dly_cnt <= to_unsigned(5,3);
-            elsif (dly_cnt = "101") then
-                dly_cnt <= to_unsigned(0,3);            
+            elsif (dly_cnt_out = "100") then
+                dly_cnt_out <= to_unsigned(5,3);
+            elsif (dly_cnt_out = "101") then
+                dly_cnt_out <= to_unsigned(0,3);            
             else
                 null;
             end if;
@@ -1569,7 +1555,7 @@ begin
     --******************************
     --* Goal position reached flag *
     --******************************
-    flag_G <= '1' when (CURR_POS = GOAL_POS) else '0';  
+    flag_G <= '1' when (curr_pos = GOAL_POS) else '0';  
     
     --*****************************
     --* Showing goal message flag *
@@ -1666,82 +1652,16 @@ begin
     to_signed(0,10) & ASR               when (TB = "111") else
     DATA_BUS;
     
-    --*************************
-    --* PS2cmd Interpretation *
-    --*************************
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1') then
-                CURR_POS <= "000000001000000001";
-                NEXT_POS <= "000000001000000001";
-                MOVE_REQ <= '0';
-                UPD_SOUND_ICON <= '0';
-                DISP_GOAL_POS <= '0';
-                SEL_SOUND <= '0';
-            else
-                if (move_resp = '1') then
-                    CURR_POS <= NEXT_POS;
-                end if;
-                UPD_SOUND_ICON <= '0';
-                MOVE_REQ <= '0';
-                -- We're changing track, send move_req back to start.
-                if (dly_cnt = 0 and FB = "110" and GRX = "101") then  
-                    NEXT_POS <= "000000001000000001";
-                    MOVE_REQ <= '1';
-                -- Not in locked mode, check for key pressed.
-                elsif (dly_cnt = 0) then
-                    case key_code is
-                        when "001" =>  -- UP (W)
-                            NEXT_XPOS <= CURR_XPOS;
-                            NEXT_YPOS <= CURR_YPOS - 1;
-                            MOVE_REQ <= '1';
-                        when "010" =>  -- LEFT (A)
-                            NEXT_YPOS <= CURR_YPOS;
-                            NEXT_XPOS <= CURR_XPOS - 1;
-                            MOVE_REQ <= '1';
-                        when "011" =>  -- DOWN (S)
-                            NEXT_XPOS <= CURR_XPOS;
-                            NEXT_YPOS <= CURR_YPOS + 1;
-                            MOVE_REQ <= '1';
-                        when "100" =>  -- RIGHT (D)
-                            NEXT_YPOS <= CURR_YPOS;
-                            NEXT_XPOS <= CURR_XPOS + 1;
-                            MOVE_REQ <= '1';
-                        when "101" => -- DISPLAY GOAL POS TOGGLE (G)
-                            DISP_GOAL_POS <= not DISP_GOAL_POS;
-                        when "110" => -- SOUND TOGGLE (SPACE)
-                            SEL_SOUND <= not SEL_SOUND;
-                            UPD_SOUND_ICON <= '1';
-                        when others =>
-                            null;
-                    end case;
-                -- In locked mode, don't check for key pressed.
-                -- Time to update sound icon
-                elsif (dly_cnt = 3) then
-                    UPD_SOUND_ICON <= '1';
-                -- Do nothing, GPU busy
-                else    
-                    null;
-                end if;
-            end if;
-        end if;
-    end process;
+
  
     --*******************************
     --* Outgoing signals assignment *
     --*******************************
     pAddr <= ASR when (ASR >= to_signed(0,8) and ASR <= to_signed(13,8)) else to_signed(0,8);
     uAddr <= uPC; 
-    curr_pos_out <= CURR_POS;
-    next_pos_out <= NEXT_POS;
     goal_pos_out <= GOAL_POS;
     sel_track_out <= unsigned(SEL_TRACK);
-    sel_sound_out <= SEL_SOUND;
-    move_req_out <= MOVE_REQ;
-    upd_sound_icon_out <= UPD_SOUND_ICON;
     goal_reached_out <= GOAL_REACHED;
-    disp_goal_pos_out <= DISP_GOAL_POS;
     score_out <= unsigned(SCORE(5 downto 0));
 
 end Behavioral;

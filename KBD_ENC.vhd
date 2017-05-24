@@ -17,7 +17,7 @@ entity KBD_ENC is
         rst		        		        : in std_logic;  -- reset signal
         PS2KeyboardCLK                  : in std_logic;  -- USB keyboard PS2 clock
         PS2KeyboardData			        : in std_logic;  -- USB keyboard PS2 data
-        PS2cmd					        : out unsigned(17 downto 0)
+        PS2cmd					        : out unsigned(2 downto 0)
         );		
 end KBD_ENC;
 
@@ -30,7 +30,7 @@ architecture behavioral of KBD_ENC is
     signal PS2Data_sr 			        : unsigned(10 downto 0);  -- PS2 data shift register
     signal PS2BitCounter	            : unsigned(3 downto 0);  -- PS2 bit counter
     signal ScanCode			            : unsigned(7 downto 0);  -- scan code
-    signal key_code			            : unsigned(17 downto 0);  --Which_key_that_has_been_pressed     
+    signal key_code			            : unsigned(2 downto 0);  --Which_key_that_has_been_pressed     
     
     type state_type is (IDLE, MAKE, BREAK);  -- declare state types for PS2
     signal PS2state : state_type;  -- PS2 state                                                                  
@@ -143,12 +143,12 @@ begin
     --******************************************************************
     with ScanCode select
         key_code <= 
-            "000000000000000001" when x"1D",	-- W (UP)
-            "000000000000000010" when x"1C",	-- A (LEFT)
-            "000000000000000011" when x"1B",	-- S (DOWN)
-            "000000000000000100" when x"23",	-- D (RIGHT)
-            "000000000000000101" when x"34",	-- G (TOGGLE DISPLAY GOAL POS)
-            "000000000000000110" when x"29",	-- space
+            "001" when x"1D",	-- W (UP)
+            "010" when x"1C",	-- A (LEFT)
+            "011" when x"1B",	-- S (DOWN)
+            "100" when x"23",	-- D (RIGHT)
+            "101" when x"34",	-- G (TOGGLE DISPLAY GOAL POS)
+            "110" when x"29",	-- space
             (others =>'0') when others;
 						  
 end behavioral;
