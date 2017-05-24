@@ -189,8 +189,6 @@ architecture Behavioral of zigsound is
     signal score_con            : unsigned(5 downto 0);
     signal dly_cnt_con          : unsigned(2 downto 0);
     signal change_track_con     : std_logic; 
- 
-    
     
     -- INPUT_DATA_MNGR signals
     signal move_req_con         : std_logic;
@@ -199,8 +197,6 @@ architecture Behavioral of zigsound is
 	signal next_pos_con         : signed(17 downto 0);
 	signal sel_sound_con        : std_logic;
 	signal disp_goal_pos_con    : std_logic;
-    
-
     
     -- uMem signals
     signal uData_con            : unsigned(24 downto 0);
@@ -342,7 +338,8 @@ begin
                 move_req_out => move_req_con,
                 upd_sound_icon_out => upd_sound_icon_con,
                 disp_goal_pos_out => disp_goal_pos_con,
-                move_resp => move_resp_con
+                move_resp => move_resp_con,
+                sel_sound_out => sel_sound_con
                 );
 
     U8 : SOUND port map(
@@ -353,7 +350,5 @@ begin
                 channel => sel_sound_con,
                 sound_data => sound_data_con
                 );
-                
-
 
   end Behavioral;

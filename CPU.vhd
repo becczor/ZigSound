@@ -67,13 +67,8 @@ architecture Behavioral of CPU is
     --* Outgoing signals signals *
     --****************************
     -- To GPU
-
-    
- 
- 
     signal SEL_TRACK        : signed(1 downto 0) := "00";  -- Track select (sel_track_out)
     -- To SOUND
-
     signal GOAL_POS         : signed(17 downto 0) := (others => '0');  -- Goal position (goal_pos_out)
     signal RND_GOAL_POS     : signed(17 downto 0) := (others => '0');
     signal SCORE            : signed(17 downto 0) := (others => '0');
@@ -97,10 +92,8 @@ architecture Behavioral of CPU is
     --******************
     --* Signal aliases *
     --******************
-
     alias GOAL_XPOS         : signed(5 downto 0) is GOAL_POS(14 downto 9);
     alias GOAL_YPOS         : signed(4 downto 0) is GOAL_POS(4 downto 0);
-
 
     --************
     --* Counters *

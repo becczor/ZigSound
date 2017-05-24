@@ -23,7 +23,7 @@ entity INPUT_DATA_MNGR is
 		disp_goal_pos_out   : out std_logic;
 		move_resp           : in std_logic;
 		--  SOUND --
-		sel_sound_out       : out std_logic      
+		sel_sound_out       : out std_logic
         );
 end INPUT_DATA_MNGR;
 
@@ -65,11 +65,11 @@ begin
                 UPD_SOUND_ICON <= '0';
                 MOVE_REQ <= '0';
                 -- We're changing track, send move_req back to start.
-                if (dly_cnt = 0 and change_track = '1') then  
+                if (dly_cnt = "000" and change_track = '1') then  
                     NEXT_POS <= "000000001000000001";
                     MOVE_REQ <= '1';
                 -- Not in locked mode, check for key pressed.
-                elsif (dly_cnt = 0) then
+                elsif (dly_cnt = "000") then
                     case key_code is
                         when "001" =>  -- UP (W)
                             NEXT_XPOS <= CURR_XPOS;
@@ -97,7 +97,7 @@ begin
                     end case;
                 -- In locked mode, don't check for key pressed.
                 -- Time to update sound icon
-                elsif (dly_cnt = 3) then
+                elsif (dly_cnt = "011") then
                     UPD_SOUND_ICON <= '1';
                 -- Do nothing, GPU busy
                 else    
@@ -112,5 +112,6 @@ begin
     sel_sound_out <= SEL_SOUND;
     disp_goal_pos_out <= DISP_GOAL_POS;
     next_pos_out <= NEXT_POS;
+    curr_pos_out <= CURR_POS;
     
 end Behavioral;
